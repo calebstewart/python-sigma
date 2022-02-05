@@ -25,6 +25,26 @@ print(rule.detection.my_condition_name)
 print(rule.detection.parse_grammar())
 ```
 
+## Documentation
+
+Documentation can be built using Sphinx from this repository. First,
+install the package with the documentation dependencies, then run
+`make html` from the `docs/` directory:
+
+``` sh
+# Install with the docs extras
+poetry install -E docs
+
+# Enter the poetry virtual environment
+poetry shell
+
+# Build the documentation
+cd docs
+make html
+
+# Open the documentation in docs/_build/index.html
+```
+
 ## State of the Project
 
 Currently, this is an early attempt at parsing the rules and conditional

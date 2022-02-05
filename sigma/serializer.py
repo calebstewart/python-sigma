@@ -54,6 +54,7 @@ or :py:meth:`~Serializer.from_dict` to load from a dictionary.
 
     serializer = Serializer.from_yaml("path/to/definition.yml")
 
+
 .. code-block:: yaml
     :caption: Example Serializer Definition File
 
@@ -61,13 +62,13 @@ or :py:meth:`~Serializer.from_dict` to load from a dictionary.
     description: "A really cool serializer"
     base: "sigma.serializer:TextQuerySerializer"
     quote: '"{}"'
-    escape: "\\{}"
+    escape: "\\\\{}"
     list_separator: ","
     or_format: "{} or {}"
     and_format: "{} and {}"
     not_format: "not {}"
     grouping: "({})"
-    escaped_characters: "([\"\\\\])"
+    escaped_characters: "([\\"\\\\\\\\])"
     field_equality: "{}: {}"
     field_in: "{}: {}"
     field_regex: "{} regex {}"
@@ -76,11 +77,12 @@ or :py:meth:`~Serializer.from_dict` to load from a dictionary.
     field_startswith: "startsWith({},{})"
     field_endswith: "endsWith({},{})"
     field_contains: "stringContains({})"
-    rule_separator: "\n"
+    rule_separator: "\\n"
     transforms:
-        - type: field
-          config:
-            CommandLine: process.command_line
+      - type: field
+        config:
+          CommandLine: process.command_line
+
 
 Serializer Inheritance
 ----------------------
@@ -100,6 +102,14 @@ fields will be modified.
         - type: field
           config:
             Image: process.executable
+
+When evaluating inherited base serializers, the following order of precedence is
+followed:
+
+- Default serializer definition files in ``sigma/data/serializers/``
+- Files with matching name/path
+- Built-in named serializer classes (defined in ``BUILTIN_SERIALIZERS``)
+- Fully qualified class names (e.g. ``package.module:ClassName``)
 
 """
 import re
