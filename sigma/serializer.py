@@ -119,6 +119,7 @@ import importlib
 import importlib.resources
 from abc import ABC, abstractmethod
 from typing import IO, Any, Dict, List, Type, Union, ClassVar, Optional
+from importlib.abc import Traversable
 
 import yaml
 from pydantic.main import BaseModel
@@ -216,49 +217,100 @@ class Serializer(ABC):
         return expression
 
     @classmethod
-    def from_dict(cls, definition: Dict[str, Any]) -> "Serializer":
-        """Construct a serializer from a dictionary definition (normally loaded from
-        yaml or JSON)."""
+    def load(cls, name: str, config: Optional[Dict[str, Any]] = None):
+        """
+        Load a serializer definition from any of:
 
-        schema = CommonSerializerSchema.parse_obj(definition)
+        - Built-in definitions (under ``sigma/data/serializers/``)
+        - A local file path
+        - Built-in named serializers (defined by ``BUILTIN_SERIALIZERS``)
+        - A fully qualified Python class path (e.g. ``package.module:ClassName``)
+
+        If the provided name refers to a named serializer class or a fully qualified class
+        name, then you should also provide the associated configuration dictionary to
+        initialize the class. If no configuration is provided, an empty dictionary is
+        passed to the classes initializer which could cause errors.
+
+        If the provided name refers to a serializer definition file (built-in or local),
+        then the configuration argument is ignored.
+
+        :param name: name of the serializer to load
+        :type name: str
+        :rtype: Serializer
+        :returns: A constructed serializer class from the given name/type
+        """
+
+        if config is None:
+            config = {
+                "name": "unnamed",
+                "description": "unknown",
+                "base": name,
+                "transforms": [],
+            }
+
         serializers_path = importlib.resources.files("sigma") / "data" / "serializers"
 
-        if (serializers_path / schema.base).is_file():
-            with (serializers_path / schema.base).open() as filp:
-                base = cls.from_dict(yaml.safe_load(filp))
-                base._extend_transforms(schema)
-
-            return base
-        elif pathlib.Path(schema.base).is_file():
-            with open(schema.base) as filp:
-                base = cls.from_dict(yaml.safe_load(filp))
-                base._extend_transforms(schema)
-
-            return base
-        elif schema.base in BUILTIN_SERIALIZERS:
-            schema = BUILTIN_SERIALIZERS[schema.base].Schema.parse_obj(definition)
-            return BUILTIN_SERIALIZERS[schema.base](schema)
+        if (serializers_path / (name + ".yml")).is_file():
+            return cls.from_yaml(serializers_path / (name + ".yml"))
+        elif pathlib.Path(name).is_file():
+            return cls.from_yaml(name)
+        elif name in BUILTIN_SERIALIZERS:
+            schema = BUILTIN_SERIALIZERS[name].Schema.parse_obj(config)
+            return BUILTIN_SERIALIZERS[name](schema)
         else:
-            module_name, clazz_name = schema.base.split(":", maxsplit=1)
+            module_name, clazz_name = name.split(":", maxsplit=1)
             module = importlib.import_module(module_name)
             serializer_type: Type[Serializer] = getattr(module, clazz_name)
 
-            schema = serializer_type.Schema.parse_obj(definition)
+            schema = serializer_type.Schema.parse_obj(config)
             return serializer_type(schema)
 
     @classmethod
-    def from_yaml(cls, path: Union[pathlib.Path, str]) -> "Serializer":
-        """Construct a serializer from a definition in a yaml file"""
+    def from_dict(cls, definition: Dict[str, Any]) -> "Serializer":
+        """Construct a serializer from a dictionary definition conforming, at a minimum,
+        to the :py:class:`CommonSerializerSchema` schema. Other configuration may be
+        necessary to construct the given base serializer class.
 
-        with open(path) as filp:
+        :param definition: a dictionary serializer configuration
+        :type definition: Dict[str, Any]
+        :rtype: Serializer
+        :returns: A new serializer instance of the requested type
+        """
+
+        schema = CommonSerializerSchema.parse_obj(definition)
+
+        return cls.load(schema.base, config=definition)
+
+    @classmethod
+    def from_yaml(cls, path: Union[pathlib.Path, str, Traversable]) -> "Serializer":
+        """Construct a serializer from a definition in a yaml file. This is the same
+        as loading the YAML into a python dictionary and using :py:meth:`Serializer.from_dict`.
+
+        :param path: a path-like object or string path to a YAML serializer definition
+        :type path: Union[pathlib.Path, str, Traversable]
+        :rtype: Serializer
+        :returns: A new serializer instance of the requested type
+        """
+
+        if isinstance(path, str):
+            path = pathlib.Path(path)
+
+        with path.open() as filp:
             return cls.from_dict(yaml.safe_load(filp))
 
 
 class TextQuerySerializer(Serializer):
     """A basic serializer which only produces a static text query based on the
-    condition and detection fields."""
+    condition and detection fields.
+
+    :param schema: A valid TextQuerySerializer configuration schema
+    :type schema: Schema
+    """
 
     class Schema(CommonSerializerSchema):
+        """Text Query configuration options which define how to combine the logical expressions
+        into the correct query syntax for your detection engine."""
+
         quote: str
         """ The character used for literal escapes in strings """
         escape: str
@@ -349,7 +401,13 @@ class TextQuerySerializer(Serializer):
             )
 
     def serialize(self, rule: Union[Rule, List[Rule]]) -> Union[str, List[str]]:
-        """Serialize the rule to a single text query"""
+        """Serialize the rule to a single text query
+
+        :param rule: a rule or list of rules to be serialized
+        :type rule: Union[Rule, List[Rule]]
+        :rtype: Union[str, List[str]]
+        :returns: the serialized rule or list of serialized rules (if a list was passed in)
+        """
 
         if isinstance(rule, list):
             return [self.serialize(r) for r in rule]

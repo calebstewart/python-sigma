@@ -18,8 +18,14 @@
 # -- Project information -----------------------------------------------------
 
 project = 'sigma'
-copyright = '2022, Author'
-author = 'Author'
+copyright = '2022, Caleb Stewart'
+author = 'Caleb Stewart'
+
+# The short X.Y version
+version = '0.1.0'
+
+# The full version, including alpha/beta/rc tags
+release = '0.1.0'
 
 
 # -- General configuration ---------------------------------------------------
