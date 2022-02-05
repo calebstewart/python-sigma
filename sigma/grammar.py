@@ -1,5 +1,14 @@
 """
-Condition grammar specification
+Sigma rule detection condition grammar parsing rules and classes. The classes defined
+here facilitate the abstract parsing of detection rules into Python-processable class
+structures. You should not need to interact directly with this module except when
+implementing serializers.
+
+There are two main types of expressions defined here: core expressions and field
+comparisons. Core expressions are parsed from the `Rule.detection.condition`
+property and are things like the core logical expressions. While field comparisons
+are constructed from the detection matching identifiers and are things like
+field equality tests
 """
 import base64
 import itertools

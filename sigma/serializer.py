@@ -1,3 +1,107 @@
+"""
+Serializers are used to convert a rule from the in-memory python representation
+to other arbitrary formats (such as Splunk queries or Elastic EQL queries).
+
+Custom serializers must inherit from the :py:class:`Serializer` class, and define
+the :py:class:`Serializer.Schema` to define the necessary configurations.
+
+.. code-block:: python
+    :caption: Example Custom Serializer
+
+    class CustomSerializer(Serializer):
+        \"\"\" Custom serialization module \"\"\"
+
+        class Schema(CommonSerializerSchema):
+            # Define custom required options for the schema
+            option: str
+
+        def serialize(self, rule: Union[Rule, List[Rule]]) -> Any:
+            # Access configuration through self.schema
+            print(self.schema.option)
+
+            # Operate on lists vs individual rules
+            if isinstance(rule, list):
+                return [self.serialize(r) for r in rule]
+
+            # Apply rule transformations
+            rule = self.apply_rule_transform(rule)
+
+            # Get the condition expression
+            expression = rule.detection.parse_grammar()
+
+            # Apply expression transformations
+            expression = self.apply_expression_transform(rule, expression)
+
+            # Simple transform just serializes the expression
+            return str(expression)
+
+Loading Serializer from YAML or Dictionary
+------------------------------------------
+
+Serializers can be loaded and constructed automatically from a YAML file or dictionary
+at runtime. The :py:class:`CommonSerializerSchema` class defines the base structure of
+a serializer definition. The ``base`` field defines which serializer class will be
+created from the definition. It can be any one of a name from ``BUILTIN_SERIALIZERS``,
+the path to another YAML definition, or a fully qualified python class name. Class names
+are formatted like ``package.module:ClassName`` and must refer to a sub-class of
+:py:class:`Serializer`. Use :py:meth:`~.Serializer.from_yaml` to load from a YAML file
+or :py:meth:`~Serializer.from_dict` to load from a dictionary.
+
+.. code-block:: python
+    :caption: Loading a Serializer from a YAML file or Dictionary
+
+    from sigma.serializer import Serializer
+
+    serializer = Serializer.from_yaml("path/to/definition.yml")
+
+.. code-block:: yaml
+    :caption: Example Serializer Definition File
+
+    name: "Cool serializer"
+    description: "A really cool serializer"
+    base: "sigma.serializer:TextQuerySerializer"
+    quote: '"{}"'
+    escape: "\\{}"
+    list_separator: ","
+    or_format: "{} or {}"
+    and_format: "{} and {}"
+    not_format: "not {}"
+    grouping: "({})"
+    escaped_characters: "([\"\\\\])"
+    field_equality: "{}: {}"
+    field_in: "{}: {}"
+    field_regex: "{} regex {}"
+    field_match: "{} like {}"
+    keyword: "{}"
+    field_startswith: "startsWith({},{})"
+    field_endswith: "endsWith({},{})"
+    field_contains: "stringContains({})"
+    rule_separator: "\n"
+    transforms:
+        - type: field
+          config:
+            CommandLine: process.command_line
+
+Serializer Inheritance
+----------------------
+
+If the base field of a serializer is a path to a different YAML file, then
+:py:meth:`~Serializer.from_yaml` will first load that serializer, and then augment
+it by appending any newly defined transforms to the other serializer. No other
+fields will be modified.
+
+.. code-block:: yaml
+    :caption: Example Inherited Serializer
+
+    name: "Inherited Serializer"
+    description: "We inherited this from someone."
+    base: "path/to/serializer/definition.yml"
+    transforms:
+        - type: field
+          config:
+            Image: process.executable
+
+"""
 import re
 import pathlib
 import functools
@@ -7,6 +111,7 @@ from typing import IO, Any, Dict, List, Type, Union, ClassVar, Optional
 
 import yaml
 from pydantic.main import BaseModel
+from pydantic.fields import Field
 
 from sigma.schema import Rule
 from sigma.grammar import (
@@ -16,6 +121,7 @@ from sigma.grammar import (
     FieldRegex,
     LogicalAnd,
     LogicalNot,
+    FieldContains,
     FieldEndsWith,
     FieldEquality,
     KeywordSearch,
@@ -167,6 +273,8 @@ class TextQuerySerializer(Serializer):
         """ A format string to test if a field ends with a string """
         field_contains: str
         """ A format string to test if a field contains another string """
+        prepend_result: str = Field("")
+        """ String to prepend to the resulting query """
         rule_separator: str
         """ Separator for when outputting multiple rules to a file """
 
@@ -197,6 +305,10 @@ class TextQuerySerializer(Serializer):
             FieldRegex: functools.partial(
                 self._serialize_comparison, self.schema.field_regex
             ),
+            FieldContains: functools.partial(
+                self._serialize_comparison,
+                self.schema.field_contains,
+            ),
             KeywordSearch: functools.partial(
                 self._serialize_keyword, self.schema.keyword
             ),
@@ -214,7 +326,9 @@ class TextQuerySerializer(Serializer):
             rule, rule.detection.parse_grammar()
         )
 
-        return self._serialize_expression(expression, group=False)
+        return self.schema.prepend_result + self._serialize_expression(
+            expression, group=False
+        )
 
     def _serialize_expression(self, expression: Any, group: bool = True):
         """Recursively serialize an expression"""

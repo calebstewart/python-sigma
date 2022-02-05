@@ -16,6 +16,7 @@ field_match: "{} like {}"
 keyword: "{}"
 field_startswith: "startsWith({},{})"
 field_endswith: "endsWith({},{})"
-field_contains: "stringContains({})"
+field_contains: "stringContains({},{})"
 rule_separator: "\n"
+prepend_result: "process where "
 transforms:

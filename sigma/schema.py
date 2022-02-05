@@ -1,3 +1,31 @@
+"""
+Sigma rule schema is the core functionality of this package. The rule schema allows
+you to generically read and write Sigma rules in Python. Rules can be loaded from
+a dictionary or directly from a YAML file. You can also reproduce compliant Sigma
+rules from in-memory representations with the :py:meth:`Rule.to_sigma` method. This
+can be used to load, modify and save sigma rules without conversion if needed.
+
+Sigma rule detection conditions can also be parsed using the ``pyparsing`` package
+into a python-native format, which is normally used in conjunction with a serializer.
+
+.. code-block:: python
+    :caption: Loading and Inspecting a Rule
+
+    from sigma.schema import Rule
+
+    rule = Rule.from_yaml("path/to/rule.yml")
+
+    # Retrieve common properties
+    print(rule.title)
+    print(rule.detection.condition)
+    print(rule.tags)
+    print(rule.author)
+
+    # Retrieve a parsed expression representing the full detection condition
+    print(rule.detection.parse_grammar())
+
+
+"""
 import re
 import fnmatch
 import pathlib
