@@ -1,10 +1,12 @@
 import re
 import fnmatch
+import pathlib
 from enum import Enum
 from uuid import UUID
 from typing import Any, Dict, List, Union, Callable, ClassVar, Optional, Generator
 from datetime import date
 
+import yaml
 import pydantic
 from pydantic.fields import Field
 
@@ -391,6 +393,18 @@ class Rule(pydantic.BaseModel):
     )
     """ The date the rule was last modified. This should be YYYY-MM-DD or YYYY/MM/DD.
     If the field is not formatted in this way, it will be saved as a simple string."""
+
+    @classmethod
+    def from_yaml(cls, path: Union[str, pathlib.Path]) -> "Rule":
+        """Load a rule from a YAML file"""
+
+        with open(path) as filp:
+            return cls.from_sigma(yaml.safe_load(filp))
+
+    @classmethod
+    def from_sigma(cls, definition: Dict[str, Any]) -> "Rule":
+        """Alias for parse_obj to be more expressive"""
+        return cls.parse_obj(definition)
 
     def to_sigma(self) -> Dict[str, Any]:
         """Convert this rule back into a JSON-serializable dictionary representing
