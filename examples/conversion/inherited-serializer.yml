@@ -1,0 +1,10 @@
+name: "Elastic EQL Serializer with Modified Fields"
+description: "Serialize a rule to EQL and modified select fields"
+base: "./eql.yml"
+transforms:
+  - type: field
+    config:
+      Image: process.executable
+      ParentImage: process.parent.executable
+      CommandLine: process.command_line
+      Imphash: process.imphash

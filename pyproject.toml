@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "python-sigma"
+name = "sigma"
 version = "0.1.0"
 description = "Python library for parsing and interacting with Sigma rules."
 authors = ["Caleb Stewart <caleb.stewart94@gmail.com>"]
