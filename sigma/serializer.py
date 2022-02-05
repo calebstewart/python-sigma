@@ -267,11 +267,11 @@ class TextQuerySerializer(Serializer):
         """ A format string to test if a field matches a regex (e.g. "{} match {}")"""
         keyword: str
         """ A format string to match a keyword across all fields (e.g. "{}") """
-        field_startswith: str
+        field_startswith: Optional[str]
         """ A format string to test if a field starts with a string """
-        field_endswith: str
+        field_endswith: Optional[str]
         """ A format string to test if a field ends with a string """
-        field_contains: str
+        field_contains: Optional[str]
         """ A format string to test if a field contains another string """
         prepend_result: str = Field("")
         """ String to prepend to the resulting query """
@@ -295,25 +295,40 @@ class TextQuerySerializer(Serializer):
             FieldEquality: functools.partial(
                 self._serialize_comparison, self.schema.field_equality
             ),
-            FieldEndsWith: functools.partial(
-                self._serialize_comparison, self.schema.field_endswith
-            ),
-            FieldStartsWith: functools.partial(
-                self._serialize_comparison, self.schema.field_startswith
-            ),
             FieldIn: self._serialize_in_expression,
             FieldRegex: functools.partial(
                 self._serialize_comparison, self.schema.field_regex
-            ),
-            FieldContains: functools.partial(
-                self._serialize_comparison,
-                self.schema.field_contains,
             ),
             KeywordSearch: functools.partial(
                 self._serialize_keyword, self.schema.keyword
             ),
             str: self._serialize_string,
         }
+
+        if self.schema.field_endswith is not None:
+            self.expression_mapping[FieldEndsWith] = functools.partial(
+                self._serialize_comparison, self.schema.field_endswith
+            )
+        else:
+            self.expression_mapping[FieldEndsWith] = functools.partial(
+                self._serialize_with_wildcard, "*{}"
+            )
+        if self.schema.field_startswith is not None:
+            self.expression_mapping[FieldStartsWith] = functools.partial(
+                self._serialize_comparison, self.schema.field_startswith
+            )
+        else:
+            self.expression_mapping[FieldStartsWith] = functools.partial(
+                self._serialize_with_wildcard, "{}*"
+            )
+        if self.schema.field_contains is not None:
+            self.expression_mapping[FieldContains] = functools.partial(
+                self._serialize_comparison, self.schema.field_contains
+            )
+        else:
+            self.expression_mapping[FieldContains] = functools.partial(
+                self._serialize_with_wildcard, "*{}*"
+            )
 
     def serialize(self, rule: Union[Rule, List[Rule]]) -> Union[str, List[str]]:
         """Serialize the rule to a single text query"""
@@ -345,6 +360,11 @@ class TextQuerySerializer(Serializer):
             self.schema.list_separator.join(
                 [self._serialize_expression(a) for a in expression.value]
             )
+        )
+
+    def _serialize_with_wildcard(self, fmt: str, expression: FieldComparison):
+        return self.schema.field_match.format(
+            expression.field, self._serialize_expression(fmt.format(expression.value))
         )
 
     def _serialize_comparison(self, fmt: str, expression: FieldComparison) -> str:
