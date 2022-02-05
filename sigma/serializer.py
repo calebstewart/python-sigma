@@ -106,6 +106,7 @@ import re
 import pathlib
 import functools
 import importlib
+import importlib.resources
 from abc import ABC, abstractmethod
 from typing import IO, Any, Dict, List, Type, Union, ClassVar, Optional
 
@@ -210,8 +211,15 @@ class Serializer(ABC):
         yaml or JSON)."""
 
         schema = CommonSerializerSchema.parse_obj(definition)
+        serializers_path = importlib.resources.files("sigma") / "data" / "serializers"
 
-        if pathlib.Path(schema.base).is_file():
+        if (serializers_path / schema.base).is_file():
+            with (serializers_path / schema.base).open() as filp:
+                base = cls.from_dict(yaml.safe_load(filp))
+                base._extend_transforms(schema)
+
+            return base
+        elif pathlib.Path(schema.base).is_file():
             with open(schema.base) as filp:
                 base = cls.from_dict(yaml.safe_load(filp))
                 base._extend_transforms(schema)
