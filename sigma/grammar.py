@@ -2,11 +2,19 @@
 Condition grammar specification
 """
 import base64
-from typing import Any, Dict, List, Type, Union, ClassVar, Optional
+import itertools
+from typing import Any, Dict, List, Type, Union, Callable, ClassVar, Optional
 
 from pydantic import BaseModel
 from pyparsing import Word, Keyword, Literal, opAssoc, alphanums, infixNotation
 from pyparsing.results import ParseResults
+
+from sigma.errors import (
+    UnknownModifierError,
+    InvalidFieldValueError,
+    UnknownIdentifierError,
+    InvalidModifierCombinationError,
+)
 
 
 class Expression(BaseModel):
@@ -58,7 +66,36 @@ class CoreExpression(Expression):
         return self
 
 
-class LogicalNot(CoreExpression):
+class LogicalExpression(CoreExpression):
+    """Logical expression"""
+
+    operator: ClassVar[bool] = True
+
+    def postprocess(
+        self, rule: "sigma.schema.RuleDetection", parent: Optional["Expression"] = None
+    ) -> "Expression":
+
+        expression = super().postprocess(rule, parent)
+        if not isinstance(expression, CoreExpression):
+            return expression
+
+        # This is some very basic expression simplification.
+        # It ensures AND(AND(1,2),AND(3,4),AND(5,6)) is resolved
+        # to AND(1,2,3,4,5,6), and does the same for other logical
+        # expressions as well. Some more complicated simplifications
+        # can probably be done, but I'm not going to mess with it
+        # for now.
+        subtypes = {type(a) for a in expression.args}
+        subtype = subtypes.pop()
+        if len(subtypes) == 0 and isinstance(self, subtype):
+            return type(self)(
+                args=list(itertools.chain(*[a.args for a in expression.args]))
+            ).postprocess(rule, parent)
+
+        return expression
+
+
+class LogicalNot(LogicalExpression):
     """Logical not expression"""
 
     operator: ClassVar[bool] = True
@@ -67,7 +104,7 @@ class LogicalNot(CoreExpression):
         return f"NOT({repr(self.args[0])})"
 
 
-class LogicalOr(CoreExpression):
+class LogicalOr(LogicalExpression):
     """Logical Or expression"""
 
     operator: ClassVar[bool] = True
@@ -76,7 +113,7 @@ class LogicalOr(CoreExpression):
         return f"OR({','.join([repr(a) for a in self.args])})"
 
 
-class LogicalAnd(CoreExpression):
+class LogicalAnd(LogicalExpression):
     """Logical And Expression"""
 
     operator: ClassVar[bool] = True
@@ -101,7 +138,9 @@ class Identifier(CoreExpression):
         return self.identifier
 
     def postprocess(
-        self, rule: "sigma.schema.Rule", parent: Optional[Expression]
+        self,
+        rule: "sigma.schema.Rule",
+        parent: Optional[Expression] = None,
     ) -> Expression:
         """Resolve the detection identifier"""
 
@@ -124,16 +163,22 @@ class Selector(CoreExpression):
         return str(self.args[1])
 
     def postprocess(
-        self, rule: "sigma.schema.Rule", parent: Optional[Expression]
+        self,
+        rule: "sigma.schema.Rule",
+        parent: Optional[Expression] = None,
     ) -> Expression:
         """Collapse selector into either a logical OR or AND expression"""
 
-        return self.condition(
-            args=[
-                Identifier(args=[identifier])
-                for identifier in rule.lookup_expression(self.pattern)
-            ]
-        ).postprocess(rule, parent)
+        args = [
+            Identifier(args=[identifier])
+            for identifier in rule.lookup_expression(self.pattern)
+        ]
+        if not args:
+            raise UnknownIdentifierError(
+                f"selector pattern {self.pattern} did not match any identifiers"
+            )
+
+        return self.condition(args=args).postprocess(rule, parent)
 
 
 class FieldComparison(Expression):
@@ -156,12 +201,16 @@ class FieldEquality(FieldComparison):
 class FieldContains(FieldComparison):
     """Test if a string is in the field somewhere"""
 
+    value: str
+
     def __repr__(self) -> str:
         return f"CONTAINS({self.field}, {repr(self.value)})"
 
 
 class Base64FieldEquality(FieldComparison):
     """Test for field equality of base64 string"""
+
+    value: Union[str, bytes]
 
     def __repr__(self) -> str:
         return f"EQ({self.field}, b64decode({repr(self.value)}))"
@@ -170,12 +219,16 @@ class Base64FieldEquality(FieldComparison):
 class FieldEndsWith(FieldComparison):
     """Test if a field ends with a token"""
 
+    value: str
+
     def __repr__(self) -> str:
         return f"ENDSWITH({self.field}, {repr(self.value)})"
 
 
 class FieldStartsWith(FieldComparison):
     """Test if a field starts with a token"""
+
+    value: str
 
     def __repr__(self) -> str:
         return f"STARTSWITH({self.field}, {repr(self.value)})"
@@ -184,60 +237,118 @@ class FieldStartsWith(FieldComparison):
 class FieldIn(FieldComparison):
     """Test if a field is in a list of constants"""
 
-    values: List[str]
+    value: List[str]
 
     def __repr__(self) -> str:
-        return f"IN({self.field}, {repr(self.values)})"
+        return f"IN({self.field}, {repr(self.value)})"
 
 
-class ListContainsField(Expression):
-    """Test for a field in a specific list of literals"""
+class FieldRegex(FieldComparison):
+    """Compare a field with a regular expression"""
 
-    field: str
-    values: List[str]
+    value: str
 
-    def __repr__(self) -> str:
-        return f"IN({self.field}, {repr(self.values)})"
+    def __repr__(self):
+        return f"MATCH({self.field}, {repr(self.value)})"
 
 
 class KeywordSearch(Expression):
     """Search for a literal keyword/string instead of a direct comparison"""
 
-    value: str
+    value: Any
 
     def __repr__(self) -> str:
-        return repr(self.value)
+        return f"KEYWORD({repr(self.value)})"
 
 
-class FieldContains(Expression):
-    """Test for a field that contains a string"""
+def base64offset_modifier(field: str, value: Any) -> List[str]:
+    """Build the expression for matching a base64offset modified expression.
 
-    field: str
-    value: str
+    NOTE: I don't fully understand what's going on here, but I ripped it from
+    pySigma... :eyes:
+    """
 
-    def __repr__(self) -> str:
-        return f"CONTAINS({self.field}, {repr(self.value)}"
+    start = (0, 2, 3)
+    end = (None, -3, -2)
+
+    if not isinstance(value, Union[str, bytes]):
+        raise InvalidFieldValueError(
+            field, Union[str, bytes], type(value), "base64offset"
+        )
+
+    encoded: bytes
+    if isinstance(value, str):
+        encoded = value.encode("utf-8")
+    else:
+        encoded = value
+
+    return [
+        base64.b64encode(i * b" " + encoded)[
+            start[i] : end[(len(encoded) + 1) % 3]
+        ].decode("utf-8")
+        for i in range(3)
+    ]
 
 
-MODIFIER_MAPPING: Dict[str, Type[FieldComparison]] = {
+def base64_modifier(field: str, value: Any) -> str:
+    """Base64 encode the field"""
+
+    if not isinstance(value, Union[str, bytes]):
+        raise InvalidFieldValueError(field, Union[str, bytes], type(value), "base64")
+
+    if isinstance(value, str):
+        value = value.encode("utf-8")
+
+    return base64.b64encode(value).decode("utf-8")
+
+
+def utf16le_modifier(field: str, value: Any, modifier: str = "utf16le") -> bytes:
+    """Transform the value into bytes"""
+
+    if not isinstance(value, str):
+        raise InvalidFieldValueError(field, str, type(value), modifier)
+
+    return value.encode("utf16le")
+
+
+def wide_modifier(field: str, value: Any) -> bytes:
+    return utf16le_modifier(field, value, modifier="wide")
+
+
+def utf16_modifier(field: str, value: Any) -> bytes:
+    return b"\xFF\xFE" + utf16le_modifier(field, value, modifier="utf16")
+
+
+def utf16be_modifier(field: str, value: Any) -> bytes:
+
+    if not isinstance(value, str):
+        raise InvalidFieldValueError(field, str, type(value), "utf16be")
+
+    return value.encode("utf16be")
+
+
+MODIFIER_MAPPING: Dict[str, Callable] = {
     "contains": FieldContains,
-    "base64": Base64FieldEquality,
+    "base64": base64_modifier,
+    "base64offset": base64offset_modifier,
     "endswith": FieldEndsWith,
     "startswith": FieldStartsWith,
+    "utf16le": utf16le_modifier,
+    "wide": lambda field, value: utf16le_modifier(field, value, "wide"),
+    "utf16be": utf16be_modifier,
+    "re": FieldRegex,
 }
 
 
 def build_key_value_expression(key: str, value: Union[list, str]) -> Expression:
     """Evaluate any modifiers in the given key and return a valid expression
     representing the key/value pair. These are taken directly from the detection
-    definition.
-
-    NOTE: this needs the most work. We need to figure out how to represent all of
-    the possible transformations within the grammar parsing expressions. For now,
-    we only support single transformations + "all" where appropriate.
-    """
+    definition."""
 
     field, *modifiers = key.split("|")
+
+    # NOTE: We assume that "all" applied anywhere in the pipeline does the same
+    # thing. The specification is vague on this, though...
     if "all" in modifiers:
         modifiers.remove("all")
         combo_class = LogicalAnd
@@ -247,15 +358,50 @@ def build_key_value_expression(key: str, value: Union[list, str]) -> Expression:
     if isinstance(value, list):
         return combo_class(args=[build_key_value_expression(key, v) for v in value])
 
-    if len(modifiers) > 1:
-        raise RuntimeError("only a single modifier (plus optional all) is supported")
-    elif modifiers:
-        if modifiers[0] not in MODIFIER_MAPPING:
-            raise RuntimeError(f"no such modifier: {modifiers[0]}")
+    completed_modifiers = []
+    modified: Any = value
+    reversed_modifiers = modifiers[::-1]
 
-        return MODIFIER_MAPPING[modifiers[0]](field=field, value=value)
+    while reversed_modifiers:
+        modifier = reversed_modifiers.pop()
+
+        # If the last modifier yielded an expression, we can't apply more modifications
+        if isinstance(modified, Expression):
+            raise InvalidModifierCombinationError(field, modifier, completed_modifiers)
+
+        # Make sure this modifier is valid
+        if modifier not in MODIFIER_MAPPING:
+            raise UnknownModifierError(field, modifier)
+
+        # Build new modified value
+        try:
+            modified = MODIFIER_MAPPING[modifier](field=field, value=modified)
+        except (TypeError, ValueError) as exc:
+            # Construction of an expression seems to have failed due to the type of
+            # the value, so we raise an invalid combination error here.
+            raise InvalidModifierCombinationError(field, modifier, completed_modifiers)
+
+        # If this modifier returned a list of new items, process them according to the
+        # combination class (normally "or", but could be "and")
+        if isinstance(modified, list):
+            return combo_class(
+                args=[
+                    build_key_value_expression(
+                        f"{field}|{'|'.join(reversed_modifiers[::-1])}", v
+                    )
+                    for v in modified
+                ]
+            )
+
+        # Save list of completed modifiers
+        completed_modifiers.append(modifier)
+
+    # Some modifiers produce an expression explicitly while others
+    # only modify the value.
+    if isinstance(modified, Expression):
+        return modified
     else:
-        return FieldEquality(field=field, value=value)
+        return FieldEquality(field=field, value=modified)
 
 
 def build_grammar_parser():

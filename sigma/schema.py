@@ -2,15 +2,20 @@ import re
 import fnmatch
 from enum import Enum
 from uuid import UUID
-from typing import (Any, Dict, List, Union, Callable, ClassVar, Optional,
-                    Generator)
+from typing import Any, Dict, List, Union, Callable, ClassVar, Optional, Generator
 from datetime import date
 
 import pydantic
 from pydantic.fields import Field
 
-from sigma.grammar import (LogicalOr, Expression, LogicalAnd, KeywordSearch,
-                           build_grammar_parser, build_key_value_expression)
+from sigma.grammar import (
+    LogicalOr,
+    Expression,
+    LogicalAnd,
+    KeywordSearch,
+    build_grammar_parser,
+    build_key_value_expression,
+)
 
 
 class LowercaseString(str):
@@ -69,7 +74,10 @@ class RuleStatus(LowercaseString, Enum):
 
 
 class RuleLevel(LowercaseString, Enum):
-    """Indicates the level/importance of a sigma rule"""
+    """The level field contains one of five string values. It describes the
+    criticality of a triggered rule. While low and medium level events have an
+    informative character, events with high and critical level should lead to
+    immediate reviews by security analysts."""
 
     INFORMATIONAL = "informational"
     """ Rule is intended for enrichment of events, e.g. by tagging them. No case
@@ -168,8 +176,7 @@ class RuleTag(str):
 
 
 class RuleLicense(str):
-    """The license for a specific rule. Currently, this is just a string, but it
-    represents a SPDX license string, and may be parsed later."""
+    """License of the rule according the SPDX ID specification."""
 
 
 class RuleLogSource(pydantic.BaseModel):
@@ -241,17 +248,33 @@ class RuleDetection(pydantic.BaseModel):
 
     GRAMMAR_PARSER: ClassVar[Any] = build_grammar_parser()
     timeframe: Optional[str] = Field(None, regex="[0-9]+[smhdMY]")
-    condition: str
+    condition: Union[List[str], str]
 
     def parse_grammar(self) -> Expression:
         """Parse the condition and evaluate fields to produce a single
         search expression."""
 
-        grammar = list(self.GRAMMAR_PARSER.parse_string(self.condition))
-        if len(grammar) > 1:
-            return LogicalAnd(args=grammar).postprocess(self)
+        if isinstance(self.condition, list):
+            results = []
+            for condition in self.condition:
+                condition_grammar = list(
+                    self.GRAMMAR_PARSER.parse_string(self.condition)
+                )
+                if len(condition_grammar) > 1:
+                    results.append(LogicalAnd(args=condition_grammar))
+                else:
+                    results.append(condition_grammar[0])
 
-        return grammar[0].postprocess(self)
+            if len(results) > 1:
+                return LogicalOr(args=results).postprocess(self)
+            else:
+                return results[0].postprocess(self)
+        else:
+            grammar = list(self.GRAMMAR_PARSER.parse_string(self.condition))
+            if len(grammar) > 1:
+                return LogicalAnd(args=grammar).postprocess(self)
+
+            return grammar[0].postprocess(self)
 
     def get_expression(self, identifier: str) -> Expression:
         """Construct an expression from the specified identifier. If the requested
@@ -265,17 +288,17 @@ class RuleDetection(pydantic.BaseModel):
 
         return definition.build_expression()
 
-    def lookup_expression(self, pattern: str) -> Generator[Expression, None, None]:
+    def lookup_expression(self, pattern: str) -> Generator[str, None, None]:
         """Lookup identifier expressions by a glob pattern"""
 
-        for key in self.__fields__.keys():
+        for key in self.dict().keys():
             if fnmatch.fnmatch(key, pattern):
                 definition = getattr(self, key)
                 if isinstance(
                     definition,
                     Union[RuleDetectionFields, RuleDetectionKeywords],
                 ):
-                    yield definition.build_expression()
+                    yield key
 
     @classmethod
     def __get_validators__(cls):
@@ -351,7 +374,7 @@ class Rule(pydantic.BaseModel):
     fields: Optional[List[str]]
     """ A list of log fields that could be interesting in further analysis of the
     event and should be displayed to the analyst. """
-    falsepositives: Optional[List[str]]
+    falsepositives: Optional[List[Union[None, str]]]
     """ A list of known false positives that may occur. """
     level: Optional[RuleLevel]
     """ The level field contains one of five string values. It describes the
@@ -368,6 +391,34 @@ class Rule(pydantic.BaseModel):
     )
     """ The date the rule was last modified. This should be YYYY-MM-DD or YYYY/MM/DD.
     If the field is not formatted in this way, it will be saved as a simple string."""
+
+    def to_sigma(self) -> Dict[str, Any]:
+        """Convert this rule back into a JSON-serializable dictionary representing
+        the sigma rule. This dictionary can safely be converted to JSON or YAML and
+        written back to disk as a valid Sigma rule."""
+
+        def _recursive_pydantic_dict(m):
+
+            if isinstance(m, Enum):
+                return str(m.value)
+            elif isinstance(m, str):
+                return str(m)
+            elif isinstance(m, float):
+                return float(m)
+            elif isinstance(m, int):
+                return int(m)
+            elif isinstance(m, list):
+                return [_recursive_pydantic_dict(v) for v in m]
+            elif isinstance(m, pydantic.BaseModel):
+                return {key: _recursive_pydantic_dict(value) for key, value in m}
+            elif isinstance(m, dict):
+                return {
+                    key: _recursive_pydantic_dict(value) for key, value in m.items()
+                }
+            else:
+                return str(m)
+
+        return _recursive_pydantic_dict(self)
 
     class Config:
         extra = "allow"

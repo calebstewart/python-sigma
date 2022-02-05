@@ -9,6 +9,7 @@ python = "^3.10"
 pydantic = "^1.9.0"
 pyparser = "^1.0"
 PyYAML = "^6.0"
+rich = "^11.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -16,3 +17,6 @@ pytest = "^5.2"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
