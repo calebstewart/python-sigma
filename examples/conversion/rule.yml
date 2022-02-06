@@ -24,7 +24,7 @@ detection:
         ParentImage|endswith: '\services.exe'
     filter:
         Image|endswith: '\clussvc.exe'
-    condition: ( selection1 or selection2 ) and not filter
+    condition: ( selection1 or selection22 ) and not filter
 falsepositives:
     - 'Another service that uses a single -s command line switch'
 level: critical

@@ -1,4 +1,4 @@
-"""
+r'''
 Serializers are used to convert a rule from the in-memory python representation
 to other arbitrary formats (such as Splunk queries or Elastic EQL queries).
 
@@ -9,7 +9,7 @@ the :py:class:`Serializer.Schema` to define the necessary configurations.
     :caption: Example Custom Serializer
 
     class CustomSerializer(Serializer):
-        \"\"\" Custom serialization module \"\"\"
+       """ Custom serialization module """
 
         class Schema(CommonSerializerSchema):
             # Define custom required options for the schema
@@ -48,11 +48,14 @@ are formatted like ``package.module:ClassName`` and must refer to a sub-class of
 or :py:meth:`~Serializer.from_dict` to load from a dictionary.
 
 .. code-block:: python
-    :caption: Loading a Serializer from a YAML file or Dictionary
+    :caption: Loading a built-in or custom serializer definition
 
     from sigma.serializer import Serializer
 
-    serializer = Serializer.from_yaml("path/to/definition.yml")
+    # Load from a YAML file path
+    serializer = Serializer.load("path/to/definition.yml")
+    # Load from a built-in serializer definition (see sigma/data/serializers)
+    serializer = Serializer.load("eql")
 
 
 .. code-block:: yaml
@@ -62,13 +65,13 @@ or :py:meth:`~Serializer.from_dict` to load from a dictionary.
     description: "A really cool serializer"
     base: "sigma.serializer:TextQuerySerializer"
     quote: '"{}"'
-    escape: "\\\\{}"
+    escape: "\\{}"
     list_separator: ","
     or_format: "{} or {}"
     and_format: "{} and {}"
     not_format: "not {}"
     grouping: "({})"
-    escaped_characters: "([\\"\\\\\\\\])"
+    escaped_characters: "([\"\\])"
     field_equality: "{}: {}"
     field_in: "{}: {}"
     field_regex: "{} regex {}"
@@ -77,7 +80,7 @@ or :py:meth:`~Serializer.from_dict` to load from a dictionary.
     field_startswith: "startsWith({},{})"
     field_endswith: "endsWith({},{})"
     field_contains: "stringContains({})"
-    rule_separator: "\\n"
+    rule_separator: "\n"
     transforms:
       - type: field
         config:
@@ -106,12 +109,12 @@ fields will be modified.
 When evaluating inherited base serializers, the following order of precedence is
 followed:
 
-- Default serializer definition files in ``sigma/data/serializers/``
+- Default serializer definition files in ``sigma/data/serializers/`` (without ``.yml`` extension)
 - Files with matching name/path
 - Built-in named serializer classes (defined in ``BUILTIN_SERIALIZERS``)
 - Fully qualified class names (e.g. ``package.module:ClassName``)
 
-"""
+'''
 import re
 import pathlib
 import functools

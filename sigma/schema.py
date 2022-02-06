@@ -38,6 +38,7 @@ import yaml
 import pydantic
 from pydantic.fields import Field
 
+from sigma.errors import UnknownIdentifierError
 from sigma.grammar import (
     LogicalOr,
     Expression,
@@ -310,11 +311,14 @@ class RuleDetection(pydantic.BaseModel):
         """Construct an expression from the specified identifier. If the requested
         identifier does not exist, a MissingIdentifier exception is raised."""
 
-        definition = getattr(self, identifier)
-        if not isinstance(
-            definition, Union[RuleDetectionKeywords, RuleDetectionFields]
-        ):
-            raise KeyError(identifier)
+        try:
+            definition = getattr(self, identifier)
+            if not isinstance(
+                definition, Union[RuleDetectionKeywords, RuleDetectionFields]
+            ):
+                raise AttributeError
+        except AttributeError:
+            raise UnknownIdentifierError(f"{identifier}: invalid detection identifier")
 
         return definition.build_expression()
 

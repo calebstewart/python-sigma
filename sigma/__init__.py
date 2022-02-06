@@ -37,6 +37,61 @@ on serializers, see :py:mod:`sigma.serializer`. For more details on transformati
     print(f"======== {rule.title} by {rule.author} ========")
     print(f"EQL Query: {eql.serialize(rule)}")
     print(f"KQL Query: {kql.serialize(rule)}")
+
+Command Line Interface
+----------------------
+
+This package also provides a command line interface for validating and converting sigma rules
+using defined serializers. A script named ``sigma-convert`` is installed with the module.
+
+.. code-block::
+    :caption: sigma-convert usage
+
+    $ sigma-convert --help
+    usage: sigma-convert [-h] [--list-builtin] [--dump-schema {yaml,json,yml}] [--validate] [--ignore-errors]
+                        [--serializer SERIALIZER]
+                        [rules ...]
+
+    Convert or validate Sigma rules. During validation, only errors for rules which fail validation are output. During
+    conversion, rule serializations are printed one-per-line for every rule provided, and stop at the first failed rule,
+    unless the --ignore-errors option is used. A non-zero exit code indicates at least one rule failure.
+
+    positional arguments:
+      rules                 Path to a sigma rule for conversion
+
+    options:
+      -h, --help            show this help message and exit
+      --list-builtin, -l    List built-in serializer names and exit
+      --dump-schema {yaml,json,yml}
+                            Dump the sigma rule schema in the selected format
+      --validate            Validate the provided rule schema (do not perform conversion)
+      --ignore-errors, -i   Ignore errors when converting rules (default: stop processing after first failure)
+      --serializer SERIALIZER, -s SERIALIZER
+                            Name, path or fully-qualified class name of the serializer to use
+
+.. code-block:: bash
+    :caption: Examples of sigma-convert usage
+
+    # Dump the serialized rule to stdout using a standard serializer
+    $ sigma-convert -s eql ./rule.yml
+    $ sigma-convert -s kql ./rule.yml
+
+    # Dump the serialized rule to stdout using a custom serializer definition
+    $ sigma-convert -s ./custom.yml ./rule.yml
+
+    # Dump the serialized rule to stdout using a custom serializer class
+    $ sigma-convert -s package.module:ClassName ./rule.yml
+
+    # Validate a rule format and conditionals
+    $ sigma-convert --validate ./rule.yml
+
+    # Dump the JSON Schema specification for Sigma rules in JSON or YAML format
+    $ sigma-convert --dump-schema json
+    $ sigma-convert --dump-schema yaml
+
+    # List built-in serializer names
+    $ sigma-convert --list-builtin
+
 """
 
 __version__ = "0.1.0"
