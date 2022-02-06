@@ -3,9 +3,42 @@
 
 from typing import List, Type
 
+from pyparsing.exceptions import ParseException
+
 
 class SigmaError(Exception):
     """Base generic sigma error. All other sigma errors are subclasses of this."""
+
+
+class ConditionSyntaxError(SigmaError):
+    """The detection.condition field syntax was incorrect"""
+
+    def __init__(
+        self, parsing_error: ParseException, fmt: str = "detection condition: {}"
+    ):
+        self.error = parsing_error
+        self.fmt = fmt
+
+    @property
+    def line(self) -> str:
+        return self.error.line
+
+    @property
+    def lineno(self) -> int:
+        return self.error.lineno
+
+    @property
+    def column(self) -> int:
+        return self.error.column
+
+    @property
+    def message(self) -> str:
+        return self.error.msg
+
+    def __str__(self) -> str:
+        return self.fmt.format(
+            f"{self.error.msg} (line:{self.lineno} col:{self.column})"
+        )
 
 
 class UnknownIdentifierError(SigmaError):

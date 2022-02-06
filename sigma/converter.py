@@ -4,7 +4,6 @@ Sigma converter command line interface.
 import sys
 import json
 import argparse
-import textwrap
 import importlib.resources
 
 import yaml

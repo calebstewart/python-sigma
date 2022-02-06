@@ -37,8 +37,9 @@ from datetime import date
 import yaml
 import pydantic
 from pydantic.fields import Field
+from pyparsing.exceptions import ParseException
 
-from sigma.errors import UnknownIdentifierError
+from sigma.errors import ConditionSyntaxError, UnknownIdentifierError
 from sigma.grammar import (
     LogicalOr,
     Expression,
@@ -287,10 +288,16 @@ class RuleDetection(pydantic.BaseModel):
 
         if isinstance(self.condition, list):
             results = []
-            for condition in self.condition:
-                condition_grammar = list(
-                    self.GRAMMAR_PARSER.parse_string(self.condition)
-                )
+            for idx, condition in enumerate(self.condition):
+                try:
+                    condition_grammar = list(
+                        self.GRAMMAR_PARSER.parse_string(condition)
+                    )
+                except ParseException as exc:
+                    raise ConditionSyntaxError(
+                        exc, fmt=f"condition[{idx}]: {{}}"
+                    ) from exc
+
                 if len(condition_grammar) > 1:
                     results.append(LogicalAnd(args=condition_grammar))
                 else:
@@ -301,7 +308,10 @@ class RuleDetection(pydantic.BaseModel):
             else:
                 return results[0].postprocess(self)
         else:
-            grammar = list(self.GRAMMAR_PARSER.parse_string(self.condition))
+            try:
+                grammar = list(self.GRAMMAR_PARSER.parse_string(self.condition))
+            except ParseException as exc:
+                raise ConditionSyntaxError(exc, fmt="condition: {}") from exc
             if len(grammar) > 1:
                 return LogicalAnd(args=grammar).postprocess(self)
 
