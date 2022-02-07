@@ -12,7 +12,7 @@ field equality tests
 """
 import base64
 import itertools
-from typing import Any, Dict, List, Type, Union, Callable, ClassVar, Optional
+from typing import Any, Dict, List, Type, Tuple, Union, Callable, ClassVar, Optional
 
 from pydantic import BaseModel
 from pyparsing import Word, Keyword, Literal, opAssoc, alphanums, infixNotation
@@ -56,6 +56,12 @@ class Expression(BaseModel):
             ]
 
         return expression
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert an expression to a condition string and a dict of new detection
+        selectors."""
+
+        raise NotImplementedError
 
 
 class CoreExpression(Expression):
@@ -128,6 +134,13 @@ class LogicalNot(LogicalExpression):
     def __repr__(self):
         return f"NOT({repr(self.args[0])})"
 
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        condition, selectors = self.args[0].to_detection()
+
+        return f"not {condition}", selectors
+
 
 class LogicalOr(LogicalExpression):
     """Logical Or expression"""
@@ -137,6 +150,32 @@ class LogicalOr(LogicalExpression):
     def __repr__(self):
         return f"OR({','.join([repr(a) for a in self.args])})"
 
+    def to_detection(self, group: bool = True) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        if all([isinstance(e, Keyword) for e in self.args]):
+            return "{}", [[e.value for e in self.args]]
+
+        if (
+            all([isinstance(e, FieldComparison) for e in self.args])
+            and len(set([type(e) for e in self.args])) == 1
+        ):
+            return "{}", [
+                {self.args[0].to_field_with_modifiers(): [e.value for e in self.args]}
+            ]
+
+        conditions = []
+        selectors = []
+        for expression in self.args:
+            condition, selector_list = expression.to_detection()
+            conditions.append(condition)
+            selectors.extend(selector_list)
+
+        if group:
+            return "(" + " or ".join(conditions) + ")", selectors
+        else:
+            return " or ".join(conditions), selectors
+
 
 class LogicalAnd(LogicalExpression):
     """Logical And Expression"""
@@ -145,6 +184,24 @@ class LogicalAnd(LogicalExpression):
 
     def __repr__(self):
         return f"AND({','.join([repr(a) for a in self.args])})"
+
+    def to_detection(self, group: bool = True) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        if all([isinstance(e, FieldComparison) for e in self.args]):
+            return "{}", [{e.to_field_with_modifiers(): e.value for e in self.args}]
+
+        conditions = []
+        selectors = []
+        for expression in self.args:
+            condition, selector_list = expression.to_detection()
+            conditions.append(condition)
+            selectors.extend(selector_list)
+
+        if group:
+            return "(" + " and ".join(conditions) + ")", selectors
+        else:
+            return " and ".join(conditions), selectors
 
 
 class Identifier(CoreExpression):
@@ -215,12 +272,28 @@ class FieldComparison(Expression):
     def __repr__(self) -> str:
         raise NotImplementedError
 
+    def to_field_with_modifiers(self) -> str:
+        return self.field
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field: self.value}]
+
 
 class FieldEquality(FieldComparison):
     """Test for field equality"""
 
     def __repr__(self) -> str:
         return f"EQ({self.field}, {repr(self.value)})"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field: self.value}]
 
 
 class FieldContains(FieldComparison):
@@ -231,6 +304,14 @@ class FieldContains(FieldComparison):
     def __repr__(self) -> str:
         return f"CONTAINS({self.field}, {repr(self.value)})"
 
+    def to_field_with_modifiers(self) -> str:
+        return f"{self.field}|contains"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field + "|contains": self.value}]
+
 
 class Base64FieldEquality(FieldComparison):
     """Test for field equality of base64 string"""
@@ -239,6 +320,11 @@ class Base64FieldEquality(FieldComparison):
 
     def __repr__(self) -> str:
         return f"EQ({self.field}, b64decode({repr(self.value)}))"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field + "|contains": self.value}]
 
 
 class FieldEndsWith(FieldComparison):
@@ -249,6 +335,14 @@ class FieldEndsWith(FieldComparison):
     def __repr__(self) -> str:
         return f"ENDSWITH({self.field}, {repr(self.value)})"
 
+    def to_field_with_modifiers(self) -> str:
+        return f"{self.field}|endswith"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field + "|endswith": self.value}]
+
 
 class FieldStartsWith(FieldComparison):
     """Test if a field starts with a token"""
@@ -257,6 +351,14 @@ class FieldStartsWith(FieldComparison):
 
     def __repr__(self) -> str:
         return f"STARTSWITH({self.field}, {repr(self.value)})"
+
+    def to_field_with_modifiers(self) -> str:
+        return f"{self.field}|startswith"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field + "|startswith": self.value}]
 
 
 class FieldIn(FieldComparison):
@@ -267,6 +369,11 @@ class FieldIn(FieldComparison):
     def __repr__(self) -> str:
         return f"IN({self.field}, {repr(self.value)})"
 
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field + "|startswith": self.value}]
+
 
 class FieldRegex(FieldComparison):
     """Compare a field with a regular expression"""
@@ -276,6 +383,14 @@ class FieldRegex(FieldComparison):
     def __repr__(self):
         return f"MATCH({self.field}, {repr(self.value)})"
 
+    def to_field_with_modifiers(self) -> str:
+        return f"{self.field}|re"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field + "|re": self.value}]
+
 
 class KeywordSearch(Expression):
     """Search for a literal keyword/string instead of a direct comparison"""
@@ -284,6 +399,11 @@ class KeywordSearch(Expression):
 
     def __repr__(self) -> str:
         return f"KEYWORD({repr(self.value)})"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [[self.value]]
 
 
 def base64offset_modifier(field: str, value: Any) -> List[str]:

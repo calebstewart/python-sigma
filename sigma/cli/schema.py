@@ -26,13 +26,24 @@ def schema():
     default="yaml",
     help="Format of the schema output",
 )
-def rule(format):
+@click.option(
+    "--examples",
+    "-e",
+    is_flag=True,
+    help="Only show examples",
+)
+def rule(format: str, examples: bool):
     """Dump the schema for Sigma rules"""
 
+    schema = json.loads(Rule.schema_json())
+
+    if examples:
+        schema = schema.get("examples", [])
+
     if format == "yaml":
-        console.print(Syntax(yaml.safe_dump(json.loads(Rule.schema_json())), "yaml"))
+        console.print(Syntax(yaml.safe_dump(schema), "yaml"))
     else:
-        console.print(Syntax(json.dumps(Rule.schema(), indent=2), "json"))
+        console.print(Syntax(json.dumps(schema, indent=2), "json"))
 
 
 @schema.command()
@@ -43,8 +54,14 @@ def rule(format):
     default="yaml",
     help="Format of the schema output",
 )
+@click.option(
+    "--examples",
+    "-e",
+    is_flag=True,
+    help="Only show examples",
+)
 @click.argument("serializer")
-def serializer(format, serializer):
+def serializer(format: str, examples: bool, serializer: str):
     """Dump the schema for the configuration for the given serializer
 
     \b
@@ -61,12 +78,15 @@ def serializer(format, serializer):
         print(f"error: {serializer}: not a valid serializer")
         return
 
+    schema = json.loads(clazz.Schema.schema_json())
+
+    if examples:
+        schema = schema.get("examples", [])
+
     if format == "yaml":
-        console.print(
-            Syntax(yaml.safe_dump(json.loads(clazz.Schema.schema_json())), "yaml")
-        )
+        console.print(Syntax(yaml.safe_dump(schema), "yaml"))
     else:
-        console.print(Syntax(json.dumps(clazz.Schema.schema(), indent=2), "json"))
+        console.print(Syntax(json.dumps(schema, indent=2), "json"))
 
 
 @schema.command()
@@ -77,8 +97,14 @@ def serializer(format, serializer):
     default="yaml",
     help="Format of the schema output",
 )
+@click.option(
+    "--examples",
+    "-e",
+    is_flag=True,
+    help="Only show examples",
+)
 @click.argument("name")
-def transformation(format: str, name: str):
+def transformation(format: str, examples: bool, name: str):
     """Dump the transformation configuration schema.
 
     \b
@@ -87,9 +113,11 @@ def transformation(format: str, name: str):
 
     clazz: Type[Transformation] = Transformation.lookup_class(name)
 
+    schema = json.loads(clazz.Schema.schema_json())
+    if examples:
+        schema = schema.get("examples", [])
+
     if format == "yaml":
-        console.print(
-            Syntax(yaml.safe_dump(json.loads(clazz.Schema.schema_json())), "yaml")
-        )
+        console.print(Syntax(yaml.safe_dump(schema), "yaml"))
     else:
-        console.print(Syntax(json.dumps(clazz.Schema.schema(), indent=2), "json"))
+        console.print(Syntax(json.dumps(schema, indent=2), "json"))

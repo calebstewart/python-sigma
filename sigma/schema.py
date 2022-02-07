@@ -36,7 +36,7 @@ from datetime import date
 
 import yaml
 import pydantic
-from pydantic.fields import Field
+from pydantic.fields import Field, PrivateAttr
 from pyparsing.exceptions import ParseException
 
 from sigma.errors import ConditionSyntaxError, UnknownIdentifierError
@@ -285,12 +285,13 @@ class RuleDetection(pydantic.BaseModel):
     GRAMMAR_PARSER: ClassVar[Any] = build_grammar_parser()
     timeframe: Optional[str] = Field(None, regex="[0-9]+[smhdMY]")
     condition: Union[List[str], str]
+    __parsed_expression: Expression = PrivateAttr()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Parse the condition grammar
-        self._parsed_expression = self.parse_grammar()
+        self.__parsed_expression = self.parse_grammar()
 
     def transform(self, rule: "Rule", transforms: "sigma.transform.Transformation"):
         """Transform all expressions with the given transformations"""
@@ -301,11 +302,11 @@ class RuleDetection(pydantic.BaseModel):
 
             return expression
 
-        self._parsed_expression = self.expression.visit(expression_visitor)
+        self.__parsed_expression = self.expression.visit(expression_visitor)
 
     @property
     def expression(self) -> Expression:
-        return self._parsed_expression
+        return self.__parsed_expression
 
     def parse_grammar(self) -> Expression:
         """Parse the condition and evaluate fields to produce a single
@@ -514,7 +515,21 @@ class Rule(pydantic.BaseModel):
             else:
                 return str(m)
 
-        return _recursive_pydantic_dict(self)
+        result: Dict[str, Any] = _recursive_pydantic_dict(self.dict())
+        result["detection"] = {
+            key: value
+            for key, value in result["detection"].items()
+            if key in ["timeframe"]
+        }
+
+        condition, selectors = self.detection.expression.to_detection(group=False)
+        selector_names = [f"selector{i}" for i in range(len(selectors))]
+        result["detection"]["condition"] = condition.format(*selector_names)
+        result["detection"].update(
+            {selector_names[i]: selectors[i] for i in range(len(selectors))}
+        )
+
+        return result
 
     class Config:
         extra = "allow"
