@@ -431,6 +431,8 @@ class Rule(pydantic.BaseModel):
     detected (max. 65,535 characters). """
     author: Optional[str]
     """ Creator of the rule """
+    license: Optional[str]
+    """ SPDX License Name """
     references: Optional[List[str]]
     """ References to the source that the rule was derived from. These could be
     blog articles, technical papers, presentations or even tweets."""

@@ -189,7 +189,7 @@ class Serializer(ABC):
         self._extend_transforms(self.schema)
 
     @abstractmethod
-    def serialize(self, rule: Union[Rule, List[Rule]]) -> Any:
+    def serialize(self, rule: Union[Rule, List[Rule]], transform: bool = True) -> Any:
         """Serialize the given sigma rule into a new format"""
 
     # @abstractmethod
@@ -492,90 +492,7 @@ class TextQuerySerializer(Serializer):
         )
 
 
-class EventQueryLanguage(TextQuerySerializer):
-    """Elastic EQL Serializer"""
-
-    class Schema(CommonSerializerSchema):
-        """Text Query configuration options which define how to combine the logical expressions
-        into the correct query syntax for your detection engine."""
-
-        quote: str = '"{}"'
-        """ The character used for literal escapes in strings """
-        escape: str = "\\{}"
-        """ The character used to escape the following character in a string """
-        list_separator: str = ","
-        """ The string used to separate list items """
-        or_format: str = "{} or {}"
-        """ A format string to construct an OR expression (e.g. "{} or {}") """
-        and_format: str = "{} and {}"
-        """ A format string to construct an AND expression (e.g. "{} or {}") """
-        not_format: str = "not {}"
-        """ A format string to construct a NOT expression (e.g. "not {}") """
-        grouping: str = "({})"
-        """ A format string to construct a grouping (e.g. "({})") """
-        escaped_characters: str = r'(["\\])'
-        """ Characters aside from the quote and escape character that require escaping """
-        field_equality: str = "{}: {}"
-        """ A format string to test field equality (e.g. "{} == {}") """
-        field_match: str = "{} like {}"
-        """ A format string to test a field with a globbing pattern (e.g. "{}: {}") """
-        field_in: str = "{}: {}"
-        """ A format string to test if a field is in a list (e.g. "{} in {}") """
-        field_regex: str = "{} regex {}"
-        """ A format string to test if a field matches a regex (e.g. "{} match {}")"""
-        keyword: str = "{}"
-        """ A format string to match a keyword across all fields (e.g. "{}") """
-        field_startswith: Optional[str] = "startsWith({},{})"
-        """ A format string to test if a field starts with a string """
-        field_endswith: Optional[str] = "endsWith({},{})"
-        """ A format string to test if a field ends with a string """
-        field_contains: Optional[str] = "stringContains({},{})"
-        """ A format string to test if a field contains another string """
-        prepend_result: str = ""
-        """ String to prepend to the resulting query """
-        rule_separator: str = "\n"
-        """ Separator for when outputting multiple rules to a file """
-
-    def __init__(self, schema: Schema):
-        super().__init__(schema)
-
-        self._categories = set()
-
-    def serialize(self, rule: Union[Rule, List[Rule]]) -> Union[str, List[str]]:
-
-        if isinstance(rule, list):
-            return [self.serialize(r) for r in rule]
-
-        rule = rule.transform(self.transforms)
-        categories = set()
-
-        def _find_category(e: Expression) -> Expression:
-            """Callback which collects the categories from the field comparisons"""
-
-            if not isinstance(e, FieldComparison):
-                return e
-
-            try:
-                category, _ = e.field.split(".", maxsplit=1)
-                categories.add(category)
-            except ValueError:
-                pass
-
-            return e
-
-        # Lookup all the categories
-        rule.detection.expression.visit(_find_category)
-
-        # Serialize the query
-        result = super().serialize(rule)
-
-        if len(categories) > 1 or not categories:
-            category = "any"
-        else:
-            category = categories.pop()
-
-        return f"{category} where {result}"
-
+from sigma.serializer.elastic import EventQueryLanguage, ElasticSecurityRule
 
 BUILTIN_SERIALIZERS: Dict[str, Tuple[Type[Serializer], str]] = {
     "TextQuerySerializer": (
@@ -585,6 +502,10 @@ BUILTIN_SERIALIZERS: Dict[str, Tuple[Type[Serializer], str]] = {
     "eql": (
         EventQueryLanguage,
         "Elastic Event Query Language (EQL) Text-Based Serializer",
+    ),
+    "es-rule": (
+        ElasticSecurityRule,
+        "Elastic Security EQL Rule in JSON format",
     ),
 }
 

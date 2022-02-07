@@ -43,14 +43,23 @@ transformation names or a fully-qualified python class path formatted as
             ParentImage: process.parent.executable
 
 """
+import re
 import importlib
 from abc import ABC
 from typing import Any, Dict, Type
 
 from pydantic.main import BaseModel
 
+from sigma.errors import SigmaError
 from sigma.schema import Rule
-from sigma.grammar import Expression, FieldComparison
+from sigma.grammar import (
+    Expression,
+    FieldContains,
+    FieldEndsWith,
+    FieldEquality,
+    FieldComparison,
+    FieldStartsWith,
+)
 
 
 class Transformation(ABC):
@@ -80,7 +89,77 @@ class Transformation(ABC):
         return expression
 
 
-class FieldTransform(Transformation):
+class FieldMatchReplace(Transformation):
+    r"""
+    Transform a field matching expression with a matching value to a field equality
+    comparison. This transformation accepts the following configs: field, pattern, target and type.
+    The type is one of endswith, startswith or contains. The field is the name of the field
+    being compared. Pattern is a regular expression which must match the value of the matching
+    expression, and must also contain a regex group which will be substituted as value in the
+    new equality expression. The target is the name of the field used in the new equality
+    expression. If the target is not provided, the field is reused in the equality expression.
+    As an example, the following config will replace ``endsWith(process.executable, "\\test.exe")``
+    with ``process.name == "test.exe"``.
+
+    .. code-block: yaml
+
+        - type: endswith
+          config:
+            type: endswith
+            field: process.executable
+            pattern: "\\\\(.*)"
+            target: process.name
+    """
+
+    VALID_TYPES: Dict[str, Type[Expression]] = {
+        "endswith": FieldEndsWith,
+        "startswith": FieldStartsWith,
+        "contains": FieldContains,
+    }
+
+    def __init__(self, config: Dict[str, str]):
+        super().__init__(config)
+
+        for key in ["field", "pattern", "type"]:
+            if key not in config:
+                raise SigmaError(f"missing pattern transform config: {key}")
+
+        if config["type"] not in self.VALID_TYPES:
+            raise SigmaError(
+                f"invalid pattern transform type: {config['type']} (expected on of {list(self.VALID_TYPES.keys())})"
+            )
+
+        self.type = self.VALID_TYPES[config["type"]]
+        self.field = config["field"]
+        self.pattern = re.compile(config["pattern"])
+        self.target = config.get("target", self.field)
+
+    def transform_expression(
+        self, rule: Rule, expression: FieldComparison
+    ) -> Expression:
+        """Transform the given expression"""
+
+        # Only transform the requested expression type
+        if not isinstance(expression, self.type):
+            return expression
+
+        # Test if the value matches the regular expression
+        match = self.pattern.fullmatch(expression.value)
+
+        # Don't modify the expression if it doesn't match
+        if match is None:
+            return expression
+
+        # Replace this expression with a simple equality using
+        # the regular expression matching group.
+        new_expression = FieldEquality(
+            field=self.target, value=match.group(1)
+        ).postprocess(rule, expression.parent)
+
+        return new_expression
+
+
+class FieldMap(Transformation):
     """Transform sigma rule expressions to replace field names. Transformation
     configuration is a mapping between built-in field names and custom field names.
 
@@ -103,7 +182,40 @@ class FieldTransform(Transformation):
         return expression
 
 
-BUILTIN_TRANSFORMS: Dict[str, Type[Transformation]] = {"field": FieldTransform}
+class FieldFuzzyMap(Transformation):
+    """Replace field names with an explicit mapping. The configuration for this
+    transformation is a mapping between Sigma field names and your backend field
+    names. This version of a field map will replace field names ignoring case and
+    also test against snake_case and CamelCase versions of the given fields. All
+    source fields in the mapping should be in snake_case.
+    """
+
+    def __init__(self, config: Dict[str, str]):
+        super().__init__(config)
+
+        self.mapping = {key.lower(): value for key, value in config.items()}
+        self.mapping.update(
+            {key.replace("_", ""): value for key, value in config.items()}
+        )
+
+    def transform_expression(self, rule: Rule, expression: Expression) -> Expression:
+        """Replace any field names based on the provided mapping. If the expression
+        is not a field comparison, this method simply returns the expression unaltered."""
+
+        if (
+            isinstance(expression, FieldComparison)
+            and expression.field.lower() in self.mapping
+        ):
+            expression.field = self.mapping[expression.field.lower()]
+
+        return expression
+
+
+BUILTIN_TRANSFORMS: Dict[str, Type[Transformation]] = {
+    "field_map": FieldMap,
+    "field_fuzzy_map": FieldFuzzyMap,
+    "match_replace": FieldMatchReplace,
+}
 
 
 class TransformationSchema(BaseModel):
