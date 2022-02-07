@@ -121,7 +121,18 @@ import functools
 import importlib
 import importlib.resources
 from abc import ABC, abstractmethod
-from typing import IO, Any, Dict, List, Type, Union, ClassVar, Optional
+from typing import (
+    IO,
+    Any,
+    Dict,
+    List,
+    Type,
+    Tuple,
+    Union,
+    ClassVar,
+    Optional,
+    Generator,
+)
 from importlib.abc import Traversable
 
 import yaml
@@ -258,8 +269,8 @@ class Serializer(ABC):
         elif pathlib.Path(name).is_file():
             return cls.from_yaml(name)
         elif name in BUILTIN_SERIALIZERS:
-            schema = BUILTIN_SERIALIZERS[name].Schema.parse_obj(config)
-            return BUILTIN_SERIALIZERS[name](schema)
+            schema = BUILTIN_SERIALIZERS[name][0].Schema.parse_obj(config)
+            return BUILTIN_SERIALIZERS[name][0](schema)
         else:
             module_name, clazz_name = name.split(":", maxsplit=1)
             module = importlib.import_module(module_name)
@@ -403,11 +414,15 @@ class TextQuerySerializer(Serializer):
                 self._serialize_with_wildcard, "*{}*"
             )
 
-    def serialize(self, rule: Union[Rule, List[Rule]]) -> Union[str, List[str]]:
+    def serialize(
+        self, rule: Union[Rule, List[Rule]], transform: bool = True
+    ) -> Union[str, List[str]]:
         """Serialize the rule to a single text query
 
         :param rule: a rule or list of rules to be serialized
         :type rule: Union[Rule, List[Rule]]
+        :param transform: whether to apply transformations (default: True)
+        :type transform: bool
         :rtype: Union[str, List[str]]
         :returns: the serialized rule or list of serialized rules (if a list was passed in)
         """
@@ -415,14 +430,10 @@ class TextQuerySerializer(Serializer):
         if isinstance(rule, list):
             return [self.serialize(r) for r in rule]
 
-        rule = self.apply_rule_transform(rule)
-        expression = self.apply_expression_transform(
-            rule, rule.detection.parse_grammar()
-        )
+        if transform:
+            rule = rule.transform(self.transforms)
 
-        return self.schema.prepend_result + self._serialize_expression(
-            expression, group=False
-        )
+        return self._serialize_expression(rule.detection.expression, group=False)
 
     def _serialize_expression(self, expression: Any, group: bool = True):
         """Recursively serialize an expression"""
@@ -481,6 +492,118 @@ class TextQuerySerializer(Serializer):
         )
 
 
-BUILTIN_SERIALIZERS: Dict[str, Type[Serializer]] = {
-    "TextQuerySerializer": TextQuerySerializer
+class EventQueryLanguage(TextQuerySerializer):
+    """Elastic EQL Serializer"""
+
+    class Schema(CommonSerializerSchema):
+        """Text Query configuration options which define how to combine the logical expressions
+        into the correct query syntax for your detection engine."""
+
+        quote: str = '"{}"'
+        """ The character used for literal escapes in strings """
+        escape: str = "\\{}"
+        """ The character used to escape the following character in a string """
+        list_separator: str = ","
+        """ The string used to separate list items """
+        or_format: str = "{} or {}"
+        """ A format string to construct an OR expression (e.g. "{} or {}") """
+        and_format: str = "{} and {}"
+        """ A format string to construct an AND expression (e.g. "{} or {}") """
+        not_format: str = "not {}"
+        """ A format string to construct a NOT expression (e.g. "not {}") """
+        grouping: str = "({})"
+        """ A format string to construct a grouping (e.g. "({})") """
+        escaped_characters: str = r'(["\\])'
+        """ Characters aside from the quote and escape character that require escaping """
+        field_equality: str = "{}: {}"
+        """ A format string to test field equality (e.g. "{} == {}") """
+        field_match: str = "{} like {}"
+        """ A format string to test a field with a globbing pattern (e.g. "{}: {}") """
+        field_in: str = "{}: {}"
+        """ A format string to test if a field is in a list (e.g. "{} in {}") """
+        field_regex: str = "{} regex {}"
+        """ A format string to test if a field matches a regex (e.g. "{} match {}")"""
+        keyword: str = "{}"
+        """ A format string to match a keyword across all fields (e.g. "{}") """
+        field_startswith: Optional[str] = "startsWith({},{})"
+        """ A format string to test if a field starts with a string """
+        field_endswith: Optional[str] = "endsWith({},{})"
+        """ A format string to test if a field ends with a string """
+        field_contains: Optional[str] = "stringContains({},{})"
+        """ A format string to test if a field contains another string """
+        prepend_result: str = ""
+        """ String to prepend to the resulting query """
+        rule_separator: str = "\n"
+        """ Separator for when outputting multiple rules to a file """
+
+    def __init__(self, schema: Schema):
+        super().__init__(schema)
+
+        self._categories = set()
+
+    def serialize(self, rule: Union[Rule, List[Rule]]) -> Union[str, List[str]]:
+
+        if isinstance(rule, list):
+            return [self.serialize(r) for r in rule]
+
+        rule = rule.transform(self.transforms)
+        categories = set()
+
+        def _find_category(e: Expression) -> Expression:
+            """Callback which collects the categories from the field comparisons"""
+
+            if not isinstance(e, FieldComparison):
+                return e
+
+            try:
+                category, _ = e.field.split(".", maxsplit=1)
+                categories.add(category)
+            except ValueError:
+                pass
+
+            return e
+
+        # Lookup all the categories
+        rule.detection.expression.visit(_find_category)
+
+        # Serialize the query
+        result = super().serialize(rule)
+
+        if len(categories) > 1 or not categories:
+            category = "any"
+        else:
+            category = categories.pop()
+
+        return f"{category} where {result}"
+
+
+BUILTIN_SERIALIZERS: Dict[str, Tuple[Type[Serializer], str]] = {
+    "TextQuerySerializer": (
+        TextQuerySerializer,
+        "Base class for text-based queries (cannot be used directly)",
+    ),
+    "eql": (
+        EventQueryLanguage,
+        "Elastic Event Query Language (EQL) Text-Based Serializer",
+    ),
 }
+
+
+def get_builtin_serializers() -> Generator[Tuple[str, str], None, None]:
+    """Iterate over built-in serializers. This method is a generator which yields
+    a tuple of [name, description] for all built-in serializers."""
+
+    for name, (_, description) in BUILTIN_SERIALIZERS.items():
+        yield (name, description)
+
+    for resource in (
+        importlib.resources.files("sigma") / "data" / "serializers"
+    ).iterdir():
+        if not resource.name.endswith(".yml"):
+            continue
+
+        name = resource.name.removesuffix(".yml")
+        with resource.open() as filp:
+            definition = CommonSerializerSchema.parse_obj(yaml.safe_load(filp))
+
+        yield (name, definition.description)

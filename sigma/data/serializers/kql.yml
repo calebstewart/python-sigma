@@ -1,5 +1,5 @@
 name: "Kibana Query Language Serializer"
-description: "Serialize a rule to an KQL query expression"
+description: "Kibana Query Language (KQL) Text-Based Serializer"
 base: "sigma.serializer:TextQuerySerializer"
 quote: '{}'
 escape: "\\{}"

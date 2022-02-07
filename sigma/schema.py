@@ -217,6 +217,7 @@ class RuleLogSource(pydantic.BaseModel):
     category: Optional[str]
     product: Optional[str]
     service: Optional[str]
+    definition: Optional[str]
 
     def __contains__(self, other: "RuleLogSource") -> bool:
         """Compare two log sources. This returns true if the sources are
@@ -230,6 +231,9 @@ class RuleLogSource(pydantic.BaseModel):
             and (self.product is None or self.product == other.product)
             and (self.service is None or self.service == other.service)
         )
+
+    class Config:
+        extra = "allow"
 
 
 class RuleRelation(pydantic.BaseModel):
@@ -281,6 +285,27 @@ class RuleDetection(pydantic.BaseModel):
     GRAMMAR_PARSER: ClassVar[Any] = build_grammar_parser()
     timeframe: Optional[str] = Field(None, regex="[0-9]+[smhdMY]")
     condition: Union[List[str], str]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Parse the condition grammar
+        self._parsed_expression = self.parse_grammar()
+
+    def transform(self, rule: "Rule", transforms: "sigma.transform.Transformation"):
+        """Transform all expressions with the given transformations"""
+
+        def expression_visitor(expression: Expression) -> Expression:
+            for t in transforms:
+                expression = t.transform_expression(rule, expression)
+
+            return expression
+
+        self._parsed_expression = self.expression.visit(expression_visitor)
+
+    @property
+    def expression(self) -> Expression:
+        return self._parsed_expression
 
     def parse_grammar(self) -> Expression:
         """Parse the condition and evaluate fields to produce a single
@@ -435,6 +460,19 @@ class Rule(pydantic.BaseModel):
     )
     """ The date the rule was last modified. This should be YYYY-MM-DD or YYYY/MM/DD.
     If the field is not formatted in this way, it will be saved as a simple string."""
+
+    def transform(self, transforms: List["sigma.transorms.Transformation"]) -> "Rule":
+        """Apply all transformations to this rule and all condition expressions"""
+
+        # Apply all rule transformations (potentially replacing this rule)
+        rule = self
+        for transform in transforms:
+            rule = transform.transform_rule(rule)
+
+        # Apply all expression transformations to the detection
+        rule.detection.transform(rule, transforms)
+
+        return rule
 
     @classmethod
     def from_yaml(cls, path: Union[str, pathlib.Path]) -> "Rule":

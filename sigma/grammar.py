@@ -41,6 +41,22 @@ class Expression(BaseModel):
 
         return self
 
+    def visit(self, callback: Callable[["Expression"], "Expression"]) -> "Expression":
+        """Execute the given callback for each expression in the tree. The callback
+        must return an expression to replace to visited expression (or the same reference
+        to leave it unchanged)."""
+
+        from sigma.grammar import CoreExpression
+
+        expression = callback(self)
+        if isinstance(expression, CoreExpression):
+            expression.args = [
+                e.visit(callback) if isinstance(e, Expression) else e
+                for e in expression.args
+            ]
+
+        return expression
+
 
 class CoreExpression(Expression):
     """Core expressions are the ones directly parsed from the condition

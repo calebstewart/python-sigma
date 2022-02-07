@@ -9,7 +9,7 @@ import importlib.resources
 import yaml
 
 from sigma.schema import Rule
-from sigma.serializer import Serializer
+from sigma.serializer import Serializer, get_builtin_serializers
 
 
 def convert():
@@ -67,11 +67,8 @@ def convert():
 
     if args.list_builtin:
         # Locate all built-in serializer definitions in the reosurces
-        for item in (
-            importlib.resources.files("sigma") / "data" / "serializers"
-        ).iterdir():
-            if item.is_file() and item.name.endswith(".yml"):
-                print(item.name.removesuffix(".yml"))
+        for name, description in get_builtin_serializers():
+            print(f"{name} - {description}")
 
         return 0
     elif not args.serializer and not args.validate:
