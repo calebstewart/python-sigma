@@ -5,13 +5,10 @@ The rules are parsed using a schema defined with `pydantic`, and can be
 loaded easily with the `parse_obj` method of the `pydantic` module.
 
 ```py
-import yaml
-
 from sigma.schema import Rule
 
 # Load a rule into a python object
-with open("test-rule.yml") as filp:
-    rule = Rule.parse_obj(yaml.safe_load(filp))
+rule = Rule.from_yaml("test-rule.yml")
     
 # Simple properties are accessible directly
 print(rule.title)
@@ -22,7 +19,37 @@ print(rule.detection.condition)
 print(rule.detection.my_condition_name)
 
 # Parsed/unified grammar from the condition is easy!
-print(rule.detection.parse_grammar())
+print(rule.detection.expression)
+```
+
+## Command Line Interface
+
+There is a basic command line interface implemented for interfacing with the
+serialization classes. The package installs the `sigma-convert` entrypoint
+which provides the ability to use built-in or customized serializers to convert
+Sigma rules to various formats.
+
+``` sh
+usage: sigma-convert [-h] [--list-builtin] [--dump-schema {yaml,json,yml}] [--validate] [--ignore-errors]
+                     [--serializer SERIALIZER]
+                     [rules ...]
+
+Convert or validate Sigma rules. During validation, only errors for rules which fail validation are output. During
+conversion, rule serializations are printed one-per-line for every rule provided, and stop at the first failed rule,
+unless the --ignore-errors option is used. A non-zero exit code indicates at least one rule failure.
+
+positional arguments:
+  rules                 Path to a sigma rule for conversion
+
+options:
+  -h, --help            show this help message and exit
+  --list-builtin, -l    List built-in serializer names and exit
+  --dump-schema {yaml,json,yml}
+                        Dump the sigma rule schema in the selected format
+  --validate            Validate the provided rule schema (do not perform conversion)
+  --ignore-errors, -i   Ignore errors when converting rules (default: stop processing after first failure)
+  --serializer SERIALIZER, -s SERIALIZER
+                        Name, path or fully-qualified class name of the serializer to use
 ```
 
 ## Documentation
@@ -44,21 +71,6 @@ make html
 
 # Open the documentation in docs/_build/index.html
 ```
-
-## State of the Project
-
-Currently, this is an early attempt at parsing the rules and conditional
-grammar only. Eventually, I will work on a pipeline for converting rules
-to other formats, but I want to focus on correctly parsing and handling
-all facets of the Sigma rule specification first.
-
-For now, this means there is no command line interface for interacting
-with rules. That will be the final step after the rest of the plumbing/
-framework is built out.
-
-I've take some inspiration from [pySigma](https://github.com/SigmaHQ/pySigma.git)
-for parsing the condition rules to hopefully speed some of the logic parsing
-up a bit, and this appears to be mostly working.
 
 ## But... why?
 
