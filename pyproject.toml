@@ -5,7 +5,7 @@ description = "Python library for parsing and interacting with Sigma rules."
 authors = ["Caleb Stewart <caleb.stewart94@gmail.com>"]
 
 [tool.poetry.scripts]
-sigma-convert = "sigma.converter:convert"
+sigma = "sigma.cli:cli"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -17,6 +17,7 @@ sphinx-toolbox = { version = "^2.15.2", optional = true }
 Sphinx = { version= "^4.0.2", optional = true }
 enum-tools = { version= "^0.7.0", optional = true }
 furo = { version= "^2021.11.23", optional = true }
+click = "^8.0.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

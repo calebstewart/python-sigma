@@ -46,11 +46,11 @@ transformation names or a fully-qualified python class path formatted as
 import re
 import importlib
 from abc import ABC
-from typing import Any, Dict, Type
+from typing import Any, Dict, Type, Tuple
 
 from pydantic.main import BaseModel
 
-from sigma.errors import SigmaError
+from sigma.errors import SigmaError, UnknownTransform
 from sigma.schema import Rule
 from sigma.grammar import (
     Expression,
@@ -211,10 +211,16 @@ class FieldFuzzyMap(Transformation):
         return expression
 
 
-BUILTIN_TRANSFORMS: Dict[str, Type[Transformation]] = {
-    "field_map": FieldMap,
-    "field_fuzzy_map": FieldFuzzyMap,
-    "match_replace": FieldMatchReplace,
+BUILTIN_TRANSFORMS: Dict[str, Tuple[Type[Transformation], str]] = {
+    "field_map": (FieldMap, "Map Sigma field names to custom field names"),
+    "field_fuzzy_map": (
+        FieldFuzzyMap,
+        "Map Sigma fields names to custom field names with fuzzy matching",
+    ),
+    "match_replace": (
+        FieldMatchReplace,
+        "Replace wildcard matching with strict equality based on regex patterns",
+    ),
 }
 
 
@@ -236,10 +242,13 @@ class TransformationSchema(BaseModel):
         """Construct a transformation instance from the schema."""
 
         if self.type in BUILTIN_TRANSFORMS:
-            return BUILTIN_TRANSFORMS[self.type](self.config)
+            return BUILTIN_TRANSFORMS[self.type][0](self.config)
         else:
-            module_name, class_name = self.type.split(":", maxsplit=1)
-            module = importlib.import_module(module_name)
-            transform_type: Type[Transformation] = getattr(module, class_name)
+            try:
+                module_name, class_name = self.type.split(":", maxsplit=1)
+                module = importlib.import_module(module_name)
+                transform_type: Type[Transformation] = getattr(module, class_name)
 
-            return transform_type(self.config)
+                return transform_type(self.config)
+            except (ValueError, ModuleNotFoundError) as exc:
+                raise UnknownTransform(self.type) from exc

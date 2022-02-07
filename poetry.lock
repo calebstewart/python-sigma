@@ -132,7 +132,7 @@ name = "click"
 version = "8.0.3"
 description = "Composable command line interface toolkit"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -862,7 +862,7 @@ docs = ["sphinx-toolbox", "Sphinx", "enum-tools", "furo"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "2993c1281180a64a0e02fbcb14447903a055e89bc3d1c70cdd45fe1ce3e52453"
+content-hash = "e8b9b65476added3931dee7a0d1ce7e464b4daf49b9edfaf5d3c47d06f5d0cda"
 
 [metadata.files]
 alabaster = [

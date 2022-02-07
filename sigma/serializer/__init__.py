@@ -139,6 +139,7 @@ import yaml
 from pydantic.main import BaseModel
 from pydantic.fields import Field
 
+from sigma.errors import SerializerNotFound
 from sigma.schema import Rule
 from sigma.grammar import (
     FieldIn,
@@ -528,3 +529,31 @@ def get_builtin_serializers() -> Generator[Tuple[str, str], None, None]:
             definition = CommonSerializerSchema.parse_obj(yaml.safe_load(filp))
 
         yield (name, definition.description)
+
+
+def get_serializer_class(name: str) -> Type[Serializer]:
+    """Retrieve the class backing the given serializer"""
+
+    serializers_path = importlib.resources.files("sigma") / "data" / "serializers"
+
+    if (serializers_path / (name + ".yml")).is_file():
+        with (serializers_path / (name + ".yml")).open() as filp:
+            definition = CommonSerializerSchema.parse_obj(yaml.safe_load(filp))
+
+        return get_serializer_class(definition.base)
+    elif pathlib.Path(name).is_file():
+        with open(name) as filp:
+            definition = CommonSerializerSchema.parse_obj(yaml.safe_load(filp))
+
+        return get_serializer_class(definition.base)
+    elif name in BUILTIN_SERIALIZERS:
+        return BUILTIN_SERIALIZERS[name][0]
+    else:
+        try:
+            module_name, clazz_name = name.split(":", maxsplit=1)
+            module = importlib.import_module(module_name)
+            serializer_type: Type[Serializer] = getattr(module, clazz_name)
+
+            return serializer_type
+        except (ValueError, ModuleNotFoundError) as exc:
+            raise SerializerNotFound(name) from exc

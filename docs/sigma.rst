@@ -12,7 +12,6 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   sigma.converter
    sigma.errors
    sigma.grammar
    sigma.schema

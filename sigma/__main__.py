@@ -1,6 +1,4 @@
-import sys
-
-from sigma.converter import convert
+from sigma.cli import cli
 
 if __name__ == "__main__":
-    sys.exit(convert())
+    cli()

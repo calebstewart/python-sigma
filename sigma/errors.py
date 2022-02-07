@@ -98,3 +98,15 @@ class InvalidFieldValueError(SigmaError):
             message = f"detections: {field}: modifier: {modifier}: expected {expected} but found {found}"
         else:
             message = f"detections: {field}: expected {expected} but found {found}"
+
+        super().__init__(message)
+
+
+class UnknownTransform(SigmaError):
+    def __init__(self, transform: str):
+        super().__init__(f"unknown rule transform: {transform}")
+
+
+class SerializerNotFound(SigmaError):
+    def __init__(self, serializer: str):
+        super().__init__(f"{serializer}: serializer not found")
