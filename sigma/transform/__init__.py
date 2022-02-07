@@ -43,12 +43,13 @@ transformation names or a fully-qualified python class path formatted as
             ParentImage: process.parent.executable
 
 """
-import re
 import importlib
 from abc import ABC
-from typing import Any, Dict, Type, Tuple
+from enum import Enum
+from typing import Any, Dict, Type, Tuple, Literal, Pattern, Optional, Generator
 
 from pydantic.main import BaseModel
+from pydantic.fields import Field
 
 from sigma.errors import SigmaError, UnknownTransform
 from sigma.schema import Rule
@@ -62,15 +63,39 @@ from sigma.grammar import (
 )
 
 
+class ExpressionType(str, Enum):
+    """Defines the types of expressions we can modify"""
+
+    ENDSWITH = "endswith"
+    STARTSWITH = "startswith"
+    CONTAINS = "contains"
+
+
 class Transformation(ABC):
     """Base transformation class for inline modification during rule serialization
 
-    :param config: a dictionary of transform configurations which only have meaning
-                   in the context of a specific transform type.
-    :type config: Dict[str, Any]
+    :param type: type of transformation
+    :type type: str
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    class Schema(BaseModel):
+        """Common transformation configuration schema. Specific transforms extend
+        this class to provide structured configuration information."""
+
+        type: str
+        """ Name of the transformation type """
+
+        class Config:
+            extra = "allow"
+
+        def load(self) -> "Transformation":
+            """Construct a transformation instance from the schema."""
+
+            clazz = Transformation.lookup_class(self.type)
+            schema = clazz.Schema.parse_obj(self.dict())
+            return clazz(schema)
+
+    def __init__(self, config: Schema):
         pass
 
     def transform_rule(self, rule: Rule) -> Rule:
@@ -88,6 +113,34 @@ class Transformation(ABC):
 
         return expression
 
+    @classmethod
+    def lookup_class(cls, name: str) -> Type["Transformation"]:
+        """Lookup the class backing the given transformation type name or fully-qualified
+        class name"""
+
+        if name in BUILTIN_TRANSFORMS:
+            clazz = BUILTIN_TRANSFORMS[name][0]
+        else:
+            try:
+                module_name, class_name = name.split(":", maxsplit=1)
+                module = importlib.import_module(module_name)
+                clazz: Type[Transformation] = getattr(module, class_name)
+
+                if clazz is None or not issubclass(clazz, Transformation):
+                    raise UnknownTransform(f"{name}: not a transformation class")
+            except (ValueError, ModuleNotFoundError) as exc:
+                raise UnknownTransform(name) from exc
+
+        return clazz
+
+    @classmethod
+    def enumerate_builtin(cls) -> Generator[Tuple[str, str], None, None]:
+        """Enumerate all built-in transformations. This method yields tuples of
+        (name, description) for each built-in transformation."""
+
+        for name, (_, description) in BUILTIN_TRANSFORMS.items():
+            yield (name, description)
+
 
 class FieldMatchReplace(Transformation):
     r"""
@@ -104,35 +157,50 @@ class FieldMatchReplace(Transformation):
     .. code-block: yaml
 
         - type: endswith
-          config:
-            type: endswith
-            field: process.executable
-            pattern: "\\\\(.*)"
-            target: process.name
+          expression: endswith
+          field: process.executable
+          pattern: "\\\\(.*)"
+          target: process.name
     """
 
+    class Schema(Transformation.Schema):
+        """Configuration schema for this transformation"""
+
+        type: Literal["match_replace"]
+        expression: ExpressionType
+        field: str
+        pattern: Pattern
+        target: Optional[str]
+
+        class Config:
+            extra = "forbid"
+
+            schema_extra = {
+                "examples": [
+                    {
+                        "type": "match_replace",
+                        "expression": "endswith",
+                        "field": "process.executable",
+                        "pattern": r"\\(.*)",
+                        "target": "process.name",
+                    }
+                ]
+            }
+
+    # map above expression types to expression classes
     VALID_TYPES: Dict[str, Type[Expression]] = {
-        "endswith": FieldEndsWith,
-        "startswith": FieldStartsWith,
-        "contains": FieldContains,
+        ExpressionType.ENDSWITH: FieldEndsWith,
+        ExpressionType.STARTSWITH: FieldStartsWith,
+        ExpressionType.CONTAINS: FieldContains,
     }
 
-    def __init__(self, config: Dict[str, str]):
-        super().__init__(config)
+    def __init__(self, schema: Schema):
+        super().__init__(schema)
 
-        for key in ["field", "pattern", "type"]:
-            if key not in config:
-                raise SigmaError(f"missing pattern transform config: {key}")
-
-        if config["type"] not in self.VALID_TYPES:
-            raise SigmaError(
-                f"invalid pattern transform type: {config['type']} (expected on of {list(self.VALID_TYPES.keys())})"
-            )
-
-        self.type = self.VALID_TYPES[config["type"]]
-        self.field = config["field"]
-        self.pattern = re.compile(config["pattern"])
-        self.target = config.get("target", self.field)
+        self.type = self.VALID_TYPES[schema.expression]
+        self.field = schema.field
+        self.pattern = schema.pattern
+        self.target = schema.target or schema.field
 
     def transform_expression(
         self, rule: Rule, expression: FieldComparison
@@ -167,10 +235,32 @@ class FieldMap(Transformation):
     :type config: Dict[str, str]
     """
 
-    def __init__(self, config: Dict[str, str]):
-        super().__init__(config)
+    class Schema(Transformation.Schema):
+        """Field mapping configuration definition"""
 
-        self.mapping = config
+        type: Literal["field_map"]
+        mapping: Dict[str, str]
+        """ Field name mappings """
+
+        class Config:
+            extra = "forbid"
+
+            schema_extra = {
+                "examples": [
+                    {
+                        "type": "field_map",
+                        "mapping": {
+                            "CommandLine": "process.command_line",
+                            "Image": "process.executable",
+                        },
+                    }
+                ]
+            }
+
+    def __init__(self, schema: Schema):
+        super().__init__(schema)
+
+        self.mapping = schema.mapping
 
     def transform_expression(self, rule: Rule, expression: Expression) -> Expression:
         """Replace any field names based on the provided mapping. If the expression
@@ -190,12 +280,34 @@ class FieldFuzzyMap(Transformation):
     source fields in the mapping should be in snake_case.
     """
 
-    def __init__(self, config: Dict[str, str]):
-        super().__init__(config)
+    class Schema(Transformation.Schema):
+        """Field mapping configuration definition"""
 
-        self.mapping = {key.lower(): value for key, value in config.items()}
+        type: Literal["field_fuzy_map"]
+        mapping: Dict[str, str]
+        """ Field name mappings """
+
+        class Config:
+            extra = "forbid"
+
+            schema_extra = {
+                "examples": [
+                    {
+                        "type": "field_map",
+                        "mapping": {
+                            "command_line": "process.command_line",
+                            "image": "process.executable",
+                        },
+                    }
+                ]
+            }
+
+    def __init__(self, schema: Schema):
+        super().__init__(schema)
+
+        self.mapping = {key.lower(): value for key, value in schema.mapping.items()}
         self.mapping.update(
-            {key.replace("_", ""): value for key, value in config.items()}
+            {key.replace("_", ""): value for key, value in schema.mapping.items()}
         )
 
     def transform_expression(self, rule: Rule, expression: Expression) -> Expression:

@@ -167,7 +167,7 @@ class CommonSerializerSchema(BaseModel):
     """ Arbitrary name for this serialization schema """
     description: str
     """ Description of the schema """
-    transforms: Optional[List[TransformationSchema]]
+    transforms: Optional[List[Transformation.Schema]]
     """ List of transforms to be applied """
     base: str
     """ The base type for this serialization. This is either the name of a builtin
@@ -203,7 +203,7 @@ class Serializer(ABC):
             return
 
         for transform in schema.transforms:
-            self.transforms.append(transform.build())
+            self.transforms.append(transform.load())
 
     def apply_rule_transform(self, rule: Rule) -> Rule:
         """Apply all rule-level transformations"""

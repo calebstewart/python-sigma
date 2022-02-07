@@ -1,14 +1,13 @@
-import sys
 from typing import List
 
 import click
 
-from sigma.cli import cli
+from sigma.cli import cli, console, aliased_group
 from sigma.schema import Rule
 from sigma.serializer import Serializer
 
 
-@cli.group()
+@aliased_group(parent=cli)
 def validate():
     """Validate Sigma rule or serializer schema"""
 
@@ -28,9 +27,11 @@ def rule(rules):
             Rule.from_yaml(rule_path)
         except Exception as exc:
             failed += 1
-            print(f"{rule_path}: {exc}", file=sys.stderr)
+            console.print(f"[yellow]{rule_path}[/yellow]: [italic]{exc}[/italic]")
 
-    print(f"{len(rules)-failed} of {len(rules)} passed validation ({failed} failed)")
+    console.print(
+        f"{len(rules)-failed} of {len(rules)} [green]passed[/green] validation ({failed} [red]failed[/red])"
+    )
 
 
 @validate.command()
@@ -48,8 +49,8 @@ def serializer(serializers: List[str]):
             Serializer.load(name)
         except Exception as exc:
             failed += 1
-            print(f"{name}: {exc}", file=sys.stderr)
+            console.print(f"[yellow]{name}[/yellow]: [italic]{exc}[/italic]")
 
-    print(
-        f"{len(serializers)-failed} of {len(serializers)} passed validation ({failed} failed)"
+    console.print(
+        f"{len(serializers)-failed} of {len(serializers)} [green]passed[/green] validation ({failed} [red]failed[/red])"
     )

@@ -291,6 +291,20 @@ test = ["pytest", "pytest-cov", "pytest-xdist"]
 doc = ["myst-parser", "sphinx-copybutton", "sphinx-design", "sphinx-inline-tabs"]
 
 [[package]]
+name = "fuzzywuzzy"
+version = "0.18.0"
+description = "Fuzzy string matching in python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+python-levenshtein = {version = ">=0.12", optional = true, markers = "extra == \"speedup\""}
+
+[package.extras]
+speedup = ["python-levenshtein (>=0.12)"]
+
+[[package]]
 name = "html5lib"
 version = "1.1"
 description = "HTML parser based on the WHATWG HTML specification"
@@ -532,6 +546,14 @@ wcwidth = "*"
 [package.extras]
 checkqa-mypy = ["mypy (==v0.761)"]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
+
+[[package]]
+name = "python-levenshtein"
+version = "0.12.2"
+description = "Python extension for computing string edit distances and similarities."
+category = "main"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "pytz"
@@ -862,7 +884,7 @@ docs = ["sphinx-toolbox", "Sphinx", "enum-tools", "furo"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "e8b9b65476added3931dee7a0d1ce7e464b4daf49b9edfaf5d3c47d06f5d0cda"
+content-hash = "e932d6e71b67f3bbd419e247f6ff0a74e3897622f74609fb8e0db03a736884fd"
 
 [metadata.files]
 alabaster = [
@@ -959,6 +981,10 @@ flake8 = [
 furo = [
     {file = "furo-2021.11.23-py3-none-any.whl", hash = "sha256:6d396451ad1aadce380c662fca9362cb10f4fd85f296d74fe3ca32006eb641d7"},
     {file = "furo-2021.11.23.tar.gz", hash = "sha256:54cecac5f3b688b5c7370d72ecdf1cd91a6c53f0f42751f4a719184b562cde70"},
+]
+fuzzywuzzy = [
+    {file = "fuzzywuzzy-0.18.0-py2.py3-none-any.whl", hash = "sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993"},
+    {file = "fuzzywuzzy-0.18.0.tar.gz", hash = "sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8"},
 ]
 html5lib = [
     {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
@@ -1146,6 +1172,9 @@ pyparsing = [
 pytest = [
     {file = "pytest-5.4.3-py3-none-any.whl", hash = "sha256:5c0db86b698e8f170ba4582a492248919255fcd4c79b1ee64ace34301fb589a1"},
     {file = "pytest-5.4.3.tar.gz", hash = "sha256:7979331bfcba207414f5e1263b5a0f8f521d0f457318836a7355531ed1a4c7d8"},
+]
+python-levenshtein = [
+    {file = "python-Levenshtein-0.12.2.tar.gz", hash = "sha256:dc2395fbd148a1ab31090dd113c366695934b9e85fe5a4b2a032745efd0346f6"},
 ]
 pytz = [
     {file = "pytz-2021.3-py2.py3-none-any.whl", hash = "sha256:3672058bc3453457b622aab7a1c3bfd5ab0bdae451512f6cf25f64ed37f5b87c"},

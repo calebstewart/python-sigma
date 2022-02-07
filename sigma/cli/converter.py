@@ -4,17 +4,11 @@ Sigma converter command line interface.
 import sys
 
 import click
-from click.exceptions import ClickException
 
 from sigma.cli import cli
+from sigma.errors import SigmaError
 from sigma.schema import Rule
 from sigma.serializer import Serializer
-
-
-class ConversionFailed(ClickException):
-    def __init__(self, message: str, code: int = 1):
-        super().__init__(message)
-        self.exit_code = code
 
 
 @cli.command()
@@ -28,6 +22,7 @@ class ConversionFailed(ClickException):
     "--serializer",
     "-s",
     help="Name, path or fully-qualified class name of the serializer to use",
+    required=True,
 )
 @click.argument("rules", nargs=-1)
 def convert(ignore_errors, serializer, rules):
@@ -40,7 +35,7 @@ def convert(ignore_errors, serializer, rules):
         # Attempt to load the specified serializer
         serializer = Serializer.load(serializer)
     except Exception as exc:
-        raise ConversionFailed(f"failed to load serializer: {exc}")
+        raise SigmaError(f"failed to load serializer: {exc}")
 
     for rule_path in rules:
         try:
@@ -51,7 +46,7 @@ def convert(ignore_errors, serializer, rules):
             print(serializer.serialize(rule))
         except Exception as exc:
             if not ignore_errors:
-                raise ConversionFailed(f"{rule_path}: {exc}")
+                raise SigmaError(f"{rule_path}: {exc}")
             else:
                 sys.stderr.write(f"{rule_path}: {exc}\n")
 

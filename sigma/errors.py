@@ -3,11 +3,17 @@
 
 from typing import List, Type
 
+from click.exceptions import ClickException
 from pyparsing.exceptions import ParseException
 
+from sigma.cli import console
 
-class SigmaError(Exception):
+
+class SigmaError(ClickException):
     """Base generic sigma error. All other sigma errors are subclasses of this."""
+
+    def show(self):
+        console.log(f"[red]error[/red]: {self}")
 
 
 class ConditionSyntaxError(SigmaError):

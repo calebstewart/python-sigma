@@ -4,14 +4,16 @@ from typing import Type
 
 import yaml
 import click
+from rich.syntax import Syntax
 
-from sigma.cli import cli
+from sigma.cli import cli, console, aliased_group
 from sigma.errors import SigmaError
 from sigma.schema import Rule
+from sigma.transform import Transformation
 from sigma.serializer import Serializer, get_serializer_class
 
 
-@cli.group()
+@aliased_group(parent=cli)
 def schema():
     """Dump the schema for rules, serializers, and transforms"""
 
@@ -28,9 +30,9 @@ def rule(format):
     """Dump the schema for Sigma rules"""
 
     if format == "yaml":
-        print(yaml.safe_dump(json.loads(Rule.schema_json())))
+        console.print(Syntax(yaml.safe_dump(json.loads(Rule.schema_json())), "yaml"))
     else:
-        print(json.dumps(Rule.schema(), indent=2))
+        console.print(Syntax(json.dumps(Rule.schema(), indent=2), "json"))
 
 
 @schema.command()
@@ -60,6 +62,34 @@ def serializer(format, serializer):
         return
 
     if format == "yaml":
-        print(yaml.safe_dump(json.loads(clazz.Schema.schema_json())))
+        console.print(
+            Syntax(yaml.safe_dump(json.loads(clazz.Schema.schema_json())), "yaml")
+        )
     else:
-        print(json.dumps(clazz.Schema.schema(), indent=2))
+        console.print(Syntax(json.dumps(clazz.Schema.schema(), indent=2), "json"))
+
+
+@schema.command()
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["yaml", "json"]),
+    default="yaml",
+    help="Format of the schema output",
+)
+@click.argument("name")
+def transformation(format: str, name: str):
+    """Dump the transformation configuration schema.
+
+    \b
+    NAME name of built-in or fully-qualified class name the transformation
+    """
+
+    clazz: Type[Transformation] = Transformation.lookup_class(name)
+
+    if format == "yaml":
+        console.print(
+            Syntax(yaml.safe_dump(json.loads(clazz.Schema.schema_json())), "yaml")
+        )
+    else:
+        console.print(Syntax(json.dumps(clazz.Schema.schema(), indent=2), "json"))
