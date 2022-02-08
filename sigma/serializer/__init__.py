@@ -122,7 +122,6 @@ import importlib
 import importlib.resources
 from abc import ABC, abstractmethod
 from typing import (
-    IO,
     Any,
     Dict,
     List,
@@ -137,10 +136,12 @@ from typing import (
 from importlib.abc import Traversable
 
 import yaml
+from yaml.error import YAMLError
 from pydantic.main import BaseModel
 from pydantic.fields import Field
+from pydantic.error_wrappers import ValidationError
 
-from sigma.errors import SerializerNotFound
+from sigma.errors import SerializerNotFound, SerializerValidationError
 from sigma.schema import Rule, RuleDetectionFields
 from sigma.grammar import (
     FieldIn,
@@ -158,7 +159,7 @@ from sigma.grammar import (
     FieldStartsWith,
     LogicalExpression,
 )
-from sigma.transform import Transformation, TransformationSchema
+from sigma.transform import Transformation
 
 
 class LogSourceMatch(BaseModel):
@@ -417,15 +418,26 @@ class Serializer(ABC):
         elif pathlib.Path(name).is_file():
             return cls.from_yaml(name)
         elif name in BUILTIN_SERIALIZERS:
-            schema = BUILTIN_SERIALIZERS[name][0].Schema.parse_obj(config)
-            return BUILTIN_SERIALIZERS[name][0](schema)
+            try:
+                schema = BUILTIN_SERIALIZERS[name][0].Schema.parse_obj(config)
+                return BUILTIN_SERIALIZERS[name][0](schema)
+            except ValidationError as exc:
+                raise SerializerValidationError(exc)
         else:
-            module_name, clazz_name = name.split(":", maxsplit=1)
-            module = importlib.import_module(module_name)
-            serializer_type: Type[Serializer] = getattr(module, clazz_name)
+            try:
+                module_name, clazz_name = name.split(":", maxsplit=1)
+                module = importlib.import_module(module_name)
+                serializer_type: Type[Serializer] = getattr(module, clazz_name)
 
-            schema = serializer_type.Schema.parse_obj(config)
-            return serializer_type(schema)
+                if not issubclass(serializer_type, Serializer):
+                    raise ValueError
+
+                schema = serializer_type.Schema.parse_obj(config)
+                return serializer_type(schema)
+            except ValidationError as exc:
+                raise SerializerValidationError(exc)
+            except (ValueError, ModuleNotFoundError, AttributeError) as exc:
+                raise SerializerNotFound(name)
 
     @classmethod
     def from_dict(cls, definition: Dict[str, Any]) -> "Serializer":
@@ -439,7 +451,10 @@ class Serializer(ABC):
         :returns: A new serializer instance of the requested type
         """
 
-        schema = CommonSerializerSchema.parse_obj(definition)
+        try:
+            schema = CommonSerializerSchema.parse_obj(definition)
+        except ValidationError as exc:
+            raise SerializerValidationError(exc)
 
         return cls.load(schema.base, config=definition)
 
@@ -458,7 +473,10 @@ class Serializer(ABC):
             path = pathlib.Path(path)
 
         with path.open() as filp:
-            return cls.from_dict(yaml.safe_load(filp))
+            try:
+                return cls.from_dict(yaml.safe_load(filp))
+            except (ValidationError, YAMLError) as exc:
+                raise SerializerValidationError(exc)
 
 
 class TextQuerySerializer(Serializer):
