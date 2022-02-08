@@ -38,8 +38,13 @@ import yaml
 import pydantic
 from pydantic.fields import Field, PrivateAttr
 from pyparsing.exceptions import ParseException
+from pydantic.error_wrappers import ValidationError
 
-from sigma.errors import ConditionSyntaxError, UnknownIdentifierError
+from sigma.errors import (
+    RuleValidationError,
+    ConditionSyntaxError,
+    UnknownIdentifierError,
+)
 from sigma.grammar import (
     LogicalOr,
     Expression,
@@ -325,7 +330,7 @@ class RuleDetection(pydantic.BaseModel):
             for idx, condition in enumerate(self.condition):
                 try:
                     condition_grammar = list(
-                        self.GRAMMAR_PARSER.parse_string(condition)
+                        self.GRAMMAR_PARSER.parse_string(condition, parse_all=True)
                     )
                 except ParseException as exc:
                     raise ConditionSyntaxError(
@@ -343,7 +348,9 @@ class RuleDetection(pydantic.BaseModel):
                 return results[0].postprocess(self)
         else:
             try:
-                grammar = list(self.GRAMMAR_PARSER.parse_string(self.condition))
+                grammar = list(
+                    self.GRAMMAR_PARSER.parse_string(self.condition, parse_all=True)
+                )
             except ParseException as exc:
                 raise ConditionSyntaxError(exc, fmt="condition: {}") from exc
             if len(grammar) > 1:
@@ -495,7 +502,11 @@ class Rule(pydantic.BaseModel):
     @classmethod
     def from_sigma(cls, definition: Dict[str, Any]) -> "Rule":
         """Alias for parse_obj to be more expressive"""
-        return cls.parse_obj(definition)
+
+        try:
+            return cls.parse_obj(definition)
+        except ValidationError as exc:
+            raise RuleValidationError(exc) from exc
 
     def to_sigma(self) -> Dict[str, Any]:
         """Convert this rule back into a JSON-serializable dictionary representing

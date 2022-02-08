@@ -193,7 +193,6 @@ class Attack(BaseModel):
                         )
                         break
 
-        path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("w") as filp:
             filp.write(attack.json())
 

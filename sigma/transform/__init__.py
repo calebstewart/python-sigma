@@ -208,7 +208,7 @@ class FieldMatchReplace(Transformation):
         """Transform the given expression"""
 
         # Only transform the requested expression type
-        if not isinstance(expression, self.type):
+        if not isinstance(expression, self.type) or expression.field != self.field:
             return expression
 
         # Test if the value matches the regular expression

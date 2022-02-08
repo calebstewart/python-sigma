@@ -71,6 +71,14 @@ class CoreExpression(Expression):
 
     args: List[Union[Expression, str]]
 
+    def __eq__(self, other):
+        """Compare two core expressions for equality"""
+
+        if not isinstance(other, type(self)):
+            return False
+
+        return repr(self) == repr(other)
+
     @classmethod
     def from_parsed(cls, s: str, loc: int, tokens: ParseResults) -> "Expression":
         """Convert the parsed expression into an expression instance"""
@@ -147,6 +155,15 @@ class LogicalOr(LogicalExpression):
 
     operator: ClassVar[bool] = True
 
+    def postprocess(
+        self, rule: "sigma.schema.RuleDetection", parent: Optional["Expression"] = None
+    ) -> "Expression":
+
+        # if len(self.args) == 1:
+        #     return self.args[0].postprocess(rule, parent=parent)
+
+        return super().postprocess(rule, parent=parent)
+
     def __repr__(self):
         return f"OR({','.join([repr(a) for a in self.args])})"
 
@@ -181,6 +198,15 @@ class LogicalAnd(LogicalExpression):
     """Logical And Expression"""
 
     operator: ClassVar[bool] = True
+
+    def postprocess(
+        self, rule: "sigma.schema.RuleDetection", parent: Optional["Expression"] = None
+    ) -> "Expression":
+
+        # if len(self.args) == 1:
+        #    return self.args[0].postprocess(rule, parent=parent)
+
+        return super().postprocess(rule, parent=parent)
 
     def __repr__(self):
         return f"AND({','.join([repr(a) for a in self.args])})"
@@ -271,6 +297,14 @@ class FieldComparison(Expression):
 
     def __repr__(self) -> str:
         raise NotImplementedError
+
+    def __eq__(self, other) -> bool:
+
+        return (
+            isinstance(other, type(self))
+            and self.field == other.field
+            and self.value == other.value
+        )
 
     def to_field_with_modifiers(self) -> str:
         return self.field
@@ -453,7 +487,7 @@ def utf16le_modifier(field: str, value: Any, modifier: str = "utf16le") -> bytes
     if not isinstance(value, str):
         raise InvalidFieldValueError(field, str, type(value), modifier)
 
-    return value.encode("utf16le")
+    return value.encode("utf-16le")
 
 
 def wide_modifier(field: str, value: Any) -> bytes:
@@ -469,7 +503,7 @@ def utf16be_modifier(field: str, value: Any) -> bytes:
     if not isinstance(value, str):
         raise InvalidFieldValueError(field, str, type(value), "utf16be")
 
-    return value.encode("utf16be")
+    return value.encode("utf-16be")
 
 
 MODIFIER_MAPPING: Dict[str, Callable] = {
@@ -481,6 +515,7 @@ MODIFIER_MAPPING: Dict[str, Callable] = {
     "utf16le": utf16le_modifier,
     "wide": lambda field, value: utf16le_modifier(field, value, "wide"),
     "utf16be": utf16be_modifier,
+    "utf16": utf16_modifier,
     "re": FieldRegex,
 }
 
@@ -520,7 +555,12 @@ def build_key_value_expression(key: str, value: Union[list, str]) -> Expression:
 
         # Build new modified value
         try:
-            modified = MODIFIER_MAPPING[modifier](field=field, value=modified)
+            if isinstance(modified, list):
+                modified = [
+                    MODIFIER_MAPPING[modifier](field=field, value=m) for m in modified
+                ]
+            else:
+                modified = MODIFIER_MAPPING[modifier](field=field, value=modified)
         except (TypeError, ValueError) as exc:
             # Construction of an expression seems to have failed due to the type of
             # the value, so we raise an invalid combination error here.
@@ -545,6 +585,15 @@ def build_key_value_expression(key: str, value: Union[list, str]) -> Expression:
     # only modify the value.
     if isinstance(modified, Expression):
         return modified
+    elif isinstance(modified, list):
+        return LogicalOr(
+            args=[
+                FieldEquality(field=field, value=v)
+                if not isinstance(v, Expression)
+                else v
+                for v in modified
+            ]
+        )
     else:
         return FieldEquality(field=field, value=modified)
 

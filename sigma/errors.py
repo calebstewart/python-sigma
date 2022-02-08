@@ -3,6 +3,7 @@
 
 from typing import List, Type
 
+from pydantic import ValidationError
 from click.exceptions import ClickException
 from pyparsing.exceptions import ParseException
 
@@ -116,3 +117,22 @@ class UnknownTransform(SigmaError):
 class SerializerNotFound(SigmaError):
     def __init__(self, serializer: str):
         super().__init__(f"{serializer}: serializer not found")
+
+
+class SigmaValidationError(SigmaError):
+    def __init__(self, validation: ValidationError):
+        super().__init__(str(validation))
+
+        self.validation = validation
+
+
+class RuleValidationError(SigmaValidationError):
+    """Raised when a rule schema fails validation"""
+
+
+class SerializerValidationError(SigmaValidationError):
+    """Raised when a serializer config fails validation"""
+
+
+class TransformValidationError(SigmaValidationError):
+    """Raised when a transform config fails validation"""

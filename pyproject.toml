@@ -22,7 +22,7 @@ requests = "^2.27.1"
 pyparsing = "^3.0.7"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^6.2"
 isort = "^5.8.0"
 flake8 = "^3.9.2"
 
