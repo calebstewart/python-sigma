@@ -253,17 +253,6 @@ class RuleRelation(pydantic.BaseModel):
         }
 
 
-class RuleDetectionKeywords(List[str]):
-    """Defines the detection criteria by OR-separated keyword strings."""
-
-    def build_expression(self) -> Expression:
-        """Build the logical OR expression for these keywords"""
-
-        args = [KeywordSearch(value=x) for x in self]
-
-        return LogicalOr(args=args) if len(args) > 1 else args[0]
-
-
 class RuleDetectionFields(Dict[str, Any]):
     """Defines the detection criteria by AND-separated field matching."""
 
@@ -275,6 +264,22 @@ class RuleDetectionFields(Dict[str, Any]):
             args.append(build_key_value_expression(key, value))
 
         return LogicalAnd(args=args) if len(args) > 1 else args[0]
+
+
+class RuleDetectionList(List[Union[str, RuleDetectionFields]]):
+    """Defines the detection criteria by OR-separated keyword strings."""
+
+    def build_expression(self) -> Expression:
+        """Build the logical OR expression for these keywords"""
+
+        args = []
+        for item in self:
+            if isinstance(item, str):
+                args.append(KeywordSearch(value=item))
+            else:
+                args.append(RuleDetectionFields(item).build_expression())
+
+        return LogicalOr(args=args) if len(args) > 1 else args[0]
 
 
 class RuleDetection(pydantic.BaseModel):
@@ -353,7 +358,7 @@ class RuleDetection(pydantic.BaseModel):
         try:
             definition = getattr(self, identifier)
             if not isinstance(
-                definition, Union[RuleDetectionKeywords, RuleDetectionFields]
+                definition, Union[RuleDetectionList, RuleDetectionFields]
             ):
                 raise AttributeError
         except AttributeError:
@@ -369,7 +374,7 @@ class RuleDetection(pydantic.BaseModel):
                 definition = getattr(self, key)
                 if isinstance(
                     definition,
-                    Union[RuleDetectionFields, RuleDetectionKeywords],
+                    Union[RuleDetectionFields, RuleDetectionList],
                 ):
                     yield key
 
@@ -388,7 +393,7 @@ class RuleDetection(pydantic.BaseModel):
             elif isinstance(v[key], dict):
                 v[key] = RuleDetectionFields(v[key])
             elif isinstance(v[key], list):
-                v[key] = RuleDetectionKeywords(v[key])
+                v[key] = RuleDetectionList(v[key])
             else:
                 raise TypeError(f"{key}: expected list or dict")
 
