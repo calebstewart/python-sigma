@@ -1,6 +1,10 @@
+from typing import TextIO, Optional
+
 import click
 import fuzzywuzzy.process
 from rich.console import Console
+
+from sigma.mitre import Attack
 
 console = Console(log_path=False)
 
@@ -46,8 +50,18 @@ def aliased_group(parent=None, **attrs):
 
 
 @aliased_group()
-def cli():
+@click.option(
+    "--mitre-data",
+    type=click.File("r"),
+    help="Override default MITRE ATT&CK data file (downloaded with 'sigma mitre update')",
+)
+def cli(mitre_data: Optional[TextIO]):
     """Sigma Rule conversion and validation CLI."""
+
+    if mitre_data is not None:
+        Attack.load(mitre_data.name)
+        mitre_data.close()
+
     pass
 
 

@@ -11,7 +11,15 @@ from sigma.errors import SigmaError
 
 @aliased_group(parent=cli)
 def mitre():
-    """Browse and update the MITRE ATT&CK data cache"""
+    """Browse and update the MITRE ATT&CK data cache. Sigma uses MITRE ATT&CK
+    data during conversion to formats which support more specific technique
+    and tactic data. In those cases, tags such as 'attack.t00001' are converted
+    along with other rule data to include the technique and/or tactic information.
+    By default, the sigma command will load cached MITRE ATT&CK data from the
+    package resources, but you can update this data at any time from the MITRE/cti
+    GitHub repository with the 'mitre update' command. If a data file exists in
+    $XDG_DATA_HOME/sigma/mitre.json, it will be used instead of the embedded data
+    file."""
 
 
 @mitre.command()
