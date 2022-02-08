@@ -438,14 +438,6 @@ python-versions = ">=3.6"
 pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 
 [[package]]
-name = "parse"
-version = "1.6.5"
-description = "parse() is the opposite of format()"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "pluggy"
 version = "0.13.1"
 description = "plugin and hook calling mechanisms for python"
@@ -502,17 +494,6 @@ description = "Pygments is a syntax highlighting package written in Python."
 category = "main"
 optional = false
 python-versions = ">=3.5"
-
-[[package]]
-name = "pyparser"
-version = "1.0"
-description = "pyparser is a collection of classes to make it easier to parse text data in a pythonic way."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-parse = "1.6.5"
 
 [[package]]
 name = "pyparsing"
@@ -884,7 +865,7 @@ docs = ["sphinx-toolbox", "Sphinx", "enum-tools", "furo"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "ea7f8c7716c3ea70406f0e5931bda9f0651662718d7b4bd8356dfe0bd9eec896"
+content-hash = "baeb98591b9581e4a7ef940079f45d914304fa938e72bc951a989c1861f6189d"
 
 [metadata.files]
 alabaster = [
@@ -1102,9 +1083,6 @@ packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
-parse = [
-    {file = "parse-1.6.5.tar.gz", hash = "sha256:c9545154ba6b0ede5b52c2877443a463dfc02f14fe43525d15255311939c3a72"},
-]
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
@@ -1161,9 +1139,6 @@ pyflakes = [
 pygments = [
     {file = "Pygments-2.11.2-py3-none-any.whl", hash = "sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65"},
     {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
-]
-pyparser = [
-    {file = "pyparser-1.0.tar.gz", hash = "sha256:d1b76e2dabdd2952cadfd545229cc144afee6130bf171a031d5bf53f11b912f5"},
 ]
 pyparsing = [
     {file = "pyparsing-3.0.7-py3-none-any.whl", hash = "sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484"},

@@ -10,7 +10,6 @@ sigma = "sigma.cli:cli"
 [tool.poetry.dependencies]
 python = "^3.10"
 pydantic = "^1.9.0"
-pyparser = "^1.0"
 PyYAML = "^6.0"
 rich = "^11.1.0"
 sphinx-toolbox = { version = "^2.15.2", optional = true }
@@ -20,6 +19,7 @@ furo = { version= "^2021.11.23", optional = true }
 click = "^8.0.3"
 fuzzywuzzy = {version = "^0.18.0", extras = ["speedup"]}
 requests = "^2.27.1"
+pyparsing = "^3.0.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
