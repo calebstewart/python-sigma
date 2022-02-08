@@ -19,7 +19,7 @@ class Technique(BaseModel):
     tactics: Optional[List[str]]
 
     @property
-    def url(self) -> str:
+    def url(self) -> str:  # pragma: no cover
         return f"https://attack.mitre.org/techniques/{self.id}"
 
 
@@ -30,7 +30,7 @@ class Tactic(BaseModel):
     title: str
 
     @property
-    def url(self) -> str:
+    def url(self) -> str:  # pragma: no cover
         return f"https://attack.mitre.org/tactics/{self.id}"
 
 
