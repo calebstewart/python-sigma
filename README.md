@@ -35,7 +35,7 @@ github with:
 
 ``` sh
 # Install directly from github
-pip install git+git@github.com:calebstewart/python-sigma.git
+pip install git+ssh://git@github.com/calebstewart/python-sigma.git
 
 # Checkout the repo, then install
 git clone git@github.com:calebstewart/python-sigma.git
