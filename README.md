@@ -2,7 +2,7 @@
 
 This library attempts to abstract the handling of Sigma rules in Python.
 The rules are parsed using a schema defined with `pydantic`, and can be
-loaded easily with the `parse_obj` method of the `pydantic` module.
+easily loaded from YAML files into a structured Python object.
 
 ```py
 from sigma.schema import Rule
@@ -22,34 +22,41 @@ print(rule.detection.my_condition_name)
 print(rule.detection.expression)
 ```
 
-## Command Line Interface
+This project is under active development, and this readme may or may not
+reflect the most up-to-date documentation. In general, you should refer
+to the generated documentation (instructions for building below) and the
+command-line help output for details until the library/tools reach a
+stable state.
 
-There is a basic command line interface implemented for interfacing with the
-serialization classes. The package installs the `sigma-convert` entrypoint
-which provides the ability to use built-in or customized serializers to convert
-Sigma rules to various formats.
+## Installation
+
+The library and command line interface can be installed using `pip` from
+github with:
 
 ``` sh
-usage: sigma-convert [-h] [--list-builtin] [--dump-schema {yaml,json,yml}] [--validate] [--ignore-errors]
-                     [--serializer SERIALIZER]
-                     [rules ...]
+# Install directly from github
+pip install git+git@github.com:calebstewart/python-sigma.git
 
-Convert or validate Sigma rules. During validation, only errors for rules which fail validation are output. During
-conversion, rule serializations are printed one-per-line for every rule provided, and stop at the first failed rule,
-unless the --ignore-errors option is used. A non-zero exit code indicates at least one rule failure.
+# Checkout the repo, then install
+git clone git@github.com:calebstewart/python-sigma.git
+cd python-sigma
+pip install .
+```
 
-positional arguments:
-  rules                 Path to a sigma rule for conversion
+If you would like to participate in development, you should use Python
+Poetry to manage your virtual environment and dependencies. For more
+information see [the Poetry documentation](https://python-poetry.org/docs/).
 
-options:
-  -h, --help            show this help message and exit
-  --list-builtin, -l    List built-in serializer names and exit
-  --dump-schema {yaml,json,yml}
-                        Dump the sigma rule schema in the selected format
-  --validate            Validate the provided rule schema (do not perform conversion)
-  --ignore-errors, -i   Ignore errors when converting rules (default: stop processing after first failure)
-  --serializer SERIALIZER, -s SERIALIZER
-                        Name, path or fully-qualified class name of the serializer to use
+``` sh
+# Setup Python development environment
+git clone git@github.com:calebstewart/python-sigma.git
+cd python-sigma
+poetry install
+
+# Enter the virtual environment to interact with the package
+poetry shell
+
+# Type "exit" to leave the poetry virtual environment
 ```
 
 ## Documentation
@@ -70,6 +77,44 @@ cd docs
 make html
 
 # Open the documentation in docs/_build/index.html
+```
+
+At this time, documentation is built automatically from docstrings and
+type-hinting in the project code itself. The plan is to eventually augment
+this auto-generated documentation, but that is a project for later after
+the API and CLI interfaces solidify. That being said, extensive examples
+and documentation have been added where appropriate using module docstrings
+throughout the project, so the documentation should at least be usable.
+
+## Command Line Interface
+
+There is a command line interface exposed by the entrpoint `sigma` which
+is installed with this package. The `sigma` command provides subcommands
+for inspecting rule and configuration schema, viewing/updating the MITRE
+ATT&CK database cache, validating serializer or rule configurations, and
+converting rules using built-in or custom serializers.
+
+This project is still under active development, and the interface could
+change at any time. You should check the built-in help by running 
+`sigma --help` at the command line, however for completeness sake, the
+current help output/list of subcommands is:
+
+``` sh
+$ sigma --help
+Usage: sigma [OPTIONS] COMMAND [ARGS]...
+
+  Sigma Rule conversion and validation CLI.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  convert    Convert Sigma rules to various formats using built-in or...
+  list       List built-in transforms and serializers
+  mitre      Browse and update the MITRE ATT&CK data cache
+  schema     Dump the schema for rules, serializers, and transforms
+  transform  Transform a list of rules using a list of transforms in a...
+  validate   Validate Sigma rule or serializer schema
 ```
 
 ## But... why?

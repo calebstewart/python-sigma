@@ -145,6 +145,7 @@ class ElasticSecurityRule(EventQueryLanguage):
                     "max_signals": 100,
                     "risk_map": {"low": 0, "medium": 25, "high": 75, "critical": 100},
                     "risk_default": 10,
+                    "extra_tags": ["custom-tag"],
                 }
             )
 
