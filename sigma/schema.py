@@ -22,7 +22,7 @@ into a python-native format, which is normally used in conjunction with a serial
     print(rule.author)
 
     # Retrieve a parsed expression representing the full detection condition
-    print(rule.detection.parse_grammar())
+    print(rule.detection.expression)
 
 
 """
@@ -308,6 +308,9 @@ class RuleDetection(pydantic.BaseModel):
     def expression(self) -> Expression:
         return self.__parsed_expression
 
+    def update_expression(self, expression: Expression):
+        self.__parsed_expression = expression
+
     def parse_grammar(self) -> Expression:
         """Parse the condition and evaluate fields to produce a single
         search expression."""
@@ -512,6 +515,8 @@ class Rule(pydantic.BaseModel):
                 return {
                     key: _recursive_pydantic_dict(value) for key, value in m.items()
                 }
+            elif m is None:
+                return None
             else:
                 return str(m)
 

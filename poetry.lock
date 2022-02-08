@@ -113,7 +113,7 @@ name = "certifi"
 version = "2021.10.8"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
-optional = true
+optional = false
 python-versions = "*"
 
 [[package]]
@@ -121,7 +121,7 @@ name = "charset-normalizer"
 version = "2.0.11"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5.0"
 
 [package.extras]
@@ -327,7 +327,7 @@ name = "idna"
 version = "3.3"
 description = "Internationalized Domain Names in Applications (IDNA)"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5"
 
 [[package]]
@@ -576,7 +576,7 @@ name = "requests"
 version = "2.27.1"
 description = "Python HTTP for Humans."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
 [package.dependencies]
@@ -854,7 +854,7 @@ name = "urllib3"
 version = "1.26.8"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
 [package.extras]
@@ -884,7 +884,7 @@ docs = ["sphinx-toolbox", "Sphinx", "enum-tools", "furo"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "e932d6e71b67f3bbd419e247f6ff0a74e3897622f74609fb8e0db03a736884fd"
+content-hash = "ea7f8c7716c3ea70406f0e5931bda9f0651662718d7b4bd8356dfe0bd9eec896"
 
 [metadata.files]
 alabaster = [

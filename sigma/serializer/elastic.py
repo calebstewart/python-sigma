@@ -1,10 +1,11 @@
 import json
 import uuid
-from typing import Dict, List, Union, ClassVar, Optional
+from typing import Any, Dict, List, Union, ClassVar, Optional
 
+from sigma.mitre import Attack, Tactic, Technique
 from sigma.schema import Rule
 from sigma.grammar import Expression, FieldComparison
-from sigma.serializer import TextQuerySerializer
+from sigma.serializer import TextQuerySerializer, CommonSerializerSchema
 
 
 class EventQueryLanguage(TextQuerySerializer):
@@ -51,6 +52,14 @@ class EventQueryLanguage(TextQuerySerializer):
         rule_separator: str = "\n"
         """ Separator for when outputting multiple rules to a file """
 
+        class Config:
+            schema_extra = CommonSerializerSchema.Config.schema_extra.copy()
+            schema_extra["examples"][0].update(
+                {
+                    "base": "eql",
+                }
+            )
+
     def serialize(
         self, rule: Union[Rule, List[Rule]], transform: bool = True
     ) -> Union[str, List[str]]:
@@ -95,6 +104,8 @@ class ElasticSecurityRule(EventQueryLanguage):
     """Serialize to a JSON Elastic Security Rule"""
 
     class Schema(EventQueryLanguage.Schema):
+        """Elastic Security Rule Configuration Schema"""
+
         enable_rule: bool = False
         """ Set the enable field in the resulting rule to True """
         interval: str = "5m"
@@ -118,6 +129,24 @@ class ElasticSecurityRule(EventQueryLanguage):
         """ Mapping of sigma rule levels to severity values """
         severity_default: str = "medium"
         """ Default severity value if the level is not in the above map """
+        extra_tags: Optional[List[str]]
+        """ Extra tags to add to all converted rules """
+
+        class Config:
+            extra = "forbid"
+            schema_extra = EventQueryLanguage.Schema.Config.schema_extra.copy()
+            schema_extra["examples"][0].update(
+                {
+                    "base": "es-rule",
+                    "enable_rule": True,
+                    "interval": "5m",
+                    "rule_type": "eql",
+                    "output_index": ".siem-signals-default",
+                    "max_signals": 100,
+                    "risk_map": {"low": 0, "medium": 25, "high": 75, "critical": 100},
+                    "risk_default": 10,
+                }
+            )
 
     RULE_LANGUAGE_MAP: ClassVar[Dict[str, str]] = {
         "eql": "eql",
@@ -139,11 +168,127 @@ class ElasticSecurityRule(EventQueryLanguage):
         if transform:
             rule = rule.transform(self.transforms)
 
+        # Lookup the indices and add extra conditions based on the logsource
+        indices, rule = self.schema.logsource.match_rule(rule)
+        if not indices:
+            indices = [
+                "apm-*-transaction",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "packetbeat-*",
+                "winlogbeat-*",
+            ]
+
         # Serialize the rule to an EQL query
         query = super().serialize(rule, transform=False)
-        index = []
+
+        attack = Attack.load()
         tags = []
-        threat = []
+        threat: List[Dict[str, Any]] = []
+        techniques: Dict[str, Technique] = {}
+        tactics: Dict[str, Tactic] = {}
+
+        # Parse MITRE ATTACK techniques and tactics out of the tags
+        if rule.tags:
+            for tag in rule.tags:
+                # MITRE ATTACK tag
+                if tag.namespace == "attack":
+
+                    # Tactic name
+                    if "_" in tag.name:
+                        name = tag.name.replace("_", " ").lower()
+                        for tactic in attack.tactics:
+                            if tactic.title.lower() == name:
+                                tags.append(tactic.id.upper())
+                                tactics[tactic.id] = tactic
+                                break
+                        else:
+                            tags.append(tag.name)
+
+                        continue
+
+                    # Tactic ID
+                    tactic = attack.get_tactic(tag.name)
+                    if tactic is not None:
+                        tags.append(tactic.id.upper())
+                        tactics[tactic.id] = tactic
+                        continue
+
+                    # Technique ID
+                    technique = attack.get_technique(tag.name)
+                    if technique is not None:
+                        tags.append(technique.id.upper())
+                        if technique.tactics:
+                            for tactic_id in technique.tactics:
+                                tactic = attack.get_tactic(tactic_id)
+                                if tactic:
+                                    tags.append(tactic.title)
+                                    tactics[tactic.id] = tactic
+
+                        techniques[technique.id] = technique
+
+                        # Add parent technique for sub-techniques
+                        if "." in technique.id:
+                            technique = attack.get_technique(technique.id.split(".")[0])
+                            if technique is not None:
+                                tags.append(technique.id.upper())
+                                if technique.tactics:
+                                    for tactic_id in technique.tactics:
+                                        tactic = attack.get_tactic(tactic_id)
+                                        if tactic:
+                                            tags.append(tactic.title)
+                                            tactics[tactic.id] = tactic
+                                techniques[technique.id] = technique
+
+                        continue
+
+                    tags.append(tag.name.upper())
+                else:
+                    tags.append(str(tag))
+
+        if self.schema.extra_tags:
+            tags.extend(self.schema.extra_tags)
+
+        tags.sort()
+
+        if tactics:
+            for tactic in tactics.values():
+                definition = {
+                    "framework": "MITRE ATT&CK®",
+                    "technique": [],
+                    "tactic": {
+                        "id": tactic.id,
+                        "name": tactic.title,
+                        "reference": tactic.url,
+                    },
+                }
+
+                for technique in techniques.values():
+                    # Only directly process main techniques
+                    if "." in technique.id:
+                        continue
+
+                    # Only techniques under this tactic
+                    if technique.tactics is None or tactic.id not in technique.tactics:
+                        continue
+
+                    tech_def = {
+                        "id": technique.id,
+                        "name": technique.title,
+                        "reference": technique.url,
+                        "subtechnique": [],
+                    }
+
+                    for sub in techniques.values():
+                        if "." in sub.id and sub.id.startswith(technique.id):
+                            tech_def["subtechnique"].append(
+                                {"id": sub.id, "name": sub.title, "reference": sub.url}
+                            )
+
+                    definition["technique"].append(tech_def)
+
+                threat.append(definition)
 
         result = {
             "author": [rule.author] if rule.author else None,
@@ -155,7 +300,7 @@ class ElasticSecurityRule(EventQueryLanguage):
             if rule.detection.timeframe
             else "now-360s",
             "immutable": False,
-            "index": index,
+            "index": indices,
             "interval": "5m",
             "rule_id": str(rule.id) if rule.id else str(uuid.uuid4()),
             "language": self.RULE_LANGUAGE_MAP.get(self.schema.rule_type, "eql"),
@@ -178,6 +323,7 @@ class ElasticSecurityRule(EventQueryLanguage):
             "type": self.schema.rule_type,
             "threat": threat,
             "version": 1,
+            "references": rule.references or [],
         }
 
         return json.dumps(result)

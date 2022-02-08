@@ -283,7 +283,7 @@ class FieldFuzzyMap(Transformation):
     class Schema(Transformation.Schema):
         """Field mapping configuration definition"""
 
-        type: Literal["field_fuzy_map"]
+        type: Literal["field_fuzzy_map"]
         mapping: Dict[str, str]
         """ Field name mappings """
 

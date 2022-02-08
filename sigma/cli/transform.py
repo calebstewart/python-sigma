@@ -40,9 +40,9 @@ def transform(
     config: TextIO,
     rules: List[TextIO],
 ):
-    """Transform a list of rules using a list of transforms in a YAML file. Currently, this
-    does not support saving expression transformations, but this is a planned feature in the
-    future.
+    """Transform a list of rules using a list of transforms in a YAML file. This loses the
+    selector names within the detection, but should produce a functionally identical rule.
+    It is worth putting some human eyes on the conversion, though.
 
     \b
     RULES paths to rules which you would like to convert

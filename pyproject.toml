@@ -19,6 +19,7 @@ enum-tools = { version= "^0.7.0", optional = true }
 furo = { version= "^2021.11.23", optional = true }
 click = "^8.0.3"
 fuzzywuzzy = {version = "^0.18.0", extras = ["speedup"]}
+requests = "^2.27.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

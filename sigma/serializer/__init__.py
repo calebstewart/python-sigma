@@ -129,6 +129,7 @@ from typing import (
     Type,
     Tuple,
     Union,
+    Literal,
     ClassVar,
     Optional,
     Generator,
@@ -140,7 +141,7 @@ from pydantic.main import BaseModel
 from pydantic.fields import Field
 
 from sigma.errors import SerializerNotFound
-from sigma.schema import Rule
+from sigma.schema import Rule, RuleDetectionFields
 from sigma.grammar import (
     FieldIn,
     LogicalOr,
@@ -160,6 +161,138 @@ from sigma.grammar import (
 from sigma.transform import Transformation, TransformationSchema
 
 
+class LogSourceMatch(BaseModel):
+    """A single log source matching rule"""
+
+    name: Optional[str]
+    """ The matching rule name """
+    product: Optional[str]
+    """ Product match """
+    service: Optional[str]
+    """ Service name match """
+    category: Optional[str]
+    """ Category name match """
+    conditions: Optional[RuleDetectionFields]
+    """ List of field selectors to add to matching condition """
+    index: Optional[Union[str, List[str]]]
+    """ One or more indices to search """
+
+    def compare(self, rule: Rule) -> bool:
+        if (
+            (self.product and self.product != rule.logsource.product)
+            or (self.service and self.service != rule.logsource.service)
+            or (self.category and self.category != rule.logsource.category)
+        ):
+            return False
+
+        return True
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate_detection
+        yield from super().__get_validators__()
+
+    @classmethod
+    def validate_detection(cls, v):
+        """Validate the schema for the"""
+
+        assert isinstance(v, dict)
+
+        if "conditions" in v:
+            assert isinstance(v["conditions"], dict)
+            v["conditions"] = RuleDetectionFields(v["conditions"])
+
+        return v
+
+    class Config:
+        schema_extra = {
+            "examples": [
+                {
+                    "name": "logsource match",
+                    "product": "windows",
+                    "category": "process_creation",
+                    "index": "logs-*",
+                }
+            ]
+        }
+
+
+class LogSourceRules(BaseModel):
+
+    defaultindex: Optional[Union[str, List[str]]] = []
+    """ The default index if no log sources match or no indices defined """
+    merging: Union[Literal["or"], Literal["and"]] = "or"
+    """ how to merge multiple matching log sources """
+    rules: List[LogSourceMatch] = []
+    """ List of log source matching rules """
+
+    def match_rule(self, rule: Rule) -> Tuple[List[str], Rule]:
+        """Match the given rule to one or more logsource matches and return
+        a list of indices and a (possibly modified) rule."""
+
+        # Find matching logsource rules
+        matches: List[LogSourceMatch] = []
+        indices: List[str] = []
+        for logsource_rule in self.rules:
+            if not logsource_rule.compare(rule):
+                continue
+
+            if isinstance(logsource_rule.index, list):
+                indices.extend(logsource_rule.index)
+            elif isinstance(logsource_rule.index, str):
+                indices.append(logsource_rule.index)
+
+            matches.append(logsource_rule)
+
+        if not matches:
+            if self.defaultindex and isinstance(self.defaultindex, list):
+                return self.defaultindex, rule
+            elif self.defaultindex and isinstance(self.defaultindex, str):
+                return [self.defaultindex], rule
+            else:
+                return [], rule
+
+        if len(matches) > 1:
+            if self.merging == "or":
+                new_expression = LogicalOr(
+                    args=[
+                        c.conditions.build_expression()
+                        for c in matches
+                        if c.conditions is not None
+                    ]
+                ).postprocess(rule)
+            else:
+                new_expression = LogicalAnd(
+                    args=[
+                        c.conditions.build_expression()
+                        for c in matches
+                        if c.conditions is not None
+                    ]
+                ).postprocess(rule)
+        elif matches[0].conditions is not None:
+            new_expression = matches[0].conditions.build_expression().postprocess(rule)
+        else:
+            new_expression = None
+
+        if new_expression is not None:
+            rule.detection.update_expression(
+                LogicalAnd(args=[rule.detection.expression, new_expression])
+            )
+
+        return (indices, rule)
+
+    class Config:
+        schema_extra = {
+            "examples": [
+                {
+                    "defaultindex": "logs-*",
+                    "merging": "or",
+                    "rules": [LogSourceMatch.Config.schema_extra["examples"][0]],
+                }
+            ]
+        }
+
+
 class CommonSerializerSchema(BaseModel):
     """Base serializer schema which all schemas should inherit"""
 
@@ -174,6 +307,21 @@ class CommonSerializerSchema(BaseModel):
     serializer class (e.g. TextQuerySerializer) or the name of another serialization
     schema file. If the latter case, the transforms from this serializer will be
     appended to the base, and any further configuration is ignored. """
+    logsource: LogSourceRules = LogSourceRules()
+    """ Rules to match log sources to indices """
+
+    class Config:
+        schema_extra = {
+            "examples": [
+                {
+                    "name": "Serializer",
+                    "description": "A serializer",
+                    "transforms": [],
+                    "base": "eql",
+                    "logsource": LogSourceRules.Config.schema_extra["examples"][0],
+                }
+            ]
+        }
 
 
 class Serializer(ABC):
@@ -193,9 +341,8 @@ class Serializer(ABC):
     def serialize(self, rule: Union[Rule, List[Rule]], transform: bool = True) -> Any:
         """Serialize the given sigma rule into a new format"""
 
-    # @abstractmethod
-    def dump(self, rule: Union[Rule, List[Rule]], filp: IO):
-        """Serialize one or more rules and dump them to a file"""
+    def find_indices(self, rule: Rule, default: List[str] = None) -> List[str]:
+        """Lookup indices defined in the configuration matching this rule"""
 
     def _extend_transforms(self, schema: CommonSerializerSchema):
 

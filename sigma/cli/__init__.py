@@ -51,4 +51,4 @@ def cli():
     pass
 
 
-from sigma.cli import list, schema, validate, converter, transform
+from sigma.cli import list, mitre, schema, validate, converter, transform
