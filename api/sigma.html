@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sigma package &#8212; Python Sigma 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/readable.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sigma.cli package" href="sigma.cli.html" />
+    <link rel="prev" title="Creating Rule Transformations" href="../transformations.html" />
+   
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sigma.cli.html" title="sigma.cli package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../transformations.html" title="Creating Rule Transformations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python Sigma 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">sigma package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sigma">
+<span id="sigma-package"></span><h1>sigma package<a class="headerlink" href="#module-sigma" title="Permalink to this headline">¶</a></h1>
+<p>The core functionality of this package comes from the <a class="reference internal" href="sigma.schema.html#module-sigma.schema" title="sigma.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sigma.schema</span></code></a> module which
+handles parsing sigma rule files into Python-native objects. A majority of the parsing and
+validation comes from pydantic. The conditional language and detection field mappings are
+parsed using a grammar constructed with the pyparsing module. Loading a rule into memory is
+as easy as using the <a class="reference internal" href="sigma.schema.html#sigma.schema.Rule.from_yaml" title="sigma.schema.Rule.from_yaml"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Rule.from_yaml</span></code></a> method to load a rule file.</p>
+<p>Along with the ingestion of rules, you can also modify sigma rules and save them back to
+disk. Modifications to the in-memory rule can be saved using the <a class="reference internal" href="sigma.schema.html#sigma.schema.Rule.to_sigma" title="sigma.schema.Rule.to_sigma"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_sigma()</span></code></a>
+method which returns a JSON and YAML-serializable dictionary.</p>
+<p>Lastly, a framework for transformation and serialization of rules is also implemented
+to assist in ingesting sigma rules into a variety of platforms. Serializers can be defined
+in Python classes or through YAML configuration files. A serializer configuration also
+contains a list of transformations which can make inline modifications to the rule and/or
+it’s detection conditions during serialization (such as field re-mapping). For more details
+on serializers, see <a class="reference internal" href="sigma.serializer.html#module-sigma.serializer" title="sigma.serializer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sigma.serializer</span></code></a>. For more details on transformations, see
+<a class="reference internal" href="sigma.transform.html#module-sigma.transform" title="sigma.transform"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sigma.transform</span></code></a>.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Loading a Rule and Converting to EQL and KQL</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sigma.schema</span> <span class="kn">import</span> <span class="n">Rule</span>
+<span class="kn">from</span> <span class="nn">sigma.serializer</span> <span class="kn">import</span> <span class="n">Serializer</span>
+
+<span class="c1"># Construct serializers for EQL and KQL languages</span>
+<span class="c1"># using built-in serializers</span>
+<span class="n">eql</span> <span class="o">=</span> <span class="n">Serializer</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s2">&quot;eql&quot;</span><span class="p">)</span>
+<span class="n">kql</span> <span class="o">=</span> <span class="n">Serializer</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s2">&quot;kql&quot;</span><span class="p">)</span>
+
+<span class="c1"># Load a rule</span>
+<span class="n">rule</span> <span class="o">=</span> <span class="n">Rule</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s2">&quot;rules/windows/process_creation/win_susp_net_execution.yml&quot;</span><span class="p">)</span>
+
+<span class="c1"># Dump the rule</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;======== </span><span class="si">{</span><span class="n">rule</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2"> by </span><span class="si">{</span><span class="n">rule</span><span class="o">.</span><span class="n">author</span><span class="si">}</span><span class="s2"> ========&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;EQL Query: </span><span class="si">{</span><span class="n">eql</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;KQL Query: </span><span class="si">{</span><span class="n">kql</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sigma.cli.html">sigma.cli package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sigma.cli.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sigma.cli.converter.html">sigma.cli.converter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sigma.cli.list.html">sigma.cli.list module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sigma.cli.mitre.html">sigma.cli.mitre module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sigma.cli.schema.html">sigma.cli.schema module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sigma.cli.transform.html">sigma.cli.transform module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sigma.cli.validate.html">sigma.cli.validate module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sigma.serializer.html">sigma.serializer package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sigma.serializer.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sigma.serializer.elastic.html">sigma.serializer.elastic module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sigma.transform.html">sigma.transform package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sigma.transform.html#transformation-schema">Transformation Schema</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sigma.errors.html">sigma.errors module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sigma.grammar.html">sigma.grammar module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sigma.mitre.html">sigma.mitre module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sigma.schema.html">sigma.schema module</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">sigma package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+  </div><h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation index</a><ul>
+      <li>Previous: <a href="../transformations.html" title="previous chapter">Creating Rule Transformations</a></li>
+      <li>Next: <a href="sigma.cli.html" title="next chapter">sigma.cli package</a></li>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/sigma.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2022, Caleb Stewart.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.
+  </div>
+  
+  </body>
+</html>

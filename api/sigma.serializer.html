@@ -1,0 +1,545 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sigma.serializer package &#8212; Python Sigma 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/readable.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sigma.serializer.elastic module" href="sigma.serializer.elastic.html" />
+    <link rel="prev" title="sigma.cli.validate module" href="sigma.cli.validate.html" />
+   
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sigma.serializer.elastic.html" title="sigma.serializer.elastic module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sigma.cli.validate.html" title="sigma.cli.validate module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python Sigma 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="sigma.html" accesskey="U">sigma package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">sigma.serializer package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sigma.serializer">
+<span id="sigma-serializer-package"></span><h1>sigma.serializer package<a class="headerlink" href="#module-sigma.serializer" title="Permalink to this headline">¶</a></h1>
+<p>Serializers are used to convert a rule from the in-memory python representation
+to other arbitrary formats (such as Splunk queries or Elastic EQL queries). A
+serializer inherits from <a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Serializer</span></code></a> and defines the
+<a class="reference internal" href="#sigma.serializer.Serializer.serialize" title="sigma.serializer.Serializer.serialize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">serialize()</span></code></a> method which can return an arbitrary object
+which represents the serialized detection rule.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.serializer.</span></span><span class="sig-name descname"><span class="pre">CommonSerializerSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transforms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.transform.html#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><span class="pre">sigma.transform.Transformation.Schema</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logsource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.serializer.LogSourceRules" title="sigma.serializer.LogSourceRules"><span class="pre">sigma.serializer.LogSourceRules</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">LogSourceRules(defaultindex=[],</span> <span class="pre">merging='or',</span> <span class="pre">rules=[])</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
+<p>Base serializer schema which all schemas should inherit</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema.Config.schema_extra">
+<span class="sig-name descname"><span class="pre">schema_extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'examples':</span> <span class="pre">[{'name':</span> <span class="pre">'Serializer',</span> <span class="pre">'description':</span> <span class="pre">'A</span> <span class="pre">serializer',</span> <span class="pre">'transforms':</span> <span class="pre">[],</span> <span class="pre">'base':</span> <span class="pre">'es-rule',</span> <span class="pre">'logsource':</span> <span class="pre">{'defaultindex':</span> <span class="pre">'logs-*',</span> <span class="pre">'merging':</span> <span class="pre">'or',</span> <span class="pre">'rules':</span> <span class="pre">[{'name':</span> <span class="pre">'logsource</span> <span class="pre">match',</span> <span class="pre">'product':</span> <span class="pre">'windows',</span> <span class="pre">'category':</span> <span class="pre">'process_creation',</span> <span class="pre">'index':</span> <span class="pre">'logs-*'}]},</span> <span class="pre">'enable_rule':</span> <span class="pre">True,</span> <span class="pre">'interval':</span> <span class="pre">'5m',</span> <span class="pre">'rule_type':</span> <span class="pre">'eql',</span> <span class="pre">'output_index':</span> <span class="pre">'.siem-signals-default',</span> <span class="pre">'max_signals':</span> <span class="pre">100,</span> <span class="pre">'risk_map':</span> <span class="pre">{'low':</span> <span class="pre">0,</span> <span class="pre">'medium':</span> <span class="pre">25,</span> <span class="pre">'high':</span> <span class="pre">75,</span> <span class="pre">'critical':</span> <span class="pre">100},</span> <span class="pre">'risk_default':</span> <span class="pre">10,</span> <span class="pre">'extra_tags':</span> <span class="pre">['custom-tag']}]}</span></em><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema.Config.schema_extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema.base">
+<span class="sig-name descname"><span class="pre">base</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema.base" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base type for this serialization. This is either the name of a builtin
+serializer class (e.g. TextQuerySerializer) or the name of another serialization
+schema file. If the latter case, the transforms from this serializer will be
+appended to the base, and any further configuration is ignored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of the schema</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema.logsource">
+<span class="sig-name descname"><span class="pre">logsource</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#sigma.serializer.LogSourceRules" title="sigma.serializer.LogSourceRules"><span class="pre">sigma.serializer.LogSourceRules</span></a></em><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema.logsource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rules to match log sources to indices</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arbitrary name for this serialization schema</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.CommonSerializerSchema.transforms">
+<span class="sig-name descname"><span class="pre">transforms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.transform.html#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><span class="pre">sigma.transform.Transformation.Schema</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.CommonSerializerSchema.transforms" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of transforms to be applied</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.serializer.</span></span><span class="sig-name descname"><span class="pre">LogSourceMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conditions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.RuleDetectionFields" title="sigma.schema.RuleDetectionFields"><span class="pre">sigma.schema.RuleDetectionFields</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.LogSourceMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
+<p>A single log source matching rule</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#sigma.serializer.LogSourceMatch.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.Config.schema_extra">
+<span class="sig-name descname"><span class="pre">schema_extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'examples':</span> <span class="pre">[{'name':</span> <span class="pre">'logsource</span> <span class="pre">match',</span> <span class="pre">'product':</span> <span class="pre">'windows',</span> <span class="pre">'category':</span> <span class="pre">'process_creation',</span> <span class="pre">'index':</span> <span class="pre">'logs-*'}]}</span></em><a class="headerlink" href="#sigma.serializer.LogSourceMatch.Config.schema_extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.category">
+<span class="sig-name descname"><span class="pre">category</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceMatch.category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Category name match</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.compare">
+<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#sigma.serializer.LogSourceMatch.compare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.conditions">
+<span class="sig-name descname"><span class="pre">conditions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.schema.html#sigma.schema.RuleDetectionFields" title="sigma.schema.RuleDetectionFields"><span class="pre">sigma.schema.RuleDetectionFields</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceMatch.conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of field selectors to add to matching condition</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.index">
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceMatch.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>One or more indices to search</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceMatch.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The matching rule name</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.product">
+<span class="sig-name descname"><span class="pre">product</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceMatch.product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Product match</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.service">
+<span class="sig-name descname"><span class="pre">service</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceMatch.service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Service name match</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceMatch.validate_detection">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.LogSourceMatch.validate_detection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate the schema for the</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceRules">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.serializer.</span></span><span class="sig-name descname"><span class="pre">LogSourceRules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultindex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merging</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'or'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'and'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'or'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.serializer.LogSourceMatch" title="sigma.serializer.LogSourceMatch"><span class="pre">sigma.serializer.LogSourceMatch</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.LogSourceRules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceRules.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#sigma.serializer.LogSourceRules.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceRules.Config.schema_extra">
+<span class="sig-name descname"><span class="pre">schema_extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'examples':</span> <span class="pre">[{'defaultindex':</span> <span class="pre">'logs-*',</span> <span class="pre">'merging':</span> <span class="pre">'or',</span> <span class="pre">'rules':</span> <span class="pre">[{'name':</span> <span class="pre">'logsource</span> <span class="pre">match',</span> <span class="pre">'product':</span> <span class="pre">'windows',</span> <span class="pre">'category':</span> <span class="pre">'process_creation',</span> <span class="pre">'index':</span> <span class="pre">'logs-*'}]}]}</span></em><a class="headerlink" href="#sigma.serializer.LogSourceRules.Config.schema_extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceRules.defaultindex">
+<span class="sig-name descname"><span class="pre">defaultindex</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceRules.defaultindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default index if no log sources match or no indices defined</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceRules.match_rule">
+<span class="sig-name descname"><span class="pre">match_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sigma.serializer.LogSourceRules.match_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the given rule to one or more logsource matches and return
+a list of indices and a (possibly modified) rule.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceRules.merging">
+<span class="sig-name descname"><span class="pre">merging</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'or'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'and'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceRules.merging" title="Permalink to this definition">¶</a></dt>
+<dd><p>how to merge multiple matching log sources</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.LogSourceRules.rules">
+<span class="sig-name descname"><span class="pre">rules</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.serializer.LogSourceMatch" title="sigma.serializer.LogSourceMatch"><span class="pre">sigma.serializer.LogSourceMatch</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.LogSourceRules.rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of log source matching rules</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.serializer.</span></span><span class="sig-name descname"><span class="pre">Serializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.serializer.CommonSerializerSchema" title="sigma.serializer.CommonSerializerSchema"><span class="pre">sigma.serializer.CommonSerializerSchema</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.Serializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base serialization class for Sigma rules. This class facilitates
+the transformation and serialization of sigma rules into a variety
+of arbitrary formats.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.Schema">
+<span class="sig-name descname"><span class="pre">Schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.serializer.CommonSerializerSchema" title="sigma.serializer.CommonSerializerSchema"><span class="pre">sigma.serializer.CommonSerializerSchema</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.Serializer.Schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.apply_expression_transform">
+<span class="sig-name descname"><span class="pre">apply_expression_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.grammar.html#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sigma.grammar.html#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a></span></span><a class="headerlink" href="#sigma.serializer.Serializer.apply_expression_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply all transformations to this expression and every sub-expression</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.apply_rule_transform">
+<span class="sig-name descname"><span class="pre">apply_rule_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></span><a class="headerlink" href="#sigma.serializer.Serializer.apply_rule_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply all rule-level transformations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.find_indices">
+<span class="sig-name descname"><span class="pre">find_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sigma.serializer.Serializer.find_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup indices defined in the configuration matching this rule</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer"><span class="pre">sigma.serializer.Serializer</span></a></span></span><a class="headerlink" href="#sigma.serializer.Serializer.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a serializer from a dictionary definition conforming, at a minimum,
+to the <a class="reference internal" href="#sigma.serializer.CommonSerializerSchema" title="sigma.serializer.CommonSerializerSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommonSerializerSchema</span></code></a> schema. Other configuration may be
+necessary to construct the given base serializer class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>definition</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – a dictionary serializer configuration</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer">Serializer</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new serializer instance of the requested type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.from_yaml">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">importlib.abc.Traversable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer"><span class="pre">sigma.serializer.Serializer</span></a></span></span><a class="headerlink" href="#sigma.serializer.Serializer.from_yaml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a serializer from a definition in a yaml file. This is the same
+as loading the YAML into a python dictionary and using <a class="reference internal" href="#sigma.serializer.Serializer.from_dict" title="sigma.serializer.Serializer.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Serializer.from_dict()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>Union</em><em>[</em><em>pathlib.Path</em><em>, </em><em>str</em><em>, </em><em>Traversable</em><em>]</em>) – a path-like object or string path to a YAML serializer definition</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer">Serializer</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A new serializer instance of the requested type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.Serializer.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a serializer definition from any of:</p>
+<ul class="simple">
+<li><p>Built-in definitions (under <code class="docutils literal notranslate"><span class="pre">sigma/data/serializers/</span></code>)</p></li>
+<li><p>A local file path</p></li>
+<li><p>Built-in named serializers (defined by <code class="docutils literal notranslate"><span class="pre">BUILTIN_SERIALIZERS</span></code>)</p></li>
+<li><p>A fully qualified Python class path (e.g. <code class="docutils literal notranslate"><span class="pre">package.module:ClassName</span></code>)</p></li>
+</ul>
+<p>If the provided name refers to a named serializer class or a fully qualified class
+name, then you should also provide the associated configuration dictionary to
+initialize the class. If no configuration is provided, an empty dictionary is
+passed to the classes initializer which could cause errors.</p>
+<p>If the provided name refers to a serializer definition file (built-in or local),
+then the configuration argument is ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – name of the serializer to load</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer">Serializer</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A constructed serializer class from the given name/type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.Serializer.serialize">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#sigma.serializer.Serializer.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize the given sigma rule into a new format</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.serializer.</span></span><span class="sig-name descname"><span class="pre">TextQuerySerializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.serializer.TextQuerySerializer.Schema" title="sigma.serializer.TextQuerySerializer.Schema"><span class="pre">sigma.serializer.TextQuerySerializer.Schema</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.TextQuerySerializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.serializer.Serializer</span></code></a></p>
+<p>A basic serializer which only produces a static text query based on the
+condition and detection fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>schema</strong> (<a class="reference internal" href="#sigma.serializer.TextQuerySerializer.Schema" title="sigma.serializer.TextQuerySerializer.Schema"><em>Schema</em></a>) – A valid TextQuerySerializer configuration schema</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transforms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.transform.html#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><span class="pre">sigma.transform.Transformation.Schema</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logsource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.serializer.LogSourceRules" title="sigma.serializer.LogSourceRules"><span class="pre">sigma.serializer.LogSourceRules</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">LogSourceRules(defaultindex=[],</span> <span class="pre">merging='or',</span> <span class="pre">rules=[])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quote</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">escape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_separator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">or_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">and_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grouping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">escaped_characters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_equality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_startswith</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_endswith</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_contains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepend_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_separator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.serializer.CommonSerializerSchema" title="sigma.serializer.CommonSerializerSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.serializer.CommonSerializerSchema</span></code></a></p>
+<p>Text Query configuration options which define how to combine the logical expressions
+into the correct query syntax for your detection engine.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.and_format">
+<span class="sig-name descname"><span class="pre">and_format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.and_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to construct an AND expression (e.g. “{} or {}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.escape">
+<span class="sig-name descname"><span class="pre">escape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.escape" title="Permalink to this definition">¶</a></dt>
+<dd><p>The character used to escape the following character in a string</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.escaped_characters">
+<span class="sig-name descname"><span class="pre">escaped_characters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.escaped_characters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Characters aside from the quote and escape character that require escaping</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.field_contains">
+<span class="sig-name descname"><span class="pre">field_contains</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.field_contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to test if a field contains another string</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.field_endswith">
+<span class="sig-name descname"><span class="pre">field_endswith</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.field_endswith" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to test if a field ends with a string</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.field_equality">
+<span class="sig-name descname"><span class="pre">field_equality</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.field_equality" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to test field equality (e.g. “{} == {}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.field_in">
+<span class="sig-name descname"><span class="pre">field_in</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.field_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to test if a field is in a list (e.g. “{} in {}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.field_match">
+<span class="sig-name descname"><span class="pre">field_match</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.field_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to test a field with a globbing pattern (e.g. “{}: {}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.field_regex">
+<span class="sig-name descname"><span class="pre">field_regex</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.field_regex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to test if a field matches a regex (e.g. “{} match {}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.field_startswith">
+<span class="sig-name descname"><span class="pre">field_startswith</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.field_startswith" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to test if a field starts with a string</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.grouping">
+<span class="sig-name descname"><span class="pre">grouping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.grouping" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to construct a grouping (e.g. “({})”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.keyword">
+<span class="sig-name descname"><span class="pre">keyword</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.keyword" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to match a keyword across all fields (e.g. “{}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.list_separator">
+<span class="sig-name descname"><span class="pre">list_separator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.list_separator" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string used to separate list items</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.not_format">
+<span class="sig-name descname"><span class="pre">not_format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.not_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to construct a NOT expression (e.g. “not {}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.or_format">
+<span class="sig-name descname"><span class="pre">or_format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.or_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>A format string to construct an OR expression (e.g. “{} or {}”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.prepend_result">
+<span class="sig-name descname"><span class="pre">prepend_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.prepend_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>String to prepend to the resulting query</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.quote">
+<span class="sig-name descname"><span class="pre">quote</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.quote" title="Permalink to this definition">¶</a></dt>
+<dd><p>The character used for literal escapes in strings</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.Schema.rule_separator">
+<span class="sig-name descname"><span class="pre">rule_separator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.Schema.rule_separator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Separator for when outputting multiple rules to a file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.serializer.TextQuerySerializer.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sigma.serializer.TextQuerySerializer.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize the rule to a single text query</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (<em>Union</em><em>[</em><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><em>Rule</em></a><em>, </em><em>List</em><em>[</em><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><em>Rule</em></a><em>]</em><em>]</em>) – a rule or list of rules to be serialized</p></li>
+<li><p><strong>transform</strong> (<em>bool</em>) – whether to apply transformations (default: True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Union[str, List[str]]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the serialized rule or list of serialized rules (if a list was passed in)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sigma.serializer.get_builtin_serializers">
+<span class="sig-prename descclassname"><span class="pre">sigma.serializer.</span></span><span class="sig-name descname"><span class="pre">get_builtin_serializers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sigma.serializer.get_builtin_serializers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over built-in serializers. This method is a generator which yields
+a tuple of [name, description] for all built-in serializers.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sigma.serializer.get_serializer_class">
+<span class="sig-prename descclassname"><span class="pre">sigma.serializer.</span></span><span class="sig-name descname"><span class="pre">get_serializer_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.serializer.Serializer" title="sigma.serializer.Serializer"><span class="pre">sigma.serializer.Serializer</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sigma.serializer.get_serializer_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the class backing the given serializer</p>
+</dd></dl>
+
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sigma.serializer.elastic.html">sigma.serializer.elastic module</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">sigma.serializer package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+  </div><h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation index</a><ul>
+  <li><a href="sigma.html">sigma package</a><ul>
+      <li>Previous: <a href="sigma.cli.validate.html" title="previous chapter">sigma.cli.validate module</a></li>
+      <li>Next: <a href="sigma.serializer.elastic.html" title="next chapter">sigma.serializer.elastic module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/sigma.serializer.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2022, Caleb Stewart.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.
+  </div>
+  
+  </body>
+</html>

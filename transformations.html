@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creating Rule Transformations &#8212; Python Sigma 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/readable.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sigma package" href="api/sigma.html" />
+    <link rel="prev" title="Creating Rule Serializers" href="serializers.html" />
+   
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api/sigma.html" title="sigma package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="serializers.html" title="Creating Rule Serializers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Python Sigma 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Creating Rule Transformations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="creating-rule-transformations">
+<h1>Creating Rule Transformations<a class="headerlink" href="#creating-rule-transformations" title="Permalink to this headline">¶</a></h1>
+<p>Rule transformations are implemented by defined a class which inherits from the
+<a class="reference internal" href="api/sigma.transform.html#sigma.transform.Transformation" title="sigma.transform.Transformation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transformation</span></code></a> class. A transformation defines two
+methods for making modifications to the rule as a whole and/or individual
+condition expressions.</p>
+<p>A single transformation can be used to transform both rules and their internal
+conditional expressions.</p>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>Transformations can define custom configuration which must be provided when
+instantiating the transformation class. This normally looks like key-value
+pairs alongside the transformation type in the serializer configuration:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Example serializer configuration</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">transforms</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">package.module:CustomTransform</span><span class="w"></span>
+<span class="w">    </span><span class="nt">title_format</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{}</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">MODIFIED&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">extra_tags</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom_tag</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<p>The exact format and types for this configuration is defined by the <code class="docutils literal notranslate"><span class="pre">Schema</span></code>
+class within your transformation. The below example shows how to setup a
+configuration schema which matches the above YAML.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Custom transformation with required configuration</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">sigma.transform</span> <span class="kn">import</span> <span class="n">Transformation</span>
+<span class="kn">from</span> <span class="nn">sigma.schema</span> <span class="kn">import</span> <span class="n">RuleTag</span>
+
+<span class="k">class</span> <span class="nc">CustomTransform</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
+
+    <span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">Transformation</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+        <span class="n">title_format</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="n">extra_tags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RuleTag</span><span class="p">]</span>
+
+        <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+            <span class="n">schema_extra</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;examples&quot;</span><span class="p">:</span> <span class="n">Transformation</span><span class="o">.</span><span class="n">Schema</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">schema_extra</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="n">schema_extra</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s2">&quot;title_format&quot;</span><span class="p">:</span> <span class="s2">&quot;My Title Format: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;extra_tags&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;attack.t12345&quot;</span><span class="p">,</span> <span class="s2">&quot;custom tag&quot;</span> <span class="p">]</span>
+            <span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Schema</span></code> class must inherit from <a class="reference internal" href="api/sigma.transform.html#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transformation.Schema</span></code></a>
+which is a <code class="docutils literal notranslate"><span class="pre">pydantic</span></code> model. Defining <code class="docutils literal notranslate"><span class="pre">Config.schema_extra</span></code> is not required, but doing
+so allows users to utilize the <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">schema</span> <span class="pre">transform</span> <span class="pre">--examples</span></code> command/options to
+view example configuration for your custom transformation.</p>
+<p>You can access the configuration values at runtime via the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Transformation.schema</span></code>
+property (i.e. in either <code class="docutils literal notranslate"><span class="pre">transform_expression</span></code> or <code class="docutils literal notranslate"><span class="pre">transform_rule</span></code>, you can use <code class="docutils literal notranslate"><span class="pre">self.schema</span></code>
+which will be an instance of your custom <code class="docutils literal notranslate"><span class="pre">Schema</span></code> class)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Defining a custom <code class="docutils literal notranslate"><span class="pre">Schema</span></code> class is not required. You can omit this class
+if your transformation does not require any special configuration.</p>
+</div>
+</div>
+<div class="section" id="rule-transformation">
+<h2>Rule Transformation<a class="headerlink" href="#rule-transformation" title="Permalink to this headline">¶</a></h2>
+<p>Modifying high-level rule properties is relatively straightforward. You define the
+<a class="reference internal" href="api/sigma.transform.html#sigma.transform.Transformation.transform_rule" title="sigma.transform.Transformation.transform_rule"><code class="xref py py-meth docutils literal notranslate"><span class="pre">transform_rule()</span></code></a> method, which takes
+a <a class="reference internal" href="api/sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a> object, and return a modified version of the
+the rule. This modified version can either be a reference to the same rule with
+modified properties or an entirely different rule.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">A transformation which modifies the rule title and tags</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sigma.transform</span> <span class="kn">import</span> <span class="n">Transformation</span>
+<span class="kn">from</span> <span class="nn">sigma.schema</span> <span class="kn">import</span> <span class="n">Rule</span>
+
+<span class="k">class</span> <span class="nc">CustomTransform</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">transform_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="n">Rule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Rule</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Modify the rule by changing the title and adding a new tag &quot;&quot;&quot;</span>
+
+        <span class="n">rule</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;MODIFIED: </span><span class="si">{</span><span class="n">rule</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">rule</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RuleTag</span><span class="p">(</span><span class="s2">&quot;attack.t12345&quot;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">rule</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="expression-transformation">
+<h2>Expression Transformation<a class="headerlink" href="#expression-transformation" title="Permalink to this headline">¶</a></h2>
+<p>To modify the conditional expression, you must define the
+<a class="reference internal" href="api/sigma.transform.html#sigma.transform.Transformation.transform_expression" title="sigma.transform.Transformation.transform_expression"><code class="xref py py-meth docutils literal notranslate"><span class="pre">transform_expression()</span></code></a> method. This
+method takes a reference to the rule being modified as well as the specific
+expression. For a given rule, this method is called for each expression
+recursively. See <a class="reference internal" href="api/sigma.grammar.html#module-sigma.grammar" title="sigma.grammar"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sigma.grammar</span></code></a> for a list of possible grammar classes
+and their meaning. As with the rule transformation, you must return a reference
+to a modified expression. This returned expression can be the same expression
+object with modified properties, or a completely new expression.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">A transformation which swaps all AND/OR statements (don’t do this)</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sigma.transform</span> <span class="kn">import</span> <span class="n">Transformation</span>
+<span class="kn">from</span> <span class="nn">sigma.schema</span> <span class="kn">import</span> <span class="n">Rule</span>
+<span class="kn">from</span> <span class="nn">sigma.grammar</span> <span class="kn">import</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">LogicalOr</span><span class="p">,</span> <span class="n">LogicalAnd</span>
+
+<span class="k">class</span> <span class="nc">CustomTransform</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">transform_expression</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="n">Rule</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="n">Expression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expression</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Modify the rule by changing the title and adding a new tag &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">LogicalOr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">LogicalAnd</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">expression</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">LogicalAnd</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">LogicalOr</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">expression</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Don&#39;t modify non AND/OR expressions</span>
+            <span class="k">return</span> <span class="n">expression</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Creating Rule Transformations</a><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#rule-transformation">Rule Transformation</a></li>
+<li><a class="reference internal" href="#expression-transformation">Expression Transformation</a></li>
+</ul>
+</li>
+</ul>
+
+  </div><h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation index</a><ul>
+      <li>Previous: <a href="serializers.html" title="previous chapter">Creating Rule Serializers</a></li>
+      <li>Next: <a href="api/sigma.html" title="next chapter">sigma package</a></li>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/transformations.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2022, Caleb Stewart.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.
+  </div>
+  
+  </body>
+</html>

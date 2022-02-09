@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sigma.errors module &#8212; Python Sigma 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/readable.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sigma.grammar module" href="sigma.grammar.html" />
+    <link rel="prev" title="sigma.transform package" href="sigma.transform.html" />
+   
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sigma.grammar.html" title="sigma.grammar module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sigma.transform.html" title="sigma.transform package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python Sigma 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="sigma.html" accesskey="U">sigma package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">sigma.errors module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sigma.errors">
+<span id="sigma-errors-module"></span><h1>sigma.errors module<a class="headerlink" href="#module-sigma.errors" title="Permalink to this headline">¶</a></h1>
+<p>Sigma specific errors and exceptions</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.ConditionSyntaxError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">ConditionSyntaxError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsing_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pyparsing.exceptions.ParseException</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'detection</span> <span class="pre">condition:</span> <span class="pre">{}'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.ConditionSyntaxError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>The detection.condition field syntax was incorrect</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sigma.errors.ConditionSyntaxError.column">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">column</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.errors.ConditionSyntaxError.column" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sigma.errors.ConditionSyntaxError.line">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.errors.ConditionSyntaxError.line" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sigma.errors.ConditionSyntaxError.lineno">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lineno</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.errors.ConditionSyntaxError.lineno" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sigma.errors.ConditionSyntaxError.message">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.errors.ConditionSyntaxError.message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.InvalidFieldValueError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">InvalidFieldValueError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">found</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.InvalidFieldValueError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>The value for a given field is invalid</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.InvalidModifierCombinationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">InvalidModifierCombinationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failed_modifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completed_modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'detections:</span> <span class="pre">{field}:</span> <span class="pre">{failed_modifier}</span> <span class="pre">invalid</span> <span class="pre">after</span> <span class="pre">{completed_modifiers}'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.InvalidModifierCombinationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>The combination of modifiers was invalid</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.RuleValidationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">RuleValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.error_wrappers.ValidationError</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.RuleValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaValidationError" title="sigma.errors.SigmaValidationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaValidationError</span></code></a></p>
+<p>Raised when a rule schema fails validation</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.SerializerNotFound">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">SerializerNotFound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serializer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.SerializerNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.SerializerValidationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">SerializerValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.error_wrappers.ValidationError</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.SerializerValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaValidationError" title="sigma.errors.SigmaValidationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaValidationError</span></code></a></p>
+<p>Raised when a serializer config fails validation</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.SigmaError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">SigmaError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.SigmaError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">click.exceptions.ClickException</span></code></p>
+<p>Base generic sigma error. All other sigma errors are subclasses of this.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.errors.SigmaError.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.SigmaError.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.SigmaValidationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">SigmaValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.error_wrappers.ValidationError</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.SigmaValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.TransformValidationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">TransformValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.error_wrappers.ValidationError</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.TransformValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaValidationError" title="sigma.errors.SigmaValidationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaValidationError</span></code></a></p>
+<p>Raised when a transform config fails validation</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.UnknownIdentifierError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">UnknownIdentifierError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.UnknownIdentifierError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>A requested identifier was not found in the detection.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.UnknownModifierError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">UnknownModifierError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'detections:</span> <span class="pre">{field}:</span> <span class="pre">invalid</span> <span class="pre">modifier:</span> <span class="pre">{modifier}'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.UnknownModifierError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>Sigma rule specified an invalid field modifier</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.UnknownTransform">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">UnknownTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.UnknownTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation index</a><ul>
+  <li><a href="sigma.html">sigma package</a><ul>
+      <li>Previous: <a href="sigma.transform.html" title="previous chapter">sigma.transform package</a></li>
+      <li>Next: <a href="sigma.grammar.html" title="next chapter">sigma.grammar module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/sigma.errors.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2022, Caleb Stewart.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.
+  </div>
+  
+  </body>
+</html>

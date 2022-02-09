@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Python Sigma’s documentation! &#8212; Python Sigma 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/readable.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Serializer Configurations" href="serializer-definition.html" />
+   
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+  <div class="indexwrapper">
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="serializer-definition.html" title="Serializer Configurations"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Python Sigma 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to Python Sigma’s documentation!</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-python-sigma-s-documentation">
+<h1>Welcome to Python Sigma’s documentation!<a class="headerlink" href="#welcome-to-python-sigma-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Python Sigma is a package which provides an abstract interface for loading and
+interacting with Sigma detection rules as well as the ability to construct and
+combine serializers and rule transformations to convert rules between common
+formats for ingestion into your backend detection systems.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="api/sigma.html#module-sigma" title="sigma"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sigma</span></code></a> package can be installed directly from GitHub with <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">python-sigma installation</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/calebstewart/python-sigma.git
+</pre></div>
+</div>
+</div>
+<p>For development environments, you should clone the repository and use Python Poetry
+to manage your virtual environment.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Development Environment Setup</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone the repository</span>
+git clone git@github.com:calebstewart/python-sigma.git
+<span class="nb">cd</span> python-sigma
+
+<span class="c1"># Setup and enter virtual environment (optionally with documentation extras)</span>
+poetry install -E docs
+poetry shell
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="command-line-interface">
+<h2>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
+<p>Along with the Python API for loading, modifying, transforming and converting rules, this
+package provides a command line interface for interacting with Sigma rules. The project is
+under active development, so this interface may change in the future. With this in mind,
+you should defer to the built-in documentation with <code class="docutils literal notranslate"><span class="pre">--help</span></code> arguments when using the
+command.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Examples of command line interface</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ sigma --help
+Usage: sigma <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
+
+   Sigma Rule conversion and validation CLI.
+
+Options:
+   --mitre-data FILENAME  Override default MITRE ATT<span class="p">&amp;</span>CK data file <span class="o">(</span>downloaded
+                          with <span class="s1">&#39;sigma mitre update&#39;</span><span class="o">)</span>
+   --help                 Show this message and exit.
+
+Commands:
+   convert    Convert Sigma rules to various formats using built-in or...
+   list       List built-in transforms and serializers
+   mitre      Browse and update the MITRE ATT<span class="p">&amp;</span>CK data cache.
+   schema     Dump the schema <span class="k">for</span> rules, serializers, and transforms
+   transform  Transform a list of rules using a list of transforms <span class="k">in</span> a...
+   validate   Validate Sigma rule or serializer schema
+
+<span class="c1"># Dump the serialized rule to stdout using a standard serializer</span>
+$ sigma convert -s eql ./rule.yml
+$ sigma convert -s kql ./rule.yml
+
+<span class="c1"># Dump the serialized rule to stdout using a custom serializer definition</span>
+$ sigma convert -s ./custom.yml ./rule.yml
+
+<span class="c1"># Dump the serialized rule to stdout using a custom serializer class</span>
+<span class="c1"># This could be from another third-party package implementing it&#39;s own</span>
+<span class="c1"># serialization interface.</span>
+$ sigma convert -s package.module:ClassName ./rule.yml
+
+<span class="c1"># Validate a given rule and condition grammar</span>
+$ sigma validate rule ./rule.yml
+
+<span class="c1"># Dump the JSON Schema specification for Sigma rules in JSON or YAML format</span>
+$ sigma schema rule
+$ sigma schema serializer es-eql
+$ sigma schema transform field_map
+
+<span class="c1"># Dump example data from schema</span>
+$ sigma schema rule --examples -o json
+$ sigma schema rule -e -o yaml
+$ sigma schema transform -e field_map
+
+<span class="c1"># List built-in serializers or transforms</span>
+$ sigma list serializer
+$ sigma list transform
+</pre></div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="serializer-definition.html">Serializer Configurations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="serializer-definition.html#base-class-definition">Base Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="serializer-definition.html#log-source-definition">Log Source Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="serializer-definition.html#transformation-definitions">Transformation Definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="serializers.html">Creating Rule Serializers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="serializers.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="serializers.html#configured-transformations">Configured Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="serializers.html#example-serializer">Example Serializer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transformations.html">Creating Rule Transformations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html#rule-transformation">Rule Transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html#expression-transformation">Expression Transformation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/sigma.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/sigma.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/sigma.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Welcome to Python Sigma’s documentation!</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#command-line-interface">Command Line Interface</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  </div><h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation index</a><ul>
+      <li>Next: <a href="serializer-definition.html" title="next chapter">Serializer Configurations</a></li>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2022, Caleb Stewart.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.
+  </div>
+  
+  </div>
+  
+  </body>
+</html>

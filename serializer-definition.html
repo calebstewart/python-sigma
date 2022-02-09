@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Serializer Configurations &#8212; Python Sigma 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/readable.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Creating Rule Serializers" href="serializers.html" />
+    <link rel="prev" title="Welcome to Python Sigma’s documentation!" href="index.html" />
+   
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="serializers.html" title="Creating Rule Serializers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Python Sigma’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Python Sigma 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Serializer Configurations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="serializer-configurations">
+<h1>Serializer Configurations<a class="headerlink" href="#serializer-configurations" title="Permalink to this headline">¶</a></h1>
+<p>Serializers are defined in Python, but can be configured via YAML (or other
+data source compatible with Python <code class="docutils literal notranslate"><span class="pre">dict</span></code> objects). The schema for
+serializer configurations is defined by each serializer, but all serializers
+inherit a common base schema.</p>
+<p>When writing serializer configurations, you can validate the definition using
+the <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">validate</span></code> command, which will utilize the schema against both
+the common serializer configuration and the configuration specific to your
+serializer base type.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Example Configuration with no Custom Configuration</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;A</span><span class="nv"> </span><span class="s">sample</span><span class="nv"> </span><span class="s">serializer&quot;</span><span class="w"></span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Description</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">serializer&quot;</span><span class="w"></span>
+<span class="nt">base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">package.module:CustomSerializer</span><span class="w"></span>
+<span class="nt">logsource</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">windows_process_creation</span><span class="w"></span>
+<span class="w">      </span><span class="nt">product</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">windows</span><span class="w"></span>
+<span class="w">      </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">process_creation</span><span class="w"></span>
+<span class="w">      </span><span class="nt">index</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-index-*</span><span class="w"></span>
+<span class="nt">transforms</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">field_map</span><span class="w"></span>
+<span class="w">    </span><span class="nt">mapping</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">CommandLine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_command_line_field</span><span class="w"></span>
+<span class="w">      </span><span class="nt">Image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_image</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="base-class-definition">
+<h2>Base Class Definition<a class="headerlink" href="#base-class-definition" title="Permalink to this headline">¶</a></h2>
+<p>Serializer configurations must specify a base class in order to construct the
+serializer in memory. The <code class="docutils literal notranslate"><span class="pre">base</span></code> field is a string which can take on a few
+different meanings in the following order:</p>
+<ul class="simple">
+<li><p>The name of a built-in serializer (as returned by <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">list</span> <span class="pre">serializers</span></code>).</p></li>
+<li><p>The path to another serializer configuration YAML file.</p></li>
+<li><p>A fully-qualified python class name in the format <code class="docutils literal notranslate"><span class="pre">package.module:ClassName</span></code>.</p></li>
+</ul>
+<p>When specifying an explicit class, the given class is instantiated and your
+configuration definition is passed directly to this class. However, if you provide
+the name of another serializer configuration file, then that serializer is
+first constructed, and then it’s configuration is updated based on the new
+configuration file. You can use this to create pseudo-inheritence without
+touching code.</p>
+<p>This is especially useful when creating serializers which output to a specific
+rule format, but the rule format does not define specific field names. You can
+construct a serializer configuration which inherits from the root serializer
+and provide extra transforms to perform the field mapping.</p>
+</div>
+<div class="section" id="log-source-definition">
+<h2>Log Source Definition<a class="headerlink" href="#log-source-definition" title="Permalink to this headline">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">logsource</span></code> field in the serializer configuration is optional, but
+may be necessary depending on your target format. The log source defines rules
+for matching specific <code class="docutils literal notranslate"><span class="pre">logsource</span></code> fields within rules, and then applying
+extra conditions or defining an index for the query in the backend detection
+system.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">A full logsource field</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">logsource</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># If no below rules match, use this index (could also be a list)</span><span class="w"></span>
+<span class="w">  </span><span class="nt">defaultindex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;logs-*&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># How to merge conditions if multiple rules match</span><span class="w"></span>
+<span class="w">  </span><span class="nt">merging</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;or&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># List of logsource rules to match against sigma rules</span><span class="w"></span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;match</span><span class="nv"> </span><span class="s">windows</span><span class="nv"> </span><span class="s">process_creation</span><span class="nv"> </span><span class="s">logs&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># If any of the three below are missing, it is not compared.</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Any of the below that are defined *must* match the sigma rule.</span><span class="w"></span>
+<span class="w">      </span><span class="nt">product</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;windows&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;process_creation&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;service&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Define indices used when converting the sigma rule</span><span class="w"></span>
+<span class="w">      </span><span class="nt">index</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;other-logs-*&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Define extra conditions which are Logical AND-joined to</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># the final matching rule (if multiple logsource rules match,</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># the logsource conditions are joined according to the above</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># merging field)</span><span class="w"></span>
+<span class="w">      </span><span class="nt">conditions</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">CommandLine|contains</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cmd.exe&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="transformation-definitions">
+<h2>Transformation Definitions<a class="headerlink" href="#transformation-definitions" title="Permalink to this headline">¶</a></h2>
+<p>A serializer can define a list transformations which will be applied prior to
+serialing the rule to the target format. Each transformation type can define
+an arbitrary structure for their configuration, but each transformation definition
+requires at least a <code class="docutils literal notranslate"><span class="pre">type</span></code> field which can take on a few different meanings
+in the following order:</p>
+<ul class="simple">
+<li><p>A built-in transformation (as returned by <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">list</span> <span class="pre">transforms</span></code>).</p></li>
+<li><p>A fully-qualified python class name in the format <code class="docutils literal notranslate"><span class="pre">package.module:ClassName</span></code>.</p></li>
+</ul>
+<p>You can utilize the <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">schema</span> <span class="pre">transform</span></code> command to view the JSON schema
+specification or examples defined by a specific transform type.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Serializer Configurations</a><ul>
+<li><a class="reference internal" href="#base-class-definition">Base Class Definition</a></li>
+<li><a class="reference internal" href="#log-source-definition">Log Source Definition</a></li>
+<li><a class="reference internal" href="#transformation-definitions">Transformation Definitions</a></li>
+</ul>
+</li>
+</ul>
+
+  </div><h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation index</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Python Sigma’s documentation!</a></li>
+      <li>Next: <a href="serializers.html" title="next chapter">Creating Rule Serializers</a></li>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/serializer-definition.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2022, Caleb Stewart.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.
+  </div>
+  
+  </body>
+</html>
