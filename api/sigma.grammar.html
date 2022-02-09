@@ -219,11 +219,26 @@ to leave it unchanged).</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.grammar.</span></span><span class="sig-name descname"><span class="pre">FieldEquality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">Expression</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.grammar.FieldEquality" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sigma.grammar.FieldComparison" title="sigma.grammar.FieldComparison"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.grammar.FieldComparison</span></code></a></p>
 <p>Test for field equality</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.grammar.FieldEquality.field">
+<span class="sig-name descname"><span class="pre">field</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.grammar.FieldEquality.field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.grammar.FieldEquality.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.grammar.FieldEquality.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sigma.grammar.FieldEquality.to_detection">
 <span class="sig-name descname"><span class="pre">to_detection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sigma.grammar.FieldEquality.to_detection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a not expression to a detection condition</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.grammar.FieldEquality.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#sigma.grammar.FieldEquality.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -296,11 +311,21 @@ to leave it unchanged).</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.grammar.</span></span><span class="sig-name descname"><span class="pre">Identifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">Expression</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.grammar.Identifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sigma.grammar.CoreExpression" title="sigma.grammar.CoreExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.grammar.CoreExpression</span></code></a></p>
 <p>Expression which identifies a specific detection condition</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.grammar.Identifier.args">
+<span class="sig-name descname"><span class="pre">args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.grammar.Identifier.args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sigma.grammar.Identifier.identifier">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">identifier</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.grammar.Identifier.identifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shortcut for grabbing the identifier</p>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.grammar.Identifier.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.grammar.Identifier.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sigma.grammar.Identifier.postprocess">
@@ -414,9 +439,19 @@ to leave it unchanged).</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.grammar.</span></span><span class="sig-name descname"><span class="pre">Selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">Expression</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.grammar.Selector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sigma.grammar.CoreExpression" title="sigma.grammar.CoreExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.grammar.CoreExpression</span></code></a></p>
 <p>Selector expression which is converted to LogicalAnd or LogicalOr</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.grammar.Selector.args">
+<span class="sig-name descname"><span class="pre">args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.grammar.Selector.args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sigma.grammar.Selector.condition">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">condition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.CoreExpression" title="sigma.grammar.CoreExpression"><span class="pre">sigma.grammar.CoreExpression</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.grammar.Selector.condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.grammar.Selector.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.grammar.Selector.parent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
