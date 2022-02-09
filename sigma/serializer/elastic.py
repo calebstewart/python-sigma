@@ -2,7 +2,10 @@ import json
 import uuid
 from typing import Any, Dict, List, Union, ClassVar, Optional
 
+import yaml
+
 from sigma.mitre import Attack, Tactic, Technique
+from sigma.errors import UnsupportedSerializerFormat
 from sigma.schema import Rule
 from sigma.grammar import Expression, FieldComparison
 from sigma.serializer import TextQuerySerializer, CommonSerializerSchema
@@ -129,8 +132,6 @@ class ElasticSecurityRule(EventQueryLanguage):
         """ Mapping of sigma rule levels to severity values """
         severity_default: str = "medium"
         """ Default severity value if the level is not in the above map """
-        extra_tags: Optional[List[str]]
-        """ Extra tags to add to all converted rules """
 
         class Config:
             extra = "forbid"
@@ -145,7 +146,6 @@ class ElasticSecurityRule(EventQueryLanguage):
                     "max_signals": 100,
                     "risk_map": {"low": 0, "medium": 25, "high": 75, "critical": 100},
                     "risk_default": 10,
-                    "extra_tags": ["custom-tag"],
                 }
             )
 
@@ -159,9 +159,32 @@ class ElasticSecurityRule(EventQueryLanguage):
 
     schema: Schema
 
+    def dumps(
+        self,
+        rule: Union[Rule, List[Rule]],
+        format: Optional[str] = None,
+        pretty: bool = False,
+    ) -> str:
+        """Dump the rule as a string in either JSON or YAML format"""
+
+        serialized = self.serialize(rule)
+        if not isinstance(serialized, list):
+            serialized = [serialized]
+
+        if format is None or format == "json":
+            if pretty:
+                return "\n".join([json.dumps(s, indent=2) for s in serialized])
+            return "\n".join([json.dumps(s) for s in serialized])
+        elif format == "yaml" or format == "yml":
+            return yaml.safe_dump_all(serialized)
+        else:
+            raise UnsupportedSerializerFormat(format)
+
     def serialize(
         self, rule: Union[Rule, List[Rule]], transform: bool = True
-    ) -> Union[str, List[str]]:
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+        """Serialize the rule(s) to a dictionary representing an Elastic Security
+        EQL rule."""
 
         if isinstance(rule, list):
             return [self.serialize(r) for r in rule]
@@ -248,9 +271,6 @@ class ElasticSecurityRule(EventQueryLanguage):
                 else:
                     tags.append(str(tag))
 
-        if self.schema.extra_tags:
-            tags.extend(self.schema.extra_tags)
-
         tags.sort()
 
         if tactics:
@@ -327,4 +347,4 @@ class ElasticSecurityRule(EventQueryLanguage):
             "references": rule.references or [],
         }
 
-        return json.dumps(result)
+        return result

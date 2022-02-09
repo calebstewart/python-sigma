@@ -46,13 +46,13 @@ transformation names or a fully-qualified python class path formatted as
 import importlib
 from abc import ABC
 from enum import Enum
-from typing import Any, Dict, Type, Tuple, Literal, Pattern, Optional, Generator
+from typing import Any, Dict, List, Type, Tuple, Literal, Pattern, Optional, Generator
 
 from pydantic.main import BaseModel
 from pydantic.fields import Field
 
 from sigma.errors import SigmaError, UnknownTransform
-from sigma.schema import Rule
+from sigma.schema import Rule, RuleTag
 from sigma.grammar import (
     Expression,
     FieldContains,
@@ -95,8 +95,8 @@ class Transformation(ABC):
             schema = clazz.Schema.parse_obj(self.dict())
             return clazz(schema)
 
-    def __init__(self, config: Schema):
-        pass
+    def __init__(self, schema: Schema):
+        self.schema = schema
 
     def transform_rule(self, rule: Rule) -> Rule:
         """Transform the given rule by either modifying it inline or returning an
@@ -227,6 +227,42 @@ class FieldMatchReplace(Transformation):
         return new_expression
 
 
+class AddTags(Transformation):
+    """Add extra tags to a sigma rule during serialization."""
+
+    class Schema(Transformation.Schema):
+        """AddTags configuration definition"""
+
+        type: Literal["add_tags"]
+        tags: List[RuleTag]
+
+        class Config:
+            extra = "forbid"
+            schema_extra = {
+                "examples": [
+                    {
+                        "type": "add_tags",
+                        "tags": [
+                            "custom_tag1",
+                            "custom_tag2",
+                            "attack.t12345",
+                        ],
+                    }
+                ]
+            }
+
+    def transform_rule(self, rule: Rule) -> Rule:
+
+        if rule.tags is not None:
+            for tag in self.schema.tags:
+                if tag not in rule.tags:
+                    rule.tags.append(tag)
+        else:
+            rule.tags = self.schema.tags
+
+        return rule
+
+
 class FieldMap(Transformation):
     """Transform sigma rule expressions to replace field names. Transformation
     configuration is a mapping between built-in field names and custom field names.
@@ -333,6 +369,7 @@ BUILTIN_TRANSFORMS: Dict[str, Tuple[Type[Transformation], str]] = {
         FieldMatchReplace,
         "Replace wildcard matching with strict equality based on regex patterns",
     ),
+    "add_tags": (AddTags, "Append extra tags to the Sigma Rule"),
 }
 
 

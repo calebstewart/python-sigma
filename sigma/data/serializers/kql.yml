@@ -1,14 +1,14 @@
 name: "Kibana Query Language Serializer"
 description: "Kibana Query Language (KQL) Text-Based Serializer"
 base: "sigma.serializer:TextQuerySerializer"
-quote: '{}'
+quote: '"{}"'
 escape: "\\{}"
 list_separator: ","
 or_format: "{} or {}"
 and_format: "{} and {}"
 not_format: "not {}"
 grouping: "({})"
-escaped_characters: "([\\\\])"
+escaped_characters: "([\\\\\"])"
 field_equality: "{}: {}"
 field_in: "{}: {}"
 field_regex: "{} regex {}"

@@ -197,7 +197,7 @@ class RuleTag(str):
             raise TypeError("string required")
 
         if not re.fullmatch("[a-z][a-z0-9_.-]*", v):
-            raise ValueError("invalid tag format")
+            raise ValueError(f"invalid tag format: {repr(v)}")
 
         return cls(v)
 

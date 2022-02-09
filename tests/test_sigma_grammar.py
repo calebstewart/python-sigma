@@ -1,4 +1,4 @@
-from typing import List, Type, Union
+from typing import List, Type
 
 import pytest
 from pyparsing.core import ParserElement

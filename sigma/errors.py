@@ -17,6 +17,15 @@ class SigmaError(ClickException):
         console.log(f"[red]error[/red]: {self}")
 
 
+class UnsupportedSerializerFormat(SigmaError):
+    """An unsupported format argument was provided to the
+    :py:meth:`~sigma.serializer.Serializer.dump` method."""
+
+    def __init__(self, format: str):
+        super().__init__(f"{format}: unsupported format")
+        self.format = format
+
+
 class ConditionSyntaxError(SigmaError):
     """The detection.condition field syntax was incorrect"""
 

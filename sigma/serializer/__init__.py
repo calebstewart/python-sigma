@@ -31,7 +31,11 @@ from pydantic.main import BaseModel
 from pydantic.fields import Field
 from pydantic.error_wrappers import ValidationError
 
-from sigma.errors import SerializerNotFound, SerializerValidationError
+from sigma.errors import (
+    SerializerNotFound,
+    SerializerValidationError,
+    UnsupportedSerializerFormat,
+)
 from sigma.schema import Rule, RuleDetectionFields
 from sigma.grammar import (
     FieldIn,
@@ -53,7 +57,23 @@ from sigma.transform import Transformation
 
 
 class LogSourceMatch(BaseModel):
-    """A single log source matching rule"""
+    """A single log source matching rule. The fields ``product``, ``service``
+    and ``category`` are optional, but if specified must equal their respective
+    fields in :py:attr:`Rule.logsource <sigma.schema.Rule.logsource>`.
+
+    The provided :py:attr:`~LogSourceMatch.conditions` are in the same format
+    as a field selector within the Sigma rule itself, and can contain any of
+    the common modifiers. The given conditions are joined with a logical AND
+    expression to any matching rules.
+
+    The :py:attr:`~LogSourceMatch.index` can either be a string or list of
+    strings and is used by some serializers to restrict the index on which
+    the log search query is made.
+
+    The name field is not used internally, but is helpful to organize your
+    serializer configuration if you have multiple different logsource matching
+    sections.
+    """
 
     name: Optional[str]
     """ The matching rule name """
@@ -69,6 +89,15 @@ class LogSourceMatch(BaseModel):
     """ One or more indices to search """
 
     def compare(self, rule: Rule) -> bool:
+        """Test if :py:attr:`Rule.logsource <sigma.schema.Rule.logsource` matches this
+        logsource definition.
+
+        :param rule: the rule to test
+        :type rule: Rule
+        :rtype: bool
+        :returns: True if the rule's logsource details match this definition
+        """
+
         if (
             (self.product and self.product != rule.logsource.product)
             or (self.service and self.service != rule.logsource.service)
@@ -109,6 +138,15 @@ class LogSourceMatch(BaseModel):
 
 
 class LogSourceRules(BaseModel):
+    """
+    This class represents the ``logsource`` field of a serializer definition,
+    and controls the selection of indices based on matching rule logsource
+    details to a list of logsource criteria.
+
+    A serializer can use the :py:meth:`~LogSourceRules.match_rule` method to
+    identify matching logsource criteria defined by the serializer configuration
+    and a list of matching indices to use when serializing the rule.
+    """
 
     defaultindex: Optional[Union[str, List[str]]] = []
     """ The default index if no log sources match or no indices defined """
@@ -118,8 +156,29 @@ class LogSourceRules(BaseModel):
     """ List of log source matching rules """
 
     def match_rule(self, rule: Rule) -> Tuple[List[str], Rule]:
-        """Match the given rule to one or more logsource matches and return
-        a list of indices and a (possibly modified) rule."""
+        """
+        Match the given rule to one or more logsource matches and return
+        a list of indices and a (possibly modified) rule. This process is
+        similar to a rule transformation, but matches rules to LogSourceMatches
+        by inspecting the :py:attr:`Rule.logsource <sigma.schema.Rule.logsource>`
+        field.
+
+        If no :py:class:`LogSourceMatch`'s match this rule or no indices are
+        defined in the match objects, the default index will be returned. The
+        indices returned will always be a list regardless of the length. If
+        no default index is defined, then the first item in the returned
+        tuple could be an empty list.
+
+        The rule may have one or more conditional expressions joined to the
+        original expression with a logical AND expression based on the conditions
+        defined in one or more :py:class:`LogSourceMatch` matches and the
+        :py:attr:`~LogSourceRules.merging` property.
+
+        :param rule: the rule to match against logsource matches
+        :type rule: Rule
+        :rtype: Tuple[List[str], Rule]
+        :returns: A tuple of (list_of_indices, modified_rule)
+        """
 
         # Find matching logsource rules
         matches: List[LogSourceMatch] = []
@@ -185,7 +244,19 @@ class LogSourceRules(BaseModel):
 
 
 class CommonSerializerSchema(BaseModel):
-    """Base serializer schema which all schemas should inherit"""
+    """Base serializer schema which all schemas should inherit. Every serializer
+    configuration is required to, at a minimum, conform to this schema. Custom
+    serializers simply build off of this definition.
+
+    The base definition is one of the following
+
+    - A built-in serializer name (as seen in ``sigma list serializer``).
+    - Path to a YAML serializer config
+    - A fully qualified class name (e.g. ``package.module:ClassName``).
+
+    Each transform definition must conform to the schema for the transform type,
+    and at a minimum the :py:class:`Base Transformation Schema <sigma.transform.Transformation.Schema>`.
+    """
 
     name: str
     """ Arbitrary name for this serialization schema """
@@ -230,12 +301,44 @@ class Serializer(ABC):
 
     @abstractmethod
     def serialize(self, rule: Union[Rule, List[Rule]], transform: bool = True) -> Any:
-        """Serialize the given sigma rule into a new format"""
+        """Serialize the given sigma rule into a new format. The return value can be
+        any python object which represents the equivalent rule in a new format.
 
-    def find_indices(self, rule: Rule, default: List[str] = None) -> List[str]:
-        """Lookup indices defined in the configuration matching this rule"""
+        :param rule: a rule or list of rules to serialize
+        :type rule: Union[Rule, List[Rule]]
+        :param transform: whether to apply transformations (default: True, mainly used internally for inheritence)
+        :type transform: bool
+        :rtype: Any
+        :returns: The serialized representation of the rule or a list of serialized representations.
+        """
+
+    @abstractmethod
+    def dumps(
+        self,
+        rule: Union[Rule, List[Rule]],
+        format: Optional[str] = None,
+        pretty: bool = False,
+    ) -> str:
+        """Serialize the given rule(s) and return a string representation. Regardless of
+        the number of rules passed, this method should always return a single string in
+        the requested format. Formats are things like "raw", "yaml", or "json". If the
+        requested format is not supported, an :py:class:`~sigma.errors.UnsupportedSerializerFormat`
+        exception should be raised. If no format is given, this method should use the
+        default format for the serializer.
+
+        :param rule: rule or list of rules to serialize and dump
+        :type rule: Union[Rule, List[Rule]]
+        :param format: a format for dumping (e.g. "yaml" or "json")
+        :type format: str
+        :param pretty: dump pretty-formatted output (default: false)
+        :type pretty: bool
+        :rtype: str
+        :returns: A string representation of the rule in the new target format
+        """
 
     def _extend_transforms(self, schema: CommonSerializerSchema):
+        """Extend the current transform list with transforms from another
+        serialization schema."""
 
         if schema.transforms is None:
             return
@@ -244,39 +347,28 @@ class Serializer(ABC):
             self.transforms.append(transform.load())
 
     def apply_rule_transform(self, rule: Rule) -> Rule:
-        """Apply all rule-level transformations"""
+        """Apply all rule and expression transformations, returning either
+        a modified rule or a completely new rule depending on the transformations
+        defined.
+
+        :param rule: the rule to transform
+        :type rule: Rule
+        :rtype: Rule
+        :returns: the transformed rule object (may be different from input)
+        """
 
         for transform in self.transforms:
             rule = transform.transform_rule(rule)
 
         return rule
 
-    def apply_expression_transform(
-        self, rule: Rule, expression: Expression
-    ) -> Expression:
-        """Apply all transformations to this expression and every sub-expression"""
-
-        if isinstance(expression, CoreExpression):
-            expression.args = [
-                self.apply_expression_transform(rule, a)
-                if isinstance(a, Expression)
-                else a
-                for a in expression.args
-            ]
-
-        for transform in self.transforms:
-            expression = transform.transform_expression(rule, expression)
-
-        return expression
-
     @classmethod
     def load(cls, name: str, config: Optional[Dict[str, Any]] = None):
         """
         Load a serializer definition from any of:
 
-        - Built-in definitions (under ``sigma/data/serializers/``)
+        - Built-in definitions (see ``sigma list serializers``)
         - A local file path
-        - Built-in named serializers (defined by ``BUILTIN_SERIALIZERS``)
         - A fully qualified Python class path (e.g. ``package.module:ClassName``)
 
         If the provided name refers to a named serializer class or a fully qualified class
@@ -490,6 +582,22 @@ class TextQuerySerializer(Serializer):
             rule = rule.transform(self.transforms)
 
         return self._serialize_expression(rule.detection.expression, group=False)
+
+    def dumps(
+        self,
+        rule: Union[Rule, List[Rule]],
+        format: Optional[str] = None,
+        pretty: bool = False,
+    ) -> str:
+        """The rule(s) to a string. In the case of a TextQuerySerializer, this
+        is the same as dumping the rule(s) directly, with newlines separating"""
+
+        if format is not None and format != "raw":
+            raise UnsupportedSerializerFormat(format)
+
+        serialized = self.serialize(rule)
+
+        return serialized if isinstance(serialized, str) else "\n".join(serialized)
 
     def _serialize_expression(self, expression: Any, group: bool = True):
         """Recursively serialize an expression"""
