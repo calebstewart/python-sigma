@@ -1,0 +1,43 @@
+name: Build Documentation
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+      - name: Setup Poetry Environment
+        run: |
+          python -m pip install poetry
+          poetry install -E docs
+      - name: Regenerate API Documentation
+        run: |
+          poetry run sphinx-apidoc -e -f -M -o docs/source/api ./sigma
+      - name: Build Documentation
+        run: |
+          cd docs
+          poetry run make html
+      - name: Commit Documentation Changes
+        run: |
+          git clone git@github.com:calebstewart/python-sigma.git --branch gh-pages --single-branch gh-pages
+          cp -r docs/build/html/* gh-pages/
+          cd gh-pages
+          touch .nojekyll
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Updated documentation" -a || true
+      - name: Push Documentation Changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: gh-pages
+          directory: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
