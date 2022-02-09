@@ -93,6 +93,55 @@ transformation names or a fully-qualified python class path formatted as
 </div>
 </div>
 <dl class="py class">
+<dt class="sig sig-object py" id="sigma.transform.AddTags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.transform.</span></span><span class="sig-name descname"><span class="pre">AddTags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><span class="pre">sigma.transform.Transformation.Schema</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.AddTags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.transform.Transformation" title="sigma.transform.Transformation"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.transform.Transformation</span></code></a></p>
+<p>Add extra tags to a sigma rule during serialization.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.transform.AddTags.Schema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'add_tags'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.schema.html#sigma.schema.RuleTag" title="sigma.schema.RuleTag"><span class="pre">sigma.schema.RuleTag</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.AddTags.Schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.transform.Transformation.Schema</span></code></a></p>
+<p>AddTags configuration definition</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.transform.AddTags.Schema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#sigma.transform.AddTags.Schema.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.transform.AddTags.Schema.Config.extra">
+<span class="sig-name descname"><span class="pre">extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'forbid'</span></em><a class="headerlink" href="#sigma.transform.AddTags.Schema.Config.extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.transform.AddTags.Schema.Config.schema_extra">
+<span class="sig-name descname"><span class="pre">schema_extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'examples':</span> <span class="pre">[{'type':</span> <span class="pre">'add_tags',</span> <span class="pre">'tags':</span> <span class="pre">['custom_tag1',</span> <span class="pre">'custom_tag2',</span> <span class="pre">'attack.t12345']}]}</span></em><a class="headerlink" href="#sigma.transform.AddTags.Schema.Config.schema_extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.transform.AddTags.Schema.tags">
+<span class="sig-name descname"><span class="pre">tags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sigma.schema.html#sigma.schema.RuleTag" title="sigma.schema.RuleTag"><span class="pre">sigma.schema.RuleTag</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.transform.AddTags.Schema.tags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.transform.AddTags.Schema.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'add_tags'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.transform.AddTags.Schema.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the transformation type</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.transform.AddTags.transform_rule">
+<span class="sig-name descname"><span class="pre">transform_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></span><a class="headerlink" href="#sigma.transform.AddTags.transform_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform the given rule by either modifying it inline or returning an
+entirely new rule. The default implementation simply returns the original
+rule.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="sigma.transform.ExpressionType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.transform.</span></span><span class="sig-name descname"><span class="pre">ExpressionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.ExpressionType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
@@ -299,7 +348,7 @@ with <code class="docutils literal notranslate"><span class="pre">process.name</
 
 <dl class="py class">
 <dt class="sig sig-object py" id="sigma.transform.Transformation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.transform.</span></span><span class="sig-name descname"><span class="pre">Transformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><span class="pre">sigma.transform.Transformation.Schema</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.Transformation" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.transform.</span></span><span class="sig-name descname"><span class="pre">Transformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><span class="pre">sigma.transform.Transformation.Schema</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.Transformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base transformation class for inline modification during rule serialization</p>
 <dl class="field-list simple">
