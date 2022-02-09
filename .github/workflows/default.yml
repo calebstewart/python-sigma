@@ -27,7 +27,7 @@ jobs:
           poetry run make html
       - name: Commit Documentation Changes
         run: |
-          git clone git@github.com:calebstewart/python-sigma.git --branch gh-pages --single-branch gh-pages
+          git clone https://github.com/calebstewart/python-sigma.git --branch gh-pages --single-branch gh-pages
           cp -r docs/build/html/* gh-pages/
           cd gh-pages
           touch .nojekyll
