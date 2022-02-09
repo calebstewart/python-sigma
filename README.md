@@ -9,7 +9,7 @@ from sigma.schema import Rule
 
 # Load a rule into a python object
 rule = Rule.from_yaml("test-rule.yml")
-    
+
 # Simple properties are accessible directly
 print(rule.title)
 print(rule.author)
@@ -95,7 +95,7 @@ ATT&CK database cache, validating serializer or rule configurations, and
 converting rules using built-in or custom serializers.
 
 This project is still under active development, and the interface could
-change at any time. You should check the built-in help by running 
+change at any time. You should check the built-in help by running
 `sigma --help` at the command line, however for completeness sake, the
 current help output/list of subcommands is:
 
@@ -122,11 +122,10 @@ Commands:
 The official Sigma repository contains the `sigmac` tool for converting
 sigma rules from sigma format to a variety of backend detection systems.
 However, this tool has aged poorly. The code is messy and hard to follow
-and documentation is limited. The Sigma team tried to update the converter
-with the `pySigma` repository, but this project seems stalled. The last
-I checked, there were no changes in the last ~6 months. Further, this
-project also suffers from little-to-no documentation, which makes submitting
-PRs painful.
+and documentation is limited. It appears the Sigma team is attempting to
+replace `sigmac` with [pySigma](https://github.com/SigmaHQ/pySigma), but
+the project is pretty new, and I wanted something I could iterate on and
+have control over in the short term.
 
 Also, the processing of sigma rules simply seems overly complex in both
 cases. This may be a "grass is greener" problem on my part, but the worst
@@ -141,3 +140,11 @@ as provide a simple interface for others to ingest Sigma rules directly.
 For example, being able to load, inspect and possibly modify sigma rules
 from Python without using the conversion tool would be a great feature for
 teams trying to work Sigma into their automation pipeline.
+
+All that being said, I want to be abundantly clear: **The sigma project
+and all the code associated with it have been immensely helpful, and the
+above is not meant to dig on the team, their code or their contributions
+to the community.** I greatly appreciate and admire all the hard work
+the SigmaHQ team has put into making the detection of malicious activity
+better over the years. I only hope that I can either learn something or
+maybe provide something useful back to the community myself. :smile:
