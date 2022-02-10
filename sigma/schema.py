@@ -364,9 +364,7 @@ class RuleDetection(pydantic.BaseModel):
 
         try:
             definition = getattr(self, identifier)
-            if not isinstance(
-                definition, Union[RuleDetectionList, RuleDetectionFields]
-            ):
+            if not isinstance(definition, (RuleDetectionList, RuleDetectionFields)):
                 raise AttributeError
         except AttributeError:
             raise UnknownIdentifierError(f"{identifier}: invalid detection identifier")
