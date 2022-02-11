@@ -36,6 +36,7 @@ configuration schema which matches the above YAML.
 
     from sigma.transform import Transformation
     from sigma.schema import RuleTag
+    from sigma.utils import CopyableSchema
 
     class CustomTransform(Transformation):
 
@@ -43,28 +44,37 @@ configuration schema which matches the above YAML.
             title_format: str
             extra_tags: List[RuleTag]
 
-            class Config:
-                schema_extra = {
-                    "examples": Transformation.Schema.Config.schema_extra["examples"].copy()
-                }
-                schema_extra["examples"][0].update({
+            class Config(CopyableSchema):
+                schema_extra = Transformation.Schema.Config.copy_schema(example_extra={
                     "title_format": "My Title Format: {}",
                     "extra_tags": [ "attack.t12345", "custom tag" ]
                 })
 
 The ``Schema`` class must inherit from :py:class:`Transformation.Schema <sigma.transform.Transformation.Schema>`
-which is a ``pydantic`` model. Defining ``Config.schema_extra`` is not required, but doing
-so allows users to utilize the ``sigma schema transform --examples`` command/options to
-view example configuration for your custom transformation.
+which is a ``pydantic`` model.
 
-You can access the configuration values at runtime via the :py:attr:`Transformation.schema <sigma.transform.Transformation.schema>`
-property (i.e. in either ``transform_expression`` or ``transform_rule``, you can use ``self.schema``
-which will be an instance of your custom ``Schema`` class)
+.. note::
+
+    Defining ``Config.schema_extra`` is not required, but doing
+    so allows users to utilize the ``sigma schema transform --examples`` command/options to
+    view example configuration for your custom transformation.
+
+.. note::
+
+   Using the :py:class:`~sigma.utils.CopyableSchema` base class allows future users to
+   who may extend your transform to easily extend your own example schemas as well.
+   The :py:class:`Transformation.Schema.Config <sigma.transform.Transformation.Schema.Config`
+   class is an example which provides the ``copy_schema`` method to duplicate the ``schema_extra``
+   field with extra example data easily.
 
 .. note::
 
    Defining a custom ``Schema`` class is not required. You can omit this class
    if your transformation does not require any special configuration.
+
+You can access the configuration values at runtime via the :py:attr:`Transformation.schema <sigma.transform.Transformation.schema>`
+property (i.e. in either ``transform_expression`` or ``transform_rule``, you can use ``self.schema``
+which will be an instance of your custom ``Schema`` class)
 
 Rule Transformation
 -------------------

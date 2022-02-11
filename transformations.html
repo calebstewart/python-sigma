@@ -80,6 +80,7 @@ configuration schema which matches the above YAML.</p>
 
 <span class="kn">from</span> <span class="nn">sigma.transform</span> <span class="kn">import</span> <span class="n">Transformation</span>
 <span class="kn">from</span> <span class="nn">sigma.schema</span> <span class="kn">import</span> <span class="n">RuleTag</span>
+<span class="kn">from</span> <span class="nn">sigma.utils</span> <span class="kn">import</span> <span class="n">CopyableSchema</span>
 
 <span class="k">class</span> <span class="nc">CustomTransform</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
 
@@ -87,11 +88,8 @@ configuration schema which matches the above YAML.</p>
         <span class="n">title_format</span><span class="p">:</span> <span class="nb">str</span>
         <span class="n">extra_tags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RuleTag</span><span class="p">]</span>
 
-        <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
-            <span class="n">schema_extra</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;examples&quot;</span><span class="p">:</span> <span class="n">Transformation</span><span class="o">.</span><span class="n">Schema</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">schema_extra</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="p">}</span>
-            <span class="n">schema_extra</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="k">class</span> <span class="nc">Config</span><span class="p">(</span><span class="n">CopyableSchema</span><span class="p">):</span>
+            <span class="n">schema_extra</span> <span class="o">=</span> <span class="n">Transformation</span><span class="o">.</span><span class="n">Schema</span><span class="o">.</span><span class="n">Config</span><span class="o">.</span><span class="n">copy_schema</span><span class="p">(</span><span class="n">example_extra</span><span class="o">=</span><span class="p">{</span>
                 <span class="s2">&quot;title_format&quot;</span><span class="p">:</span> <span class="s2">&quot;My Title Format: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;extra_tags&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;attack.t12345&quot;</span><span class="p">,</span> <span class="s2">&quot;custom tag&quot;</span> <span class="p">]</span>
             <span class="p">})</span>
@@ -99,17 +97,29 @@ configuration schema which matches the above YAML.</p>
 </div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">Schema</span></code> class must inherit from <a class="reference internal" href="api/sigma.transform.html#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transformation.Schema</span></code></a>
-which is a <code class="docutils literal notranslate"><span class="pre">pydantic</span></code> model. Defining <code class="docutils literal notranslate"><span class="pre">Config.schema_extra</span></code> is not required, but doing
+which is a <code class="docutils literal notranslate"><span class="pre">pydantic</span></code> model.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Defining <code class="docutils literal notranslate"><span class="pre">Config.schema_extra</span></code> is not required, but doing
 so allows users to utilize the <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">schema</span> <span class="pre">transform</span> <span class="pre">--examples</span></code> command/options to
 view example configuration for your custom transformation.</p>
-<p>You can access the configuration values at runtime via the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Transformation.schema</span></code>
-property (i.e. in either <code class="docutils literal notranslate"><span class="pre">transform_expression</span></code> or <code class="docutils literal notranslate"><span class="pre">transform_rule</span></code>, you can use <code class="docutils literal notranslate"><span class="pre">self.schema</span></code>
-which will be an instance of your custom <code class="docutils literal notranslate"><span class="pre">Schema</span></code> class)</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Using the <code class="xref py py-class docutils literal notranslate"><span class="pre">CopyableSchema</span></code> base class allows future users to
+who may extend your transform to easily extend your own example schemas as well.
+The <code class="xref py py-class docutils literal notranslate"><span class="pre">Transformation.Schema.Config</span> <span class="pre">&lt;sigma.transform.Transformation.Schema.Config</span></code>
+class is an example which provides the <code class="docutils literal notranslate"><span class="pre">copy_schema</span></code> method to duplicate the <code class="docutils literal notranslate"><span class="pre">schema_extra</span></code>
+field with extra example data easily.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Defining a custom <code class="docutils literal notranslate"><span class="pre">Schema</span></code> class is not required. You can omit this class
 if your transformation does not require any special configuration.</p>
 </div>
+<p>You can access the configuration values at runtime via the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Transformation.schema</span></code>
+property (i.e. in either <code class="docutils literal notranslate"><span class="pre">transform_expression</span></code> or <code class="docutils literal notranslate"><span class="pre">transform_rule</span></code>, you can use <code class="docutils literal notranslate"><span class="pre">self.schema</span></code>
+which will be an instance of your custom <code class="docutils literal notranslate"><span class="pre">Schema</span></code> class)</p>
 </div>
 <div class="section" id="rule-transformation">
 <h2>Rule Transformation<a class="headerlink" href="#rule-transformation" title="Permalink to this headline">¶</a></h2>
