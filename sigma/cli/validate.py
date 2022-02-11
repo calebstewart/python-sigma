@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict, List
 
 import click
 
@@ -15,7 +15,8 @@ def validate():
 
 @validate.command()
 @click.argument("rules", nargs=-1)
-def rule(rules):
+@click.pass_obj
+def rule(obj: Dict[str, Any], rules):
     """Validate the schema conformancy of Sigma rule(s).
 
     \b
@@ -28,7 +29,10 @@ def rule(rules):
             Rule.from_yaml(rule_path)
         except Exception as exc:
             failed += 1
-            logger.warn("%s: %s", rule_path, str(exc))
+            if obj.get("traceback"):
+                logger.exception(rule_path)
+            else:
+                logger.warn("%s: %s", rule_path, str(exc))
 
     console.print(
         f"{len(rules)-failed} of {len(rules)} [green]passed[/green] validation ({failed} [red]failed[/red])"
@@ -37,7 +41,8 @@ def rule(rules):
 
 @validate.command()
 @click.argument("serializers", nargs=-1)
-def serializer(serializers: List[str]):
+@click.pass_obj
+def serializer(obj: Dict[str, Any], serializers: List[str]):
     """Validate the schema conformancy of Sigma serializer(s).
 
     \b
@@ -50,7 +55,10 @@ def serializer(serializers: List[str]):
             Serializer.load(name)
         except Exception as exc:
             failed += 1
-            logger.warn("%s: %s", name, str(exc))
+            if obj.get("traceback"):
+                logger.exception(name)
+            else:
+                logger.warn("%s: %s", name, str(exc))
 
     console.print(
         f"{len(serializers)-failed} of {len(serializers)} [green]passed[/green] validation ({failed} [red]failed[/red])"

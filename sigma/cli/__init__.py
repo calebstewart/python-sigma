@@ -43,7 +43,7 @@ class CommandWithVerbosity(click.Command):
 
         # Setup logging according to the --verbose argument
         logging.basicConfig(
-            level=logging.ERROR
+            level=logging.WARNING
             - ctx.params["verbose"] * (logging.CRITICAL - logging.ERROR),
             format="%(message)s",
             handlers=[
