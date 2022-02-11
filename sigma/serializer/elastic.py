@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Union, ClassVar, Optional
 
 import yaml
 
+from sigma.util import CopyableSchema
 from sigma.mitre import Attack, Tactic, Technique
 from sigma.errors import UnsupportedSerializerFormat
 from sigma.schema import Rule
@@ -57,18 +58,8 @@ class EventQueryLanguage(TextQuerySerializer):
         rule_separator: str = "\n"
         """ Separator for when outputting multiple rules to a file """
 
-        class Config:
-            schema_extra = {
-                "examples": [
-                    CommonSerializerSchema.Config.schema_extra["examples"][0].copy()
-                ]
-            }
-
-            schema_extra["examples"][0].update(
-                {
-                    "base": "eql",
-                }
-            )
+        class Config(CopyableSchema):
+            schema_extra = CommonSerializerSchema.Config.copy_schema({"base": "eql"})
 
     def serialize(
         self, rule: Union[Rule, List[Rule]], transform: bool = True
@@ -140,14 +131,9 @@ class ElasticSecurityRule(EventQueryLanguage):
         severity_default: str = "medium"
         """ Default severity value if the level is not in the above map """
 
-        class Config:
+        class Config(CopyableSchema):
             extra = "forbid"
-            schema_extra = {
-                "examples": [
-                    CommonSerializerSchema.Config.schema_extra["examples"][0].copy()
-                ]
-            }
-            schema_extra["examples"][0].update(
+            schema_extra = CommonSerializerSchema.Config.copy_schema(
                 {
                     "base": "es-rule",
                     "enable_rule": True,

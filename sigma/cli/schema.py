@@ -75,9 +75,12 @@ def serializer(ctx: click.Context, format: str, examples: bool, serializer: str)
     if examples:
         schema = schema.get("examples", [])
 
-    if not examples:
-        error_console.print(f"No examples defined for [cyan]{serializer}[/cyan].")
-        ctx.exit(1)
+        if not schema:
+            error_console.print(f"No examples defined for [cyan]{serializer}[/cyan].")
+            ctx.exit(1)
+
+        for example in schema:
+            example.update({"base": serializer})
 
     if format == "yaml":
         console.print(Syntax(yaml.safe_dump(schema), "yaml"))
@@ -111,9 +114,15 @@ def transformation(ctx: click.Context, format: str, examples: bool, name: str):
     clazz: Type[Transformation] = Transformation.lookup_class(name)
     schema = json.loads(clazz.Schema.schema_json())
 
-    if not examples:
-        error_console.print(f"No examples defined for [cyan]{name}[/cyan].")
-        ctx.exit(1)
+    if examples:
+        schema = schema.get("examples", [])
+
+        if not schema:
+            error_console.print(f"No examples defined for [cyan]{name}[/cyan].")
+            ctx.exit(1)
+
+        for example in schema:
+            example.update({"type": name})
 
     if format == "yaml":
         console.print(Syntax(yaml.safe_dump(schema), "yaml"))

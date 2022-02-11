@@ -19,26 +19,32 @@ model.
     from typing import List
 
     from sigma.serializer import CommonSerializerSchema, Serializer
+    from sigma.utils import CopyableSchema
 
     class CustomSerializer(Serializer):
         class Schema(CommonSerializerSchema):
             my_config: str
             other_config: List[int]
 
-            class Config:
-                schema_extra = {
-                    "examples": [CommonSerializerSchema.Config.schema_extra["examples"][0].copy()],
-                }
-                schema_extra["examples"][0].update({
+            class Config(CopyableSchema):
+                schema_extra = CommonSerializerSchema.Config.copy_schema(example_extra={
                     "my_config": "hello world",
                     "other_config": [1,2,3,4,5],
                 })
 
 .. warning::
 
-    The definition of a ``Config.schema_extra`` is optional, but recommended. Defining examples
+    The definition of a ``Config`` is optional, but recommended. Defining examples
     allows users to utilize the ``sigma schema serializer`` command to view examples for your
     schema configuration.
+
+.. note::
+
+   Using the :py:class:`~sigma.utils.CopyableSchema` base class allows future users to
+   who may extend your serializer to easily extend your own example schemas as well.
+   The :py:class:`CommonSerializerSchema.Config <sigma.serializer.CommonSerializerSchema.Config`
+   class is an example which provides the ``copy_schema`` method to duplicate the ``schema_extra``
+   field with extra example data easily.
 
 After defining your schema, you can access the active configuration at runtime via the ``self.schema``
 property which will be an instance of your custom schema class.

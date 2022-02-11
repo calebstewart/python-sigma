@@ -6,6 +6,7 @@ serializer inherits from :py:class:`Serializer` and defines the
 which represents the serialized detection rule.
 """
 import re
+import copy
 import pathlib
 import functools
 import importlib
@@ -31,6 +32,7 @@ from pydantic.main import BaseModel
 from pydantic.fields import Field
 from pydantic.error_wrappers import ValidationError
 
+from sigma.util import CopyableSchema
 from sigma.errors import (
     SerializerNotFound,
     SerializerValidationError,
@@ -124,7 +126,7 @@ class LogSourceMatch(BaseModel):
 
         return v
 
-    class Config:
+    class Config(CopyableSchema):
         schema_extra = {
             "examples": [
                 {
@@ -231,7 +233,7 @@ class LogSourceRules(BaseModel):
 
         return (indices, rule)
 
-    class Config:
+    class Config(CopyableSchema):
         schema_extra = {
             "examples": [
                 {
@@ -272,14 +274,14 @@ class CommonSerializerSchema(BaseModel):
     logsource: LogSourceRules = LogSourceRules()
     """ Rules to match log sources to indices """
 
-    class Config:
+    class Config(CopyableSchema):
         schema_extra = {
             "examples": [
                 {
                     "name": "Serializer",
                     "description": "A serializer",
                     "transforms": [],
-                    "base": "eql",
+                    "base": "base_class",
                     "logsource": LogSourceRules.Config.schema_extra["examples"][0],
                 }
             ]
