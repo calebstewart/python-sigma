@@ -6,7 +6,7 @@ import yaml
 import click
 from rich.syntax import Syntax
 
-from sigma.cli import cli, console, aliased_group
+from sigma.cli import cli, console, aliased_group, error_console
 from sigma.errors import SigmaError
 from sigma.schema import Rule
 from sigma.transform import Transformation
@@ -61,27 +61,23 @@ def rule(format: str, examples: bool):
     help="Only show examples",
 )
 @click.argument("serializer")
-def serializer(format: str, examples: bool, serializer: str):
+@click.pass_context
+def serializer(ctx: click.Context, format: str, examples: bool, serializer: str):
     """Dump the schema for the configuration for the given serializer
 
     \b
     SERIALIZER the path, name or fully-qualified class name of a serializer
     """
 
-    try:
-        clazz: Type[Serializer] = get_serializer_class(serializer)
-    except SigmaError as exc:
-        print(f"error: {exc}", file=sys.stderr)
-        return
-
-    if not issubclass(clazz, Serializer):
-        print(f"error: {serializer}: not a valid serializer")
-        return
-
+    clazz: Type[Serializer] = get_serializer_class(serializer)
     schema = json.loads(clazz.Schema.schema_json())
 
     if examples:
         schema = schema.get("examples", [])
+
+    if not examples:
+        error_console.print(f"No examples defined for [cyan]{serializer}[/cyan].")
+        ctx.exit(1)
 
     if format == "yaml":
         console.print(Syntax(yaml.safe_dump(schema), "yaml"))
@@ -104,7 +100,8 @@ def serializer(format: str, examples: bool, serializer: str):
     help="Only show examples",
 )
 @click.argument("name")
-def transformation(format: str, examples: bool, name: str):
+@click.pass_context
+def transformation(ctx: click.Context, format: str, examples: bool, name: str):
     """Dump the transformation configuration schema.
 
     \b
@@ -112,10 +109,11 @@ def transformation(format: str, examples: bool, name: str):
     """
 
     clazz: Type[Transformation] = Transformation.lookup_class(name)
-
     schema = json.loads(clazz.Schema.schema_json())
-    if examples:
-        schema = schema.get("examples", [])
+
+    if not examples:
+        error_console.print(f"No examples defined for [cyan]{name}[/cyan].")
+        ctx.exit(1)
 
     if format == "yaml":
         console.print(Syntax(yaml.safe_dump(schema), "yaml"))

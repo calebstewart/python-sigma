@@ -1,12 +1,11 @@
-from typing import List, Optional
+from typing import Optional
 
 import click
 from rich import box
 from rich.table import Table, Column
 
-from sigma.cli import cli, console, aliased_group
+from sigma.cli import cli, console, aliased_group, error_console
 from sigma.mitre import Attack
-from sigma.errors import SigmaError
 
 
 @aliased_group(parent=cli)
@@ -34,10 +33,7 @@ def update(output: Optional[str]):
     automatically override the built-in data file. If no output path is specified,
     this will be the default output path."""
 
-    try:
-        attack = Attack.download(path=output)
-    except Exception as exc:
-        raise SigmaError(f"{output}: {exc}") from exc
+    attack = Attack.download(path=output)
 
     console.print(
         f"Loaded {len(attack.tactics)} tactics and {len(attack.techniques)} techniques"
@@ -46,7 +42,8 @@ def update(output: Optional[str]):
 
 @mitre.command()
 @click.argument("query", nargs=1, required=False)
-def tactic(query: Optional[str]):
+@click.pass_context
+def tactic(ctx: click.Context, query: Optional[str]):
     """Lookup a tactic by a simple search (contains on title and ID)."""
 
     attack = Attack.load()
@@ -65,12 +62,17 @@ def tactic(query: Optional[str]):
         ):
             table.add_row(tactic.id, tactic.title, tactic.url)
 
+    if not table:
+        error_console.print("No matching tactics found.")
+        ctx.exit(1)
+
     console.print(table)
 
 
 @mitre.command()
 @click.argument("query", nargs=1, required=False)
-def technique(query: Optional[str]):
+@click.pass_context
+def technique(ctx: click.Context, query: Optional[str]):
     """Lookup a technique by a simple search (contains on title and ID)."""
 
     attack = Attack.load()
@@ -88,5 +90,9 @@ def technique(query: Optional[str]):
             query in technique.id.lower() or query in technique.title.lower()
         ):
             table.add_row(technique.id, technique.title, technique.url)
+
+    if not table:
+        error_console.print("No matching techniques found.")
+        ctx.exit(1)
 
     console.print(table)

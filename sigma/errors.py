@@ -7,14 +7,11 @@ from pydantic import ValidationError
 from click.exceptions import ClickException
 from pyparsing.exceptions import ParseException
 
+from sigma import logger
 
-class SigmaError(ClickException):
+
+class SigmaError(Exception):
     """Base generic sigma error. All other sigma errors are subclasses of this."""
-
-    def show(self):
-        from sigma.cli import console
-
-        console.log(f"[red]error[/red]: {self}")
 
 
 class UnsupportedSerializerFormat(SigmaError):

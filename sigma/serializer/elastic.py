@@ -14,6 +14,8 @@ from sigma.serializer import TextQuerySerializer, CommonSerializerSchema
 class EventQueryLanguage(TextQuerySerializer):
     """Elastic EQL Serializer"""
 
+    DEFAULT_FORMAT: ClassVar[Optional[str]] = "json"
+
     class Schema(TextQuerySerializer.Schema):
         """Text Query configuration options which define how to combine the logical expressions
         into the correct query syntax for your detection engine."""
@@ -56,7 +58,12 @@ class EventQueryLanguage(TextQuerySerializer):
         """ Separator for when outputting multiple rules to a file """
 
         class Config:
-            schema_extra = CommonSerializerSchema.Config.schema_extra.copy()
+            schema_extra = {
+                "examples": [
+                    CommonSerializerSchema.Config.schema_extra["examples"][0].copy()
+                ]
+            }
+
             schema_extra["examples"][0].update(
                 {
                     "base": "eql",
@@ -135,7 +142,11 @@ class ElasticSecurityRule(EventQueryLanguage):
 
         class Config:
             extra = "forbid"
-            schema_extra = EventQueryLanguage.Schema.Config.schema_extra.copy()
+            schema_extra = {
+                "examples": [
+                    CommonSerializerSchema.Config.schema_extra["examples"][0].copy()
+                ]
+            }
             schema_extra["examples"][0].update(
                 {
                     "base": "es-rule",

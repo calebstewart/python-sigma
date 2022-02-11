@@ -39,4 +39,9 @@ on serializers, see :py:mod:`sigma.serializer`. For more details on transformati
 
 """
 
+import logging
+
 __version__ = "0.1.0"
+
+# Construct the module logger
+logger = logging.getLogger(__name__)

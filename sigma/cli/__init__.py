@@ -1,12 +1,86 @@
+import logging
 from typing import TextIO, Optional
 
 import click
 import fuzzywuzzy.process
 from rich.console import Console
+from rich.logging import RichHandler
+from click.exceptions import ClickException
 
+from sigma import logger
 from sigma.mitre import Attack
 
 console = Console(log_path=False)
+error_console = Console(log_path=False, stderr=True)
+
+
+class CommandWithVerbosity(click.Command):
+    """A command that automatically adds the verbosity and traceback
+    arguments, sets up logging prior to invocation, and catches any
+    unhandled exceptions/logs them according to the logging configuration."""
+
+    def __init__(self, *args, **kwargs):
+
+        # This shouldn't happen, but :shrug:
+        if not kwargs.get("params"):
+            kwargs["params"] = []
+
+        # Add extra arguments to this command for logging setup
+        kwargs["params"].append(
+            click.Option(
+                ["--verbose", "-v"], count=True, help="Increase logging verbosity."
+            )
+        )
+        kwargs["params"].append(
+            click.Option(
+                ["--traceback", "-t"], is_flag=True, help="Dump a traceback on errors."
+            )
+        )
+
+        super().__init__(*args, **kwargs)
+
+    def invoke(self, ctx: click.Context):
+
+        # Setup logging according to the --verbose argument
+        logging.basicConfig(
+            level=logging.ERROR
+            - ctx.params["verbose"] * (logging.CRITICAL - logging.ERROR),
+            format="%(message)s",
+            handlers=[
+                RichHandler(
+                    rich_tracebacks=True,
+                    tracebacks_width=None,
+                    show_path=False,
+                    console=error_console,
+                )
+            ],
+        )
+
+        # Store the traceback state in the context object in case
+        # a command needs to use it directly
+        if ctx.obj is None:
+            ctx.obj = {}
+        ctx.obj["traceback"] = ctx.params["traceback"]
+
+        # Remove the traceback and logging parameters
+        # to ensure they aren't passed to the command
+        # functions.
+        del ctx.params["traceback"]
+        del ctx.params["verbose"]
+
+        try:
+            # Invoke the command
+            super().invoke(ctx)
+        except ClickException:
+            # Click exceptions handled normally to maintain
+            # the look/feel of help and usage output.
+            raise
+        except Exception as exc:
+            # All other exceptions handled through logging.
+            if ctx.obj["traceback"]:
+                logger.exception(str(exc))
+            else:
+                logger.error(str(exc))
 
 
 class FuzzyAliasedGroup(click.Group):
@@ -37,6 +111,13 @@ class FuzzyAliasedGroup(click.Group):
 
         return click.Group.get_command(self, ctx, match)
 
+    def command(self, *args, **kwargs):
+
+        if "cls" not in kwargs:
+            kwargs["cls"] = CommandWithVerbosity
+
+        return super().command(*args, **kwargs)
+
 
 def aliased_group(parent=None, **attrs):
     """Decorator for creating sub-command groups with fuzzy matching
@@ -55,7 +136,9 @@ def aliased_group(parent=None, **attrs):
     type=click.File("r"),
     help="Override default MITRE ATT&CK data file (downloaded with 'sigma mitre update')",
 )
-def cli(mitre_data: Optional[TextIO]):
+@click.version_option()
+@click.pass_context
+def cli(ctx: click.Context, mitre_data: Optional[TextIO]):
     """Sigma Rule conversion and validation CLI."""
 
     if mitre_data is not None:

@@ -2,12 +2,15 @@
 Sigma converter command line interface.
 """
 import sys
-from typing import List, Optional
+import logging
+from typing import Any, Dict, List, Optional
 
 import click
 from rich.syntax import Syntax
+from rich.logging import RichHandler
 
-from sigma.cli import cli, console
+from sigma import logging
+from sigma.cli import CommandWithVerbosity, cli, console, error_console
 from sigma.errors import SigmaError
 from sigma.schema import Rule
 from sigma.serializer import Serializer
@@ -39,7 +42,9 @@ from sigma.serializer import Serializer
     help="Pretty-format the output",
 )
 @click.argument("rules", nargs=-1)
+@click.pass_obj
 def convert(
+    obj: Dict[str, Any],
     ignore_errors: bool,
     serializer: str,
     format: Optional[str],
@@ -48,14 +53,18 @@ def convert(
 ):
     """
     Convert Sigma rules to various formats using built-in or custom serializers.
-    To list built-in serializers, see the `sigma list` command.
+    To list built-in serializers, see the `sigma list` command. If no format is
+    given, the default format defined by your serializer will be used to render
+    and highlight the resulting output. In general, the pretty argument forces
+    formats like JSON to include newlines and indentation to make reading easier.
+
+    If the output is non-interactive (e.g. not a TTY), the serializer output is
+    not rendered in any special way. It is simply printed with the built-in print
+    function. This is useful when ingesting output with things like `jq`.
     """
 
-    try:
-        # Attempt to load the specified serializer
-        serializer: Serializer = Serializer.load(serializer)
-    except Exception as exc:
-        raise SigmaError(f"failed to load serializer: {exc}")
+    # Attempt to load the specified serializer
+    serializer: Serializer = Serializer.load(serializer)
 
     rule_list = []
     for rule_path in rules:
@@ -65,16 +74,29 @@ def convert(
             rule_list.append(rule)
         except Exception as exc:
             if not ignore_errors:
-                raise SigmaError(f"{rule_path}: {exc}")
+                raise
+            if obj.get("traceback"):
+                logging.exception(f"failed to load {rule_path}")
             else:
-                sys.stderr.write(f"{rule_path}: {exc}\n")
+                logging.error(f"{rule_path}: {exc}")
+
+    if ignore_errors:
+        logging.warn(
+            f"{len(rules) - len(rule_list)} of {len(rules)} [red]failed[/red] conversion.",
+            extra={"markup": True},
+        )
 
     result = serializer.dumps(rule_list, format=format, pretty=pretty)
 
-    if format == "yaml" or format == "yml":
-        console.print(Syntax(result, "yaml"))
+    if format is None:
+        format = serializer.DEFAULT_FORMAT
+
+    if not console.is_interactive:
+        print(result)
+    elif format == "yaml" or format == "yml":
+        console.print(Syntax(result, "yaml", word_wrap=True))
     elif format == "json":
-        console.print(Syntax(result, "json"))
+        console.print(Syntax(result, "json", word_wrap=True))
     else:
         console.print(result)
 

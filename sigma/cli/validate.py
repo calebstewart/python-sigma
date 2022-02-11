@@ -2,6 +2,7 @@ from typing import List
 
 import click
 
+from sigma import logger
 from sigma.cli import cli, console, aliased_group
 from sigma.schema import Rule
 from sigma.serializer import Serializer
@@ -27,7 +28,7 @@ def rule(rules):
             Rule.from_yaml(rule_path)
         except Exception as exc:
             failed += 1
-            console.print(f"[yellow]{rule_path}[/yellow]: [italic]{exc}[/italic]")
+            logger.warn("%s: %s", rule_path, str(exc))
 
     console.print(
         f"{len(rules)-failed} of {len(rules)} [green]passed[/green] validation ({failed} [red]failed[/red])"
@@ -49,7 +50,7 @@ def serializer(serializers: List[str]):
             Serializer.load(name)
         except Exception as exc:
             failed += 1
-            console.print(f"[yellow]{name}[/yellow]: [italic]{exc}[/italic]")
+            logger.warn("%s: %s", name, str(exc))
 
     console.print(
         f"{len(serializers)-failed} of {len(serializers)} [green]passed[/green] validation ({failed} [red]failed[/red])"

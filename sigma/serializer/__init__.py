@@ -291,6 +291,8 @@ class Serializer(ABC):
     the transformation and serialization of sigma rules into a variety
     of arbitrary formats."""
 
+    DEFAULT_FORMAT: ClassVar[Optional[str]] = None
+    """ Default format name when using dumps (used to highlight output) """
     Schema: ClassVar[Type[CommonSerializerSchema]]
 
     def __init__(self, schema: CommonSerializerSchema):

@@ -88,9 +88,6 @@ def transform(
             else:
                 output_path = output_format.format(rule_path.parent / rule_path.stem)
 
-        try:
-            # Dump the transformed rule back to a file
-            with open(output_path, "w") as filp:
-                yaml.safe_dump(rule.to_sigma(), filp)
-        except (FileNotFoundError, PermissionError) as exc:
-            raise SigmaError(f"failed to open output path: {output_path}")
+        # Dump the transformed rule back to a file
+        with open(output_path, "w") as filp:
+            yaml.safe_dump(rule.to_sigma(), filp)
