@@ -41,11 +41,13 @@ from sigma.errors import (
 from sigma.schema import Rule, RuleDetectionFields
 from sigma.grammar import (
     FieldIn,
+    FieldLike,
     LogicalOr,
     Expression,
     FieldRegex,
     LogicalAnd,
     LogicalNot,
+    FieldLookup,
     FieldContains,
     FieldEndsWith,
     FieldEquality,
@@ -53,6 +55,7 @@ from sigma.grammar import (
     CoreExpression,
     FieldComparison,
     FieldStartsWith,
+    FieldLookupRegex,
     LogicalExpression,
 )
 from sigma.transform import Transformation
@@ -495,10 +498,10 @@ class TextQuerySerializer(Serializer):
         """ Characters aside from the quote and escape character that require escaping """
         field_equality: str
         """ A format string to test field equality (e.g. "{} == {}") """
+        field_like: str
+        """ Format for matching a field to a single pattern (e.g. "{}  like~ {}") """
         field_match: str
         """ A format string to test a field with a globbing pattern (e.g. "{}: {}") """
-        field_in: str
-        """ A format string to test if a field is in a list (e.g. "{} in {}") """
         field_regex: str
         """ A format string to test if a field matches a regex (e.g. "{} match {}")"""
         keyword: str
@@ -509,10 +512,10 @@ class TextQuerySerializer(Serializer):
         """ A format string to test if a field ends with a string """
         field_contains: Optional[str]
         """ A format string to test if a field contains another string """
-        prepend_result: str = Field("")
-        """ String to prepend to the resulting query """
-        rule_separator: str
-        """ Separator for when outputting multiple rules to a file """
+        field_lookup: Optional[str]
+        """ Format for matching a field to a list of patterns (e.g. "{} like~ {}") """
+        field_lookup_regex: Optional[str]
+        """ Format for matching a field to a list of regex patterns (e.g. "{} regex {}") """
 
     def __init__(self, schema: Schema):
         super().__init__(schema)
@@ -528,10 +531,11 @@ class TextQuerySerializer(Serializer):
             LogicalNot: functools.partial(
                 self._serialize_core_expression, self.schema.not_format
             ),
-            FieldEquality: functools.partial(
-                self._serialize_comparison, self.schema.field_equality
+            FieldLike: functools.partial(
+                self._serialize_comparison, self.schema.field_like
             ),
-            FieldIn: self._serialize_in_expression,
+            FieldLookup: self._serialize_in_expression,
+            FieldLookupRegex: self._serialize_in_expression,
             FieldRegex: functools.partial(
                 self._serialize_comparison, self.schema.field_regex
             ),
@@ -613,11 +617,39 @@ class TextQuerySerializer(Serializer):
 
         return result
 
-    def _serialize_in_expression(self, expression: FieldIn) -> str:
-        return self.schema.grouping.format(
-            self.schema.list_separator.join(
-                [self._serialize_expression(a) for a in expression.value]
+    def _serialize_in_expression(
+        self, expression: Union[FieldLookup, FieldLookupRegex]
+    ) -> str:
+
+        if isinstance(expression, FieldLookup):
+            is_regex = False
+            compare_clazz = FieldLike
+            format_str = self.schema.field_lookup or ""
+        else:
+            is_regex = True
+            compare_clazz = FieldRegex
+            format_str = self.schema.field_lookup_regex or ""
+
+        # No support for the correct lookup syntax
+        if (self.schema.field_lookup_regex is None and is_regex) or (
+            self.schema.field_lookup is None and not is_regex
+        ):
+            return self._serialize_expression(
+                LogicalOr(
+                    args=[
+                        compare_clazz(field=expression.field, value=v)
+                        for v in expression.value
+                    ]
+                )
             )
+
+        return format_str.format(
+            expression.field,
+            self.schema.grouping.format(
+                self.schema.list_separator.join(
+                    [self._serialize_expression(a) for a in expression.value]
+                )
+            ),
         )
 
     def _serialize_with_wildcard(self, fmt: str, expression: FieldComparison):
@@ -638,6 +670,22 @@ class TextQuerySerializer(Serializer):
     def _serialize_chained_core_expression(
         self, fmt: str, expression: LogicalExpression
     ) -> str:
+
+        # NOTE: we should aggregate multiple similar field comparisons into a single "field in (group)"
+        #       expression here, but I'm not sure how I want to handle this yet.
+        if isinstance(expression, LogicalOr):
+            grouped = {}
+            other = []
+            for sub in expression.args[0]:
+                if (
+                    isinstance(sub, FieldComparison)
+                    and self.INVERSE_COMPARISON_MAP[type(sub)] in self.schema.lookups
+                ):
+                    if type(sub) not in grouped:
+                        grouped[type(sub)] = []
+                    grouped[type(sub)].append(sub)
+                else:
+                    other.append(sub)
 
         result = self._serialize_expression(expression.args[0])
         for i in range(1, len(expression.args)):

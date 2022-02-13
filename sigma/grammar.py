@@ -48,14 +48,12 @@ class Expression(BaseModel):
 
         from sigma.grammar import CoreExpression
 
-        expression = callback(self)
-        if isinstance(expression, CoreExpression):
-            expression.args = [
-                e.visit(callback) if isinstance(e, Expression) else e
-                for e in expression.args
+        if isinstance(self, CoreExpression):
+            self.args = [
+                e.visit(callback) if isinstance(e, Expression) else e for e in self.args
             ]
 
-        return expression
+        return callback(self)
 
     def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
         """Convert an expression to a condition string and a dict of new detection
@@ -161,8 +159,54 @@ class LogicalOr(LogicalExpression):
 
         # if len(self.args) == 1:
         #     return self.args[0].postprocess(rule, parent=parent)
+        #
 
-        return super().postprocess(rule, parent=parent)
+        # Post-process sub-arguments
+        self.args = [arg.postprocess(rule, self) for arg in self.args]
+
+        grouped_re = {}
+        grouped_like = {}
+        others = []
+        for arg in self.args:
+            if isinstance(arg, FieldLike):
+                if arg.field not in grouped_like:
+                    grouped_like[arg.field] = []
+                grouped_like[arg.field].append(arg)
+            elif isinstance(arg, FieldRegex):
+                if arg.field not in grouped_re:
+                    grouped_re[arg.field] = []
+                grouped_re[arg.field].append(arg)
+            else:
+                others.append(arg)
+
+        for field, args in grouped_re.items():
+            if len(args) == 1:
+                others.append(args[0])
+            else:
+                others.append(
+                    FieldLookupRegex(
+                        field=field, value=[a.value for a in args]
+                    ).postprocess(rule, self)
+                )
+
+        for field, args in grouped_like.items():
+            if len(args) == 1:
+                others.append(args[0])
+            else:
+                others.append(
+                    FieldLookup(field=field, value=[a.value for a in args]).postprocess(
+                        rule, self
+                    )
+                )
+
+        if len(others) == 1:
+            others[0].parent = parent
+            return others[0]
+
+        self.args = others
+        self.parent = parent
+
+        return self
 
     def __repr__(self):
         return f"OR({','.join([repr(a) for a in self.args])})"
@@ -312,7 +356,7 @@ class FieldComparison(Expression):
     def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
         """Convert a not expression to a detection condition"""
 
-        return "{}", [{self.field: self.value}]
+        return "{}", [{self.to_field_with_modifiers(): self.value}]
 
 
 class FieldEquality(FieldComparison):
@@ -323,6 +367,18 @@ class FieldEquality(FieldComparison):
 
     def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
         """Convert a not expression to a detection condition"""
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        """Convert a not expression to a detection condition"""
+
+        return "{}", [{self.field: self.value}]
+
+
+class FieldLike(FieldComparison):
+    """Test for field equality"""
+
+    def __repr__(self) -> str:
+        return f"LIKE({self.field}, {repr(self.value)})"
 
     def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
         """Convert a not expression to a detection condition"""
@@ -424,6 +480,27 @@ class FieldRegex(FieldComparison):
         """Convert a not expression to a detection condition"""
 
         return "{}", [{self.field + "|re": self.value}]
+
+
+class FieldLookup(FieldComparison):
+    """Check if the field is in a list of values with wildcard matching"""
+
+    value: List[Any]
+
+    def __repr__(self):
+        return f"IN({self.field}, {repr(self.value)})"
+
+
+class FieldLookupRegex(FieldLookup):
+    """Field lookup but with a regex modifier"""
+
+    value: List[str]
+
+    def to_field_with_modifiers(self) -> str:
+        return f"{self.field}|re"
+
+    def __repr__(self):
+        return f"REGEX({self.field}, {repr(self.value)})"
 
 
 class KeywordSearch(Expression):
@@ -588,14 +665,12 @@ def build_key_value_expression(key: str, value: Union[list, str]) -> Expression:
     elif isinstance(modified, list):
         return LogicalOr(
             args=[
-                FieldEquality(field=field, value=v)
-                if not isinstance(v, Expression)
-                else v
+                FieldLike(field=field, value=v) if not isinstance(v, Expression) else v
                 for v in modified
             ]
         )
     else:
-        return FieldEquality(field=field, value=modified)
+        return FieldLike(field=field, value=modified)
 
 
 def build_grammar_parser():
