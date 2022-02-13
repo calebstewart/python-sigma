@@ -50,14 +50,14 @@
             
   <div class="section" id="creating-rule-serializers">
 <h1>Creating Rule Serializers<a class="headerlink" href="#creating-rule-serializers" title="Permalink to this headline">¶</a></h1>
-<p>Rule serializers are simple classes which inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">Serializer</span></code>
-and implement the <code class="xref py py-meth docutils literal notranslate"><span class="pre">serialize()</span></code> method. This method takes
+<p>Rule serializers are simple classes which inherit from <a class="reference internal" href="api/sigma.serializer.html#sigma.serializer.Serializer" title="sigma.serializer.Serializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Serializer</span></code></a>
+and implement the <a class="reference internal" href="api/sigma.serializer.html#sigma.serializer.Serializer.serialize" title="sigma.serializer.Serializer.serialize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">serialize()</span></code></a> method. This method takes
 a rule or list of rules, and returns arbitrary data which represents some transformed and
 converted rule.</p>
 <div class="section" id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
 <p>Serializer configuration is defined through the <code class="docutils literal notranslate"><span class="pre">SerializerClass.Schema</span></code> class. This class
-must inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">CommonSerializerSchema</span></code>, which is a pydantic
+must inherit from <a class="reference internal" href="api/sigma.serializer.html#sigma.serializer.CommonSerializerSchema" title="sigma.serializer.CommonSerializerSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommonSerializerSchema</span></code></a>, which is a pydantic
 model.</p>
 <div class="literal-block-wrapper docutils container" id="id1">
 <div class="code-block-caption"><span class="caption-text">Defining serializer configuration schema</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
@@ -98,10 +98,10 @@ property which will be an instance of your custom schema class.</p>
 </div>
 <div class="section" id="configured-transformations">
 <h2>Configured Transformations<a class="headerlink" href="#configured-transformations" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">CommonSerializerSchema</span></code> configuration contains a list of optional
+<p>The <a class="reference internal" href="api/sigma.serializer.html#sigma.serializer.CommonSerializerSchema" title="sigma.serializer.CommonSerializerSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommonSerializerSchema</span></code></a> configuration contains a list of optional
 transformations which should be applied prior to serialization. You can access the list of loaded
 transformations with <code class="docutils literal notranslate"><span class="pre">self.transforms</span></code> and apply transformations in your
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">serialize()</span></code> method with the <a class="reference internal" href="api/sigma.schema.html#sigma.schema.Rule.transform" title="sigma.schema.Rule.transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Rule.transform</span></code></a>
+<a class="reference internal" href="api/sigma.serializer.html#sigma.serializer.Serializer.serialize" title="sigma.serializer.Serializer.serialize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">serialize()</span></code></a> method with the <a class="reference internal" href="api/sigma.schema.html#sigma.schema.Rule.transform" title="sigma.schema.Rule.transform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Rule.transform</span></code></a>
 method. You should only apply rule transformations if the <code class="docutils literal notranslate"><span class="pre">transform</span></code> argument is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
 This is to enable easier chaining of serializers through inheritence.</p>
 </div>

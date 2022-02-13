@@ -1,0 +1,7 @@
+sigma.util module
+=================
+
+.. automodule:: sigma.util
+   :members:
+   :undoc-members:
+   :show-inheritance:

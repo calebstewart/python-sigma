@@ -26,3 +26,4 @@ Submodules
    sigma.grammar
    sigma.mitre
    sigma.schema
+   sigma.util
