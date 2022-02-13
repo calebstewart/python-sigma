@@ -15,8 +15,6 @@ from sigma.serializer import TextQuerySerializer, CommonSerializerSchema
 class EventQueryLanguage(TextQuerySerializer):
     """Elastic EQL Serializer"""
 
-    DEFAULT_FORMAT: ClassVar[Optional[str]] = "json"
-
     class Schema(TextQuerySerializer.Schema):
         """Text Query configuration options which define how to combine the logical expressions
         into the correct query syntax for your detection engine."""
@@ -104,6 +102,8 @@ class EventQueryLanguage(TextQuerySerializer):
 
 class ElasticSecurityRule(EventQueryLanguage):
     """Serialize to a JSON Elastic Security Rule"""
+
+    DEFAULT_FORMAT: ClassVar[Optional[str]] = "json"
 
     class Schema(EventQueryLanguage.Schema):
         """Elastic Security Rule Configuration Schema"""
