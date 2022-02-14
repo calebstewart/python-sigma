@@ -142,6 +142,22 @@ rule.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="sigma.transform.ContainsToMatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.transform.</span></span><span class="sig-name descname"><span class="pre">ContainsToMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.transform.Transformation.Schema" title="sigma.transform.Transformation.Schema"><span class="pre">sigma.transform.Transformation.Schema</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.ContainsToMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.transform.Transformation" title="sigma.transform.Transformation"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.transform.Transformation</span></code></a></p>
+<p>Convert string contains field comparisons to a match with wildcards</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.transform.ContainsToMatch.transform_expression">
+<span class="sig-name descname"><span class="pre">transform_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.grammar.html#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sigma.grammar.html#sigma.grammar.Expression" title="sigma.grammar.Expression"><span class="pre">sigma.grammar.Expression</span></a></span></span><a class="headerlink" href="#sigma.transform.ContainsToMatch.transform_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform the given expression by either modifying it or returning an
+entirely new expression. This method is called recursively on each
+sub-expression, so you need-not evaluate sub-expressions explicitly.
+The default implementation simply returns the original expression.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="sigma.transform.ExpressionType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.transform.</span></span><span class="sig-name descname"><span class="pre">ExpressionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.ExpressionType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
@@ -416,40 +432,6 @@ The default implementation simply returns the original expression.</p>
 <dd><p>Transform the given rule by either modifying it inline or returning an
 entirely new rule. The default implementation simply returns the original
 rule.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="sigma.transform.TransformationSchema">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.transform.</span></span><span class="sig-name descname"><span class="pre">TransformationSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.transform.TransformationSchema" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
-<p>Schema for loading a transformation from a dictionary.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>type</strong> (<em>str</em>) – type of transformation (either a built-in name from BUILTIN_TRANSFORMS
-or a fully-qualified python module/class name like <code class="docutils literal notranslate"><span class="pre">package:class</span></code>)</p></li>
-<li><p><strong>config</strong> – transformation configuration, specific to the transform type.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="sigma.transform.TransformationSchema.build">
-<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sigma.transform.Transformation" title="sigma.transform.Transformation"><span class="pre">sigma.transform.Transformation</span></a></span></span><a class="headerlink" href="#sigma.transform.TransformationSchema.build" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct a transformation instance from the schema.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="sigma.transform.TransformationSchema.config">
-<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.transform.TransformationSchema.config" title="Permalink to this definition">¶</a></dt>
-<dd><p>A dictionary containing configuration specific to the transform type</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="sigma.transform.TransformationSchema.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.transform.TransformationSchema.type" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transformation type to use</p>
 </dd></dl>
 
 </dd></dl>
