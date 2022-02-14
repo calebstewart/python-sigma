@@ -54,6 +54,7 @@ from pydantic.fields import Field
 from sigma.errors import SigmaError, UnknownTransform
 from sigma.schema import Rule, RuleTag
 from sigma.grammar import (
+    FieldLike,
     Expression,
     FieldContains,
     FieldEndsWith,
@@ -359,6 +360,21 @@ class FieldFuzzyMap(Transformation):
         return expression
 
 
+class ContainsToMatch(Transformation):
+    """Convert string contains field comparisons to a match with wildcards"""
+
+    def transform_expression(self, rule: Rule, expression: Expression) -> Expression:
+
+        if isinstance(expression, FieldContains):
+            return FieldLike(
+                parent=expression.parent,
+                field=expression.field,
+                value=f"*{expression.value}*",
+            )
+
+        return expression
+
+
 BUILTIN_TRANSFORMS: Dict[str, Tuple[Type[Transformation], str]] = {
     "field_map": (FieldMap, "Map Sigma field names to custom field names"),
     "field_fuzzy_map": (
@@ -370,34 +386,8 @@ BUILTIN_TRANSFORMS: Dict[str, Tuple[Type[Transformation], str]] = {
         "Replace wildcard matching with strict equality based on regex patterns",
     ),
     "add_tags": (AddTags, "Append extra tags to the Sigma Rule"),
+    "contains_to_like": (
+        ContainsToMatch,
+        "Convert string contains expressions to a field like with wildcards",
+    ),
 }
-
-
-class TransformationSchema(BaseModel):
-    """Schema for loading a transformation from a dictionary.
-
-    :param type: type of transformation (either a built-in name from BUILTIN_TRANSFORMS
-                 or a fully-qualified python module/class name like ``package:class``)
-    :type type: str
-    :param config: transformation configuration, specific to the transform type.
-    """
-
-    type: str
-    """ The transformation type to use """
-    config: Dict[str, Any]
-    """ A dictionary containing configuration specific to the transform type """
-
-    def build(self) -> Transformation:
-        """Construct a transformation instance from the schema."""
-
-        if self.type in BUILTIN_TRANSFORMS:
-            return BUILTIN_TRANSFORMS[self.type][0](self.config)
-        else:
-            try:
-                module_name, class_name = self.type.split(":", maxsplit=1)
-                module = importlib.import_module(module_name)
-                transform_type: Type[Transformation] = getattr(module, class_name)
-
-                return transform_type(self.config)
-            except (ValueError, ModuleNotFoundError) as exc:
-                raise UnknownTransform(self.type) from exc

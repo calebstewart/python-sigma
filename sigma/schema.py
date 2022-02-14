@@ -312,7 +312,9 @@ class RuleDetection(pydantic.BaseModel):
 
             return expression
 
-        self.__parsed_expression = self.expression.visit(expression_visitor)
+        self.__parsed_expression = self.expression.visit(
+            expression_visitor
+        ).postprocess(rule, None)
 
     @property
     def expression(self) -> Expression:
