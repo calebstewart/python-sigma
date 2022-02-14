@@ -559,4 +559,7 @@ class ElasticSecurityRule(EventQueryLanguage):
             "actions": actions,
         }
 
+        if self.schema.timestamp_override:
+            result["timestamp_override"] = self.schema.timestamp_override
+
         return result
