@@ -6,7 +6,6 @@ serializer inherits from :py:class:`Serializer` and defines the
 which represents the serialized detection rule.
 """
 import re
-import copy
 import pathlib
 import functools
 import importlib
@@ -29,7 +28,6 @@ from importlib.abc import Traversable
 import yaml
 from yaml.error import YAMLError
 from pydantic.main import BaseModel
-from pydantic.fields import Field
 from pydantic.error_wrappers import ValidationError
 
 from sigma.util import CopyableSchema
@@ -40,19 +38,15 @@ from sigma.errors import (
 )
 from sigma.schema import Rule, RuleDetectionFields
 from sigma.grammar import (
-    FieldIn,
     FieldLike,
     LogicalOr,
-    Expression,
     FieldRegex,
     LogicalAnd,
     LogicalNot,
     FieldLookup,
     FieldContains,
     FieldEndsWith,
-    FieldEquality,
     KeywordSearch,
-    CoreExpression,
     FieldComparison,
     FieldStartsWith,
     FieldLookupRegex,
@@ -670,22 +664,6 @@ class TextQuerySerializer(Serializer):
     def _serialize_chained_core_expression(
         self, fmt: str, expression: LogicalExpression
     ) -> str:
-
-        # NOTE: we should aggregate multiple similar field comparisons into a single "field in (group)"
-        #       expression here, but I'm not sure how I want to handle this yet.
-        if isinstance(expression, LogicalOr):
-            grouped = {}
-            other = []
-            for sub in expression.args[0]:
-                if (
-                    isinstance(sub, FieldComparison)
-                    and self.INVERSE_COMPARISON_MAP[type(sub)] in self.schema.lookups
-                ):
-                    if type(sub) not in grouped:
-                        grouped[type(sub)] = []
-                    grouped[type(sub)].append(sub)
-                else:
-                    other.append(sub)
 
         result = self._serialize_expression(expression.args[0])
         for i in range(1, len(expression.args)):

@@ -451,20 +451,6 @@ class FieldStartsWith(FieldComparison):
         return "{}", [{self.field + "|startswith": self.value}]
 
 
-class FieldIn(FieldComparison):
-    """Test if a field is in a list of constants"""
-
-    value: List[str]
-
-    def __repr__(self) -> str:
-        return f"IN({self.field}, {repr(self.value)})"
-
-    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
-        """Convert a not expression to a detection condition"""
-
-        return "{}", [{self.field + "|startswith": self.value}]
-
-
 class FieldRegex(FieldComparison):
     """Compare a field with a regular expression"""
 
