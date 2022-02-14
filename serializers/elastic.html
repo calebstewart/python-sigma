@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Elastic Serializers &#8212; Python Sigma 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/readable.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Creating Rule Serializers" href="../custom-serializers.html" />
+    <link rel="prev" title="Serializer Configurations" href="index.html" />
+   
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../custom-serializers.html" title="Creating Rule Serializers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Serializer Configurations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python Sigma 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Serializer Configurations</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Elastic Serializers</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="elastic-serializers">
+<h1>Elastic Serializers<a class="headerlink" href="#elastic-serializers" title="Permalink to this headline">¶</a></h1>
+<p>There are two built-in Elastic related serializers: <code class="docutils literal notranslate"><span class="pre">eql</span></code> and <code class="docutils literal notranslate"><span class="pre">es-rule</span></code>. Both
+serializers generate a query in the Event Query Language (EQL) format. The former
+generates a bare string with the EQL query while the latter produces a JSON object
+suitable for uploading as an Elastic Security Alert rule (see
+<a class="reference external" href="https://www.elastic.co/guide/en/security/8.1/rules-api-create.html#actions-object-schema">Create Rule</a>).</p>
+<div class="section" id="event-query-language-eql">
+<h2>Event Query Language (EQL)<a class="headerlink" href="#event-query-language-eql" title="Permalink to this headline">¶</a></h2>
+<p>The EQL serializer does not require any extra configuration beyond the default
+serializer options (e.g. <code class="docutils literal notranslate"><span class="pre">logsource</span></code> or <code class="docutils literal notranslate"><span class="pre">transforms</span></code>). It can be used
+directly to produce valid EQL query strings.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Converting a rule to EQL</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sigma convert -s eql ./rule.yml
+</pre></div>
+</div>
+</div>
+<p>As with other serializers, you can combine the EQL serializer with custom transformations
+to produce a modified version of the Sigma rule with a serializer configuration file.</p>
+</div>
+<div class="section" id="elastic-security-rule">
+<h2>Elastic Security Rule<a class="headerlink" href="#elastic-security-rule" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">es-rule</span></code> serializer is built on-top of the EQL serializer. It first serializes
+the raw conditional to an EQL query and then utilizes the other Sigma details to produce
+a JSON object suitable for uploading to Elastic as an alert rule. There are a few extra
+configuration options which you can use when configuring your <code class="docutils literal notranslate"><span class="pre">es-rule</span></code> serializers.</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">enable_rule</span></code></dt><dd><p>If set to true, the generated rule will be enabled. By default, generated rules
+are disabled.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">interval</span></code></dt><dd><p>Control the time interval for the generated rule. The syntax for this field is
+the same as the interval field in the Elastic REST API specification (see
+<a class="reference external" href="https://www.elastic.co/guide/en/elasticsearch/reference/8.1/common-options.html#date-math">here</a>).
+The default interval is <code class="docutils literal notranslate"><span class="pre">5m</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">output_index</span></code></dt><dd><p>Control the output index for alerts. The default index is <code class="docutils literal notranslate"><span class="pre">.siem-signals-default</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">max_signals</span></code></dt><dd><p>The maximum number of alerts the rule can create during a single execution. The
+default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">risk_map</span></code></dt><dd><p>A dictionary mapping Sigma rule levels to risk integers. By default low, medium,
+high and critical are mapped to <code class="docutils literal notranslate"><span class="pre">5</span></code>, <code class="docutils literal notranslate"><span class="pre">35</span></code>, <code class="docutils literal notranslate"><span class="pre">65</span></code>, <code class="docutils literal notranslate"><span class="pre">95</span></code> respectively.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">risk_default</span></code></dt><dd><p>If a Sigma rule level does not match an item in the above dictionary, this value
+will be used instead. The default is <code class="docutils literal notranslate"><span class="pre">35</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">severity_map</span></code></dt><dd><p>A dictionary mapping Sigma rule levels to Elastic severity values. By default,
+low, medium, high, and critical are mapped to themselves while informational
+is mapped to <code class="docutils literal notranslate"><span class="pre">low</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">severity_default</span></code></dt><dd><p>If a Sigma rule level does not match an item in the above dictionary, this value
+will be used instead. The default is <code class="docutils literal notranslate"><span class="pre">medium</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">timestamp_override</span></code></dt><dd><p>This field directly sets the corresponding field in the output rule. It can be used
+to adjust where the rule timestamp comes from within Elastic. This is not added
+to the rule by default. For example, you could set this value to <code class="docutils literal notranslate"><span class="pre">event.timestamp</span></code>
+to use that custom field for the event time instead of the ingested time.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">actions</span></code></dt><dd><p>List of actions to perform if a rule fires. This is a list of
+<code class="xref py py-data docutils literal notranslate"><span class="pre">ElasticSecurityAction</span></code> objects, which are described
+below. By default, no actions are added to the rule.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="elastic-security-actions">
+<h2>Elastic Security Actions<a class="headerlink" href="#elastic-security-actions" title="Permalink to this headline">¶</a></h2>
+<p>As described by the <a class="reference external" href="https://www.elastic.co/guide/en/security/8.1/rules-api-create.html#actions-object-schema">Create Rule API docs</a>,
+there are a few different action types which can be specified.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.slack</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.email</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.pagerduty</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.webhook</span></code></p></li>
+</ul>
+<p>Instead of allowing free-form dictionary objects in the <code class="docutils literal notranslate"><span class="pre">actions</span></code> field of a serializer,
+each of these different types define their own schema, which enables validation prior to
+serialization. Further, each action defined in your serializer can optionally define a list
+of tags which must match a rule for the action to be applied. For example, the following
+action would only be applied to rules with the <code class="docutils literal notranslate"><span class="pre">custom</span></code> tag.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">actions</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slack</span><span class="w"></span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-connector-id</span><span class="w"></span>
+<span class="w">    </span><span class="nt">tags</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span><span class="w"></span>
+<span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">slack</span><span class="nv"> </span><span class="s">message&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>If no tags are provided, the action is applied to every rule. The configuration fields are
+mostly the same as the official Elastic REST API, but have been morphed slightly to conform
+with the format of the serializer configuration. Their usage should be relatively straight
+forward. The following is an example of all possible properties for all available Elastic actions.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">actions</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slack</span><span class="w"></span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-connector-id</span><span class="w"></span>
+<span class="w">    </span><span class="nt">tags</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span><span class="w"></span>
+<span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">slack</span><span class="nv"> </span><span class="s">message&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># At least one of to, cc, bcc must be provided.</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># The subject is optional.</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">email</span><span class="w"></span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-connector-id</span><span class="w"></span>
+<span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security@company.com</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cc</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">someone@company.com</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bcc</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">someoneelse@company.com</span><span class="w"></span>
+<span class="w">    </span><span class="nt">subject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ALERT&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MESSAGE&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># The body field is JSON serialized per the elastic documentation</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span><span class="w"></span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-connector-id</span><span class="w"></span>
+<span class="w">    </span><span class="nt">body</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">my</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom</span><span class="w"></span>
+<span class="w">      </span><span class="nt">object</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.14</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pagerduty</span><span class="w"></span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-connector-id</span><span class="w"></span>
+<span class="w">    </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Critical&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">event_action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;trigger&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Rest are optional</span><span class="w"></span>
+<span class="w">    </span><span class="nt">dedup_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;something&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">timestamp</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2020-03-20T14:28:23.382748&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;security-solution&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;logical-group&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;:shrug:&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">alert</span><span class="nv"> </span><span class="s">summary&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># This was renamed due to python conflicts with &#39;class&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">clazz</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;class/type</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">event&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Elastic Serializers</a><ul>
+<li><a class="reference internal" href="#event-query-language-eql">Event Query Language (EQL)</a></li>
+<li><a class="reference internal" href="#elastic-security-rule">Elastic Security Rule</a></li>
+<li><a class="reference internal" href="#elastic-security-actions">Elastic Security Actions</a></li>
+</ul>
+</li>
+</ul>
+
+  </div><h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation index</a><ul>
+  <li><a href="index.html">Serializer Configurations</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Serializer Configurations</a></li>
+      <li>Next: <a href="../custom-serializers.html" title="next chapter">Creating Rule Serializers</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/serializers/elastic.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2022, Caleb Stewart.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.
+  </div>
+  
+  </body>
+</html>
