@@ -101,3 +101,11 @@ in the following order:
 
 You can utilize the ``sigma schema transform`` command to view the JSON schema
 specification or examples defined by a specific transform type.
+
+Built-in Serializers
+--------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   elastic

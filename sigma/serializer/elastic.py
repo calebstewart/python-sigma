@@ -1,13 +1,17 @@
 import json
 import uuid
-from typing import Any, Dict, List, Union, ClassVar, Optional
+from enum import Enum
+from typing import Any, Dict, List, Union, Literal, ClassVar, Optional, Annotated
+from datetime import datetime
 
 import yaml
+from pydantic.main import BaseModel
+from pydantic.fields import Field
 
 from sigma.util import CopyableSchema
 from sigma.mitre import Attack, Tactic, Technique
 from sigma.errors import UnsupportedSerializerFormat
-from sigma.schema import Rule
+from sigma.schema import Rule, RuleTag
 from sigma.grammar import Expression, FieldComparison
 from sigma.serializer import TextQuerySerializer, CommonSerializerSchema
 
@@ -100,6 +104,190 @@ class EventQueryLanguage(TextQuerySerializer):
         return f"{category} where {result}"
 
 
+class ElasticSecurityActionType(str, Enum):
+
+    SLACK = "slack"
+    EMAIL = "email"
+    PAGERDUTY = "pagerduty"
+    WEBHOOK = "webhook"
+
+
+class ElasticSecurityBaseAction(BaseModel):
+    """Schema for Elastic Security Rule actions"""
+
+    type: ElasticSecurityActionType
+    """ The connector type used for sending notifications """
+    group: str = "default"
+    """ Optionally groups actions by use cases. Use default for alert notifications. """
+    id: str
+    """ The connector ID """
+    tags: List[RuleTag] = list()
+    """ List of tags to filter action application. If any of the given tags matches
+    a rule, this action will be applied to the rule. If no tags are given, the action
+    will be applied to all serialized rules. """
+
+    def to_rule_format(self) -> Dict[str, Any]:
+        """Convert this elastic security action into a rule-compliant dictionary"""
+        return {
+            "action_type_id": f".{self.type.value}",
+            "group": self.group,
+            "id": self.id,
+            "params": {},
+        }
+
+    class Config(CopyableSchema):
+        schema_extra = {
+            "examples": [
+                {
+                    "type": "action-type",
+                    "group": "default",
+                    "id": "connector-id",
+                    "tags": ["my_custom_tag"],
+                }
+            ]
+        }
+
+
+class ElasticSecuritySlackAction(ElasticSecurityBaseAction):
+
+    type: Literal[ElasticSecurityActionType.SLACK]
+    message: str
+
+    def to_rule_format(self) -> Dict[str, Any]:
+        result = super().to_rule_format()
+        result["params"].update({"message": self.message})
+        return result
+
+    class Config(CopyableSchema):
+        schema_extra = ElasticSecurityBaseAction.Config.copy_schema(
+            {
+                "type": ElasticSecurityActionType.SLACK.value,
+                "message": "OH NO! {{ context.rule.name }} FIRED!",
+            }
+        )
+
+
+class ElasticSecurityEmailAction(ElasticSecurityBaseAction):
+
+    type: Literal[ElasticSecurityActionType.EMAIL]
+    to: Optional[List[str]]
+    cc: Optional[List[str]]
+    bcc: Optional[List[str]]
+    subject: Optional[str]
+    message: str
+
+    def to_rule_format(self) -> Dict[str, Any]:
+        result = super().to_rule_format()
+
+        if self.to:
+            result["params"]["to"] = ";".join(self.to)
+        if self.cc:
+            result["params"]["cc"] = ";".join(self.cc)
+        if self.bcc:
+            result["params"]["bcc"] = ";".join(self.bcc)
+        if self.subject:
+            result["params"]["subject"] = self.subject
+
+        result["params"]["message"] = self.message
+
+        return result
+
+    class Config(CopyableSchema):
+        schema_extra = ElasticSecurityBaseAction.Config.copy_schema(
+            {
+                "type": ElasticSecurityActionType.EMAIL.value,
+                "to": "security@company.com",
+                "subject": "NEW ALERT",
+                "message": "OH NO! {{ context.rule.name }} FIRED!",
+            }
+        )
+
+
+class ElasticSecurityWebhookAction(ElasticSecurityBaseAction):
+
+    type: Literal[ElasticSecurityActionType.WEBHOOK]
+    body: Any
+
+    def to_rule_format(self) -> Dict[str, Any]:
+
+        result = super().to_rule_format()
+
+        result["params"]["body"] = json.dumps(self.body)
+
+        return result
+
+    class Config(CopyableSchema):
+        schema_extra = ElasticSecurityBaseAction.Config.copy_schema(
+            {
+                "type": ElasticSecurityActionType.SLACK.value,
+                "body": {
+                    "my_custom": "data",
+                },
+            }
+        )
+
+
+class ElasticSecurityPagerDutyAction(ElasticSecurityBaseAction):
+
+    type: Literal[ElasticSecurityActionType.PAGERDUTY]
+    severity: str
+    event_action: str
+    dedup_key: Optional[str]
+    timestamp: Optional[datetime]
+    component: Optional[str]
+    group: Optional[str]
+    source: Optional[str]
+    summary: Optional[str]
+    clazz: Optional[str]
+
+    def to_rule_format(self) -> Dict[str, Any]:
+        result = super().to_rule_format()
+
+        result["params"].update(
+            {
+                "severity": self.severity,
+                "eventAction": self.event_action,
+            }
+        )
+
+        if self.dedup_key:
+            result["params"]["dedupKey"] = self.dedup_key
+        if self.timestamp:
+            result["params"]["timestamp"] = self.timestamp.isoformat()
+        if self.component:
+            result["params"]["component"] = self.component
+        if self.group:
+            result["params"]["group"] = self.group
+        if self.source:
+            result["params"]["source"] = self.source
+        if self.summary:
+            result["params"]["summary"] = self.summary
+        if self.clazz:
+            result["params"]["class"] = self.clazz
+
+        return result
+
+    class Config(CopyableSchema):
+        schema_extra = ElasticSecurityBaseAction.Config.copy_schema(
+            {
+                "type": ElasticSecurityActionType.SLACK.value,
+                "severity": "Critical",
+                "event_action": "trigger",
+            }
+        )
+
+
+ElasticSecurityAction = Annotated[
+    Union[
+        ElasticSecurityWebhookAction,
+        ElasticSecurityEmailAction,
+        ElasticSecuritySlackAction,
+        ElasticSecurityPagerDutyAction,
+    ],
+    Field(discriminator="type"),
+]
+
+
 class ElasticSecurityRule(EventQueryLanguage):
     """Serialize to a JSON Elastic Security Rule"""
 
@@ -131,6 +319,10 @@ class ElasticSecurityRule(EventQueryLanguage):
         """ Mapping of sigma rule levels to severity values """
         severity_default: str = "medium"
         """ Default severity value if the level is not in the above map """
+        timestamp_override: Optional[str] = None
+        """ Sets the time field used to query indices. When unspecified, rules query the
+        @timestamp field. The source field must be an Elasticsearch date data type. """
+        actions: List[ElasticSecurityAction] = []
 
         class Config(CopyableSchema):
             extra = "forbid"
@@ -144,6 +336,10 @@ class ElasticSecurityRule(EventQueryLanguage):
                     "max_signals": 100,
                     "risk_map": {"low": 0, "medium": 25, "high": 75, "critical": 100},
                     "risk_default": 10,
+                    "timestamp_override": "event.ingested",
+                    "actions": [
+                        ElasticSecuritySlackAction.Config.schema_extra["examples"][0],
+                    ],
                 }
             )
 
@@ -309,6 +505,23 @@ class ElasticSecurityRule(EventQueryLanguage):
 
                 threat.append(definition)
 
+        actions = []
+        for action in self.schema.actions:
+
+            if not action.tags:
+                actions.append(action.to_rule_format())
+
+            if not rule.tags:
+                continue
+
+            for tag in action.tags:
+                if tag in rule.tags:
+                    break
+            else:
+                continue
+
+            actions.append(action.to_rule_format())
+
         result = {
             "author": [rule.author] if rule.author else None,
             "description": rule.description,
@@ -343,6 +556,7 @@ class ElasticSecurityRule(EventQueryLanguage):
             "threat": threat,
             "version": 1,
             "references": rule.references or [],
+            "actions": actions,
         }
 
         return result

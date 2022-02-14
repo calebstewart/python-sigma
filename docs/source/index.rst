@@ -98,9 +98,9 @@ command.
    :maxdepth: 2
    :caption: Contents:
 
-   serializer-definition
-   serializers
-   transformations
+   serializers/index
+   custom-serializers
+   custom-transformations
    API Documentation <api/sigma.rst>
 
 Indices and tables
