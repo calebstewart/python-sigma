@@ -49,9 +49,7 @@ class ConditionSyntaxError(SigmaError):
         return self.error.msg
 
     def __str__(self) -> str:
-        return self.fmt.format(
-            f"{self.error.msg} (line:{self.lineno} col:{self.column})"
-        )
+        return self.fmt.format(str(self.error))
 
 
 class UnknownIdentifierError(SigmaError):

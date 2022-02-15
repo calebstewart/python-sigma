@@ -30,6 +30,7 @@ from yaml.error import YAMLError
 from pydantic.main import BaseModel
 from pydantic.error_wrappers import ValidationError
 
+from sigma.cli import logger
 from sigma.util import CopyableSchema
 from sigma.errors import (
     SerializerNotFound,
@@ -40,12 +41,14 @@ from sigma.schema import Rule, RuleDetectionFields
 from sigma.grammar import (
     FieldLike,
     LogicalOr,
+    Expression,
     FieldRegex,
     LogicalAnd,
     LogicalNot,
     FieldLookup,
     FieldContains,
     FieldEndsWith,
+    FieldEquality,
     KeywordSearch,
     FieldComparison,
     FieldStartsWith,
@@ -528,6 +531,9 @@ class TextQuerySerializer(Serializer):
             FieldLike: functools.partial(
                 self._serialize_comparison, self.schema.field_like
             ),
+            FieldEquality: functools.partial(
+                self._serialize_comparison, self.schema.field_equality
+            ),
             FieldLookup: self._serialize_in_expression,
             FieldLookupRegex: self._serialize_in_expression,
             FieldRegex: functools.partial(
@@ -605,6 +611,11 @@ class TextQuerySerializer(Serializer):
         """Recursively serialize an expression"""
 
         result = self.expression_mapping.get(type(expression), str)(expression)
+        if (
+            isinstance(expression, Expression)
+            and type(expression) not in self.expression_mapping
+        ):
+            logger.debug("%s not found in text query expression map", type(expression))
 
         if group and isinstance(expression, LogicalExpression):
             return self.schema.grouping.format(result)
