@@ -13,6 +13,7 @@ from sigma.errors import (
 )
 from sigma.schema import Rule
 from sigma.grammar import (
+    FieldLike,
     LogicalOr,
     Expression,
     FieldRegex,
@@ -22,6 +23,7 @@ from sigma.grammar import (
     FieldEquality,
     KeywordSearch,
     FieldStartsWith,
+    FieldLookupRegex,
 )
 
 
@@ -59,33 +61,33 @@ def test_load_from_yaml(tmp_path: pathlib.Path):
             },
             LogicalAnd(
                 args=[
-                    FieldEquality(field="field", value="value"),
+                    FieldLike(field="field", value="value"),
                     FieldEndsWith(field="field", value="value"),
                     FieldRegex(field="field", value="value"),
                     FieldStartsWith(field="field", value="value"),
                     FieldContains(field="field", value="value"),
-                    FieldEquality(
+                    FieldLike(
                         field="field", value=base64.b64encode(b"value").decode("utf-8")
                     ),
-                    FieldEquality(
+                    FieldLike(
                         field="field",
                         value=base64.b64encode("value".encode("utf-16le")).decode(
                             "utf-8"
                         ),
                     ),
-                    FieldEquality(
+                    FieldLike(
                         field="field",
                         value=base64.b64encode("value".encode("utf-16le")).decode(
                             "utf-8"
                         ),
                     ),
-                    FieldEquality(
+                    FieldLike(
                         field="field",
                         value=base64.b64encode("value".encode("utf-16be")).decode(
                             "utf-8"
                         ),
                     ),
-                    FieldEquality(
+                    FieldLike(
                         field="field",
                         value=base64.b64encode(
                             b"\xFF\xFE" + "value".encode("utf-16le")
@@ -107,12 +109,9 @@ def test_load_from_yaml(tmp_path: pathlib.Path):
                 args=[
                     LogicalAnd(
                         args=[
-                            FieldEquality(field="field1", value="value1"),
-                            LogicalOr(
-                                args=[
-                                    FieldRegex(field="field2", value="value2-1"),
-                                    FieldRegex(field="field2", value="value2-2"),
-                                ]
+                            FieldLike(field="field1", value="value1"),
+                            FieldLookupRegex(
+                                field="field2", value=["value2-1", "value2-2"]
                             ),
                         ]
                     ),
@@ -120,7 +119,7 @@ def test_load_from_yaml(tmp_path: pathlib.Path):
                         args=[
                             KeywordSearch(value="keyword1"),
                             KeywordSearch(value="keyword2"),
-                            FieldEquality(field="field3", value="value3"),
+                            FieldLike(field="field3", value="value3"),
                         ]
                     ),
                 ]

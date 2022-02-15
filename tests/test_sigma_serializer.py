@@ -22,7 +22,7 @@ builtin_serializer_tests = [
                     "selector": {"process.field": 'value"'},
                     "condition": "selector",
                 },
-                "expected": 'process where process.field: "value\\""',
+                "expected": 'process where process.field like~ "value\\""',
             },
             {
                 "title": "modifiers",
@@ -32,7 +32,7 @@ builtin_serializer_tests = [
                     "selector2": ["keyword1", {"field3|re": ".*"}],
                     "condition": "selector1 or selector2",
                 },
-                "expected": 'any where (field1: "value" and stringContains(field2,"value")) or ("keyword1" or field3 regex ".*")',
+                "expected": 'any where (field1 like~ "value" and stringContains(field2,"value")) or ("keyword1" or field3 regex ".*")',
             },
         ],
     }

@@ -30,7 +30,7 @@ from yaml.error import YAMLError
 from pydantic.main import BaseModel
 from pydantic.error_wrappers import ValidationError
 
-from sigma.cli import logger
+from sigma import logger
 from sigma.util import CopyableSchema
 from sigma.errors import (
     SerializerNotFound,
