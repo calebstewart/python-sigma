@@ -1,8 +1,14 @@
 import logging
+import warnings
 from typing import TextIO, Optional
 
+# Ignore the warning from thefuzz if we don't have thefuzz[speedup]
+warnings.filterwarnings(
+    "ignore", message=".*python-Levenshtein.*", category=UserWarning
+)
+
 import click
-import fuzzywuzzy.process
+import thefuzz.process
 from rich.console import Console
 from rich.logging import RichHandler
 from click.exceptions import ClickException
@@ -99,7 +105,7 @@ class FuzzyAliasedGroup(click.Group):
             match = match[0]
 
         if match is None and len(cmd_name) >= 2:
-            match = fuzzywuzzy.process.extractOne(cmd_name, self.list_commands(ctx))
+            match = thefuzz.process.extractOne(cmd_name, self.list_commands(ctx))
             if match is not None and match[1] < 70:
                 match = None
             elif match is not None:
