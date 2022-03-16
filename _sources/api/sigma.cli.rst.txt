@@ -13,6 +13,7 @@ Submodules
    :maxdepth: 4
 
    sigma.cli.converter
+   sigma.cli.elastic
    sigma.cli.list
    sigma.cli.mitre
    sigma.cli.schema

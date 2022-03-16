@@ -71,6 +71,12 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation.action">action (sigma.schema.BaseCorrelation attribute)</a>
+
+      <ul>
+        <li><a href="api/sigma.schema.html#sigma.schema.IncludeSchema.action">(sigma.schema.IncludeSchema attribute)</a>
+</li>
+      </ul></li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityRule.Schema.actions">actions (sigma.serializer.elastic.ElasticSecurityRule.Schema attribute)</a>
 </li>
       <li><a href="api/sigma.transform.html#sigma.transform.AddTags">AddTags (class in sigma.transform)</a>
@@ -121,10 +127,12 @@
 </li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.base64offset_modifier">base64offset_modifier() (in module sigma.grammar)</a>
 </li>
-      <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityEmailAction.bcc">bcc (sigma.serializer.elastic.ElasticSecurityEmailAction attribute)</a>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation">BaseCorrelation (class in sigma.schema)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityEmailAction.bcc">bcc (sigma.serializer.elastic.ElasticSecurityEmailAction attribute)</a>
+</li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityWebhookAction.body">body (sigma.serializer.elastic.ElasticSecurityWebhookAction attribute)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleDetectionFields.build_expression">build_expression() (sigma.schema.RuleDetectionFields method)</a>
@@ -165,18 +173,20 @@
 </li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceMatch.compare">compare() (sigma.serializer.LogSourceMatch method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityPagerDutyAction.component">component (sigma.serializer.elastic.ElasticSecurityPagerDutyAction attribute)</a>
 </li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.Selector.condition">condition (sigma.grammar.Selector property)</a>
 
       <ul>
+        <li><a href="api/sigma.schema.html#sigma.schema.CountCorrelation.condition">(sigma.schema.CountCorrelation attribute)</a>
+</li>
         <li><a href="api/sigma.schema.html#sigma.schema.RuleDetection.condition">(sigma.schema.RuleDetection attribute)</a>
 </li>
       </ul></li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceMatch.conditions">conditions (sigma.serializer.LogSourceMatch attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.errors.html#sigma.errors.ConditionSyntaxError">ConditionSyntaxError</a>
 </li>
       <li><a href="api/sigma.transform.html#sigma.transform.ExpressionType.CONTAINS">CONTAINS (sigma.transform.ExpressionType attribute)</a>
@@ -188,6 +198,24 @@
       <li><a href="api/sigma.util.html#sigma.util.CopyableSchema">CopyableSchema (class in sigma.util)</a>
 </li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.CoreExpression">CoreExpression (class in sigma.grammar)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.Correlation">Correlation (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationGreaterThan">CorrelationGreaterThan (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationGreaterThanEqual">CorrelationGreaterThanEqual (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationLessThan">CorrelationLessThan (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationLessThanEqual">CorrelationLessThanEqual (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationRange">CorrelationRange (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationSimpleCondition">CorrelationSimpleCondition (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationType">CorrelationType (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CountCorrelation">CountCorrelation (class in sigma.schema)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleLevel.CRITICAL">CRITICAL (sigma.schema.RuleLevel attribute)</a>
 </li>
@@ -213,10 +241,10 @@
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleStatus.DEPRECATED">DEPRECATED (sigma.schema.RuleStatus attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleRelationType.DERIVED">DERIVED (sigma.schema.RuleRelationType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule.description">description (sigma.schema.Rule attribute)</a>
 
       <ul>
@@ -235,12 +263,16 @@
         <li><a href="api/sigma.serializer.html#sigma.serializer.TextQuerySerializer.dumps">(sigma.serializer.TextQuerySerializer method)</a>
 </li>
       </ul></li>
+      <li><a href="api/sigma.errors.html#sigma.errors.DuplicateRuleNameError">DuplicateRuleNameError</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.cli.elastic.html#sigma.cli.elastic.ElasticDeploymentSpec">ElasticDeploymentSpec (class in sigma.cli.elastic)</a>
+</li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityActionType">ElasticSecurityActionType (class in sigma.serializer.elastic)</a>
 </li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityBaseAction">ElasticSecurityBaseAction (class in sigma.serializer.elastic)</a>
@@ -292,6 +324,8 @@
 </li>
       </ul></li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityPagerDutyAction.event_action">event_action (sigma.serializer.elastic.ElasticSecurityPagerDutyAction attribute)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationType.EVENT_COUNT">EVENT_COUNT (sigma.schema.CorrelationType attribute)</a>
 </li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.EventQueryLanguage">EventQueryLanguage (class in sigma.serializer.elastic)</a>
 </li>
@@ -443,6 +477,8 @@
 </li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.FieldStartsWith">FieldStartsWith (class in sigma.grammar)</a>
 </li>
+      <li><a href="api/sigma.schema.html#sigma.schema.IncludeSchema.filename">filename (sigma.schema.IncludeSchema attribute)</a>
+</li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.Serializer.from_dict">from_dict() (sigma.serializer.Serializer class method)</a>
 </li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.CoreExpression.from_parsed">from_parsed() (sigma.grammar.CoreExpression class method)</a>
@@ -473,24 +509,30 @@
 </li>
       <li><a href="api/sigma.mitre.html#sigma.mitre.Attack.get_tactic">get_tactic() (sigma.mitre.Attack method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.mitre.html#sigma.mitre.Attack.get_technique">get_technique() (sigma.mitre.Attack method)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleDetection.GRAMMAR_PARSER">GRAMMAR_PARSER (sigma.schema.RuleDetection attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityBaseAction.group">group (sigma.serializer.elastic.ElasticSecurityBaseAction attribute)</a>
 
       <ul>
         <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityPagerDutyAction.group">(sigma.serializer.elastic.ElasticSecurityPagerDutyAction attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation.group_by">group_by (sigma.schema.BaseCorrelation attribute)</a>
+</li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.EventQueryLanguage.Schema.grouping">grouping (sigma.serializer.elastic.EventQueryLanguage.Schema attribute)</a>
 
       <ul>
         <li><a href="api/sigma.serializer.html#sigma.serializer.TextQuerySerializer.Schema.grouping">(sigma.serializer.TextQuerySerializer.Schema attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationGreaterThan.gt">gt (sigma.schema.CorrelationGreaterThan attribute)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationGreaterThanEqual.gte">gte (sigma.schema.CorrelationGreaterThanEqual attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -519,9 +561,11 @@
       </ul></li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.Identifier">Identifier (class in sigma.grammar)</a>
 </li>
+      <li><a href="api/sigma.grammar.html#sigma.grammar.Identifier.identifier">identifier (sigma.grammar.Identifier property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sigma.grammar.html#sigma.grammar.Identifier.identifier">identifier (sigma.grammar.Identifier property)</a>
+      <li><a href="api/sigma.schema.html#sigma.schema.IncludeSchema">IncludeSchema (class in sigma.schema)</a>
 </li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceMatch.index">index (sigma.serializer.LogSourceMatch attribute)</a>
 </li>
@@ -557,8 +601,12 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sigma.schema.html#sigma.schema.Rule.level">level (sigma.schema.Rule attribute)</a>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation.level">level (sigma.schema.BaseCorrelation attribute)</a>
+
+      <ul>
+        <li><a href="api/sigma.schema.html#sigma.schema.Rule.level">(sigma.schema.Rule attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule.license">license (sigma.schema.Rule attribute)</a>
 </li>
       <li><a href="api/sigma.errors.html#sigma.errors.ConditionSyntaxError.line">line (sigma.errors.ConditionSyntaxError property)</a>
@@ -574,17 +622,25 @@
       <li><a href="api/sigma.mitre.html#sigma.mitre.Attack.load">load() (sigma.mitre.Attack class method)</a>
 
       <ul>
+        <li><a href="api/sigma.schema.html#sigma.schema.IncludeSchema.load">(sigma.schema.IncludeSchema method)</a>
+</li>
+        <li><a href="api/sigma.schema.html#sigma.schema.Sigma.load">(sigma.schema.Sigma class method)</a>
+</li>
         <li><a href="api/sigma.serializer.html#sigma.serializer.Serializer.load">(sigma.serializer.Serializer class method)</a>
 </li>
         <li><a href="api/sigma.transform.html#sigma.transform.Transformation.Schema.load">(sigma.transform.Transformation.Schema method)</a>
 </li>
       </ul></li>
-      <li><a href="api/sigma.grammar.html#sigma.grammar.LogicalAnd">LogicalAnd (class in sigma.grammar)</a>
+      <li><a href="api/sigma.cli.elastic.html#sigma.cli.elastic.load_rules_from_paths">load_rules_from_paths() (in module sigma.cli.elastic)</a>
 </li>
-      <li><a href="api/sigma.grammar.html#sigma.grammar.LogicalExpression">LogicalExpression (class in sigma.grammar)</a>
+      <li><a href="api/sigma.errors.html#sigma.errors.SkipRule.log">log() (sigma.errors.SkipRule method)</a>
+</li>
+      <li><a href="api/sigma.grammar.html#sigma.grammar.LogicalAnd">LogicalAnd (class in sigma.grammar)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.grammar.html#sigma.grammar.LogicalExpression">LogicalExpression (class in sigma.grammar)</a>
+</li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.LogicalNot">LogicalNot (class in sigma.grammar)</a>
 </li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.LogicalOr">LogicalOr (class in sigma.grammar)</a>
@@ -611,6 +667,10 @@
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.LowercaseString">LowercaseString (class in sigma.schema)</a>
 </li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationLessThan.lt">lt (sigma.schema.CorrelationLessThan attribute)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationLessThanEqual.lte">lte (sigma.schema.CorrelationLessThanEqual attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -627,8 +687,16 @@
 </li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityRule.Schema.max_signals">max_signals (sigma.serializer.elastic.ElasticSecurityRule.Schema attribute)</a>
 </li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationRange.maximum">maximum (sigma.schema.CorrelationRange property)</a>
+</li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleLevel.MEDIUM">MEDIUM (sigma.schema.RuleLevel attribute)</a>
 </li>
+      <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityRule.merge_config">merge_config() (sigma.serializer.elastic.ElasticSecurityRule method)</a>
+
+      <ul>
+        <li><a href="api/sigma.serializer.html#sigma.serializer.Serializer.merge_config">(sigma.serializer.Serializer method)</a>
+</li>
+      </ul></li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleRelationType.MERGED">MERGED (sigma.schema.RuleRelationType attribute)</a>
 </li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceRules.merging">merging (sigma.serializer.LogSourceRules attribute)</a>
@@ -641,6 +709,10 @@
         <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecuritySlackAction.message">(sigma.serializer.elastic.ElasticSecuritySlackAction attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationRange.minimum">minimum (sigma.schema.CorrelationRange property)</a>
+</li>
+      <li><a href="api/sigma.errors.html#sigma.errors.MissingCorrelationRule">MissingCorrelationRule</a>
+</li>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule.modified">modified (sigma.schema.Rule attribute)</a>
 </li>
       <li>
@@ -652,6 +724,8 @@
         <li><a href="api/sigma.cli.html#module-sigma.cli">sigma.cli</a>
 </li>
         <li><a href="api/sigma.cli.converter.html#module-sigma.cli.converter">sigma.cli.converter</a>
+</li>
+        <li><a href="api/sigma.cli.elastic.html#module-sigma.cli.elastic">sigma.cli.elastic</a>
 </li>
         <li><a href="api/sigma.cli.list.html#module-sigma.cli.list">sigma.cli.list</a>
 </li>
@@ -681,14 +755,20 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.errors.html#sigma.errors.MultipleCorrelationError">MultipleCorrelationError</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sigma.schema.html#sigma.schema.RuleTag.name">name (sigma.schema.RuleTag property)</a>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation.name">name (sigma.schema.BaseCorrelation attribute)</a>
 
       <ul>
+        <li><a href="api/sigma.schema.html#sigma.schema.RuleTag.name">(sigma.schema.RuleTag property)</a>
+</li>
         <li><a href="api/sigma.serializer.html#sigma.serializer.CommonSerializerSchema.name">(sigma.serializer.CommonSerializerSchema attribute)</a>
 </li>
         <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceMatch.name">(sigma.serializer.LogSourceMatch attribute)</a>
@@ -697,6 +777,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleTag.namespace">namespace (sigma.schema.RuleTag property)</a>
+</li>
+      <li><a href="api/sigma.errors.html#sigma.errors.NoCorrelationDocument">NoCorrelationDocument</a>
 </li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.EventQueryLanguage.Schema.not_format">not_format (sigma.serializer.elastic.EventQueryLanguage.Schema attribute)</a>
 
@@ -806,6 +888,8 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationRange.range">range (sigma.schema.CorrelationRange attribute)</a>
+</li>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule.references">references (sigma.schema.Rule attribute)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule.related">related (sigma.schema.Rule attribute)</a>
@@ -817,6 +901,8 @@
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityRule.Schema.risk_map">risk_map (sigma.serializer.elastic.ElasticSecurityRule.Schema attribute)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule">Rule (class in sigma.schema)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation.rule">rule (sigma.schema.BaseCorrelation attribute)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule.Config">Rule.Config (class in sigma.schema)</a>
 </li>
@@ -850,8 +936,12 @@
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleRelationType">RuleRelationType (class in sigma.schema)</a>
 </li>
-      <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceRules.rules">rules (sigma.serializer.LogSourceRules attribute)</a>
+      <li><a href="api/sigma.cli.elastic.html#sigma.cli.elastic.ElasticDeploymentSpec.rules">rules (sigma.cli.elastic.ElasticDeploymentSpec attribute)</a>
+
+      <ul>
+        <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceRules.rules">(sigma.serializer.LogSourceRules attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleStatus">RuleStatus (class in sigma.schema)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleTag">RuleTag (class in sigma.schema)</a>
@@ -922,6 +1012,8 @@
 </li>
       <li><a href="api/sigma.errors.html#sigma.errors.SerializerNotFound">SerializerNotFound</a>
 </li>
+      <li><a href="api/sigma.cli.elastic.html#sigma.cli.elastic.ElasticDeploymentSpec.serializers">serializers (sigma.cli.elastic.ElasticDeploymentSpec attribute)</a>
+</li>
       <li><a href="api/sigma.errors.html#sigma.errors.SerializerValidationError">SerializerValidationError</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleLogSource.service">service (sigma.schema.RuleLogSource attribute)</a>
@@ -943,6 +1035,8 @@
         <li><a href="api/sigma.html#module-sigma">module</a>
 </li>
       </ul></li>
+      <li><a href="api/sigma.schema.html#sigma.schema.Sigma">Sigma (class in sigma.schema)</a>
+</li>
       <li>
     sigma.cli
 
@@ -959,6 +1053,13 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    sigma.cli.elastic
+
+      <ul>
+        <li><a href="api/sigma.cli.elastic.html#module-sigma.cli.elastic">module</a>
+</li>
+      </ul></li>
       <li>
     sigma.cli.list
 
@@ -1056,6 +1157,14 @@
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.SimpleDate">SimpleDate (class in sigma.schema)</a>
 </li>
+      <li><a href="api/sigma.transform.html#sigma.transform.FieldFuzzyMap.Schema.skip_unknown">skip_unknown (sigma.transform.FieldFuzzyMap.Schema attribute)</a>
+
+      <ul>
+        <li><a href="api/sigma.transform.html#sigma.transform.FieldMap.Schema.skip_unknown">(sigma.transform.FieldMap.Schema attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="api/sigma.errors.html#sigma.errors.SkipRule">SkipRule</a>
+</li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityActionType.SLACK">SLACK (sigma.serializer.elastic.ElasticSecurityActionType attribute)</a>
 </li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityPagerDutyAction.source">source (sigma.serializer.elastic.ElasticSecurityPagerDutyAction attribute)</a>
@@ -1100,6 +1209,10 @@
 </li>
       <li><a href="api/sigma.mitre.html#sigma.mitre.Attack.techniques">techniques (sigma.mitre.Attack attribute)</a>
 </li>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationType.TEMPORAL">TEMPORAL (sigma.schema.CorrelationType attribute)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.TemporalCorrelation">TemporalCorrelation (class in sigma.schema)</a>
+</li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleStatus.TEST">TEST (sigma.schema.RuleStatus attribute)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleStatus.TESTING">TESTING (sigma.schema.RuleStatus attribute)</a>
@@ -1109,6 +1222,8 @@
       <li><a href="api/sigma.serializer.html#sigma.serializer.TextQuerySerializer.Schema">TextQuerySerializer.Schema (class in sigma.serializer)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleDetection.timeframe">timeframe (sigma.schema.RuleDetection attribute)</a>
+</li>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation.timespan">timespan (sigma.schema.BaseCorrelation attribute)</a>
 </li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityPagerDutyAction.timestamp">timestamp (sigma.serializer.elastic.ElasticSecurityPagerDutyAction attribute)</a>
 </li>
@@ -1224,9 +1339,15 @@
       </ul></li>
       <li><a href="api/sigma.errors.html#sigma.errors.TransformValidationError">TransformValidationError</a>
 </li>
-      <li><a href="api/sigma.schema.html#sigma.schema.RuleRelation.type">type (sigma.schema.RuleRelation attribute)</a>
+      <li><a href="api/sigma.schema.html#sigma.schema.BaseCorrelation.type">type (sigma.schema.BaseCorrelation attribute)</a>
 
       <ul>
+        <li><a href="api/sigma.schema.html#sigma.schema.CountCorrelation.type">(sigma.schema.CountCorrelation attribute)</a>
+</li>
+        <li><a href="api/sigma.schema.html#sigma.schema.RuleRelation.type">(sigma.schema.RuleRelation attribute)</a>
+</li>
+        <li><a href="api/sigma.schema.html#sigma.schema.TemporalCorrelation.type">(sigma.schema.TemporalCorrelation attribute)</a>
+</li>
         <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityBaseAction.type">(sigma.serializer.elastic.ElasticSecurityBaseAction attribute)</a>
 </li>
         <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.ElasticSecurityEmailAction.type">(sigma.serializer.elastic.ElasticSecurityEmailAction attribute)</a>
@@ -1257,6 +1378,8 @@
       <li><a href="api/sigma.errors.html#sigma.errors.UnknownIdentifierError">UnknownIdentifierError</a>
 </li>
       <li><a href="api/sigma.errors.html#sigma.errors.UnknownModifierError">UnknownModifierError</a>
+</li>
+      <li><a href="api/sigma.errors.html#sigma.errors.UnknownRuleNameError">UnknownRuleNameError</a>
 </li>
       <li><a href="api/sigma.errors.html#sigma.errors.UnknownTransform">UnknownTransform</a>
 </li>
@@ -1319,9 +1442,13 @@
 </li>
         <li><a href="api/sigma.grammar.html#sigma.grammar.KeywordSearch.value">(sigma.grammar.KeywordSearch attribute)</a>
 </li>
+        <li><a href="api/sigma.schema.html#sigma.schema.CorrelationSimpleCondition.value">(sigma.schema.CorrelationSimpleCondition property)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.schema.html#sigma.schema.CorrelationType.VALUE_COUNT">VALUE_COUNT (sigma.schema.CorrelationType attribute)</a>
+</li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.Expression.visit">visit() (sigma.grammar.Expression method)</a>
 </li>
   </ul></td>

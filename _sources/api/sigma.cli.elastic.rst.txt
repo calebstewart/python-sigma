@@ -1,0 +1,7 @@
+sigma.cli.elastic module
+========================
+
+.. automodule:: sigma.cli.elastic
+   :members:
+   :undoc-members:
+   :show-inheritance:

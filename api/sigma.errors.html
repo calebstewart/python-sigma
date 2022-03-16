@@ -80,6 +80,13 @@
 </dd></dl>
 
 <dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.DuplicateRuleNameError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">DuplicateRuleNameError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.DuplicateRuleNameError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>There one or more rules with duplicate names in the given YAML file</p>
+</dd></dl>
+
+<dl class="py exception">
 <dt class="sig sig-object py" id="sigma.errors.InvalidFieldValueError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">InvalidFieldValueError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">found</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.InvalidFieldValueError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
@@ -91,6 +98,27 @@
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">InvalidModifierCombinationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failed_modifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completed_modifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'detections:</span> <span class="pre">{field}:</span> <span class="pre">{failed_modifier}</span> <span class="pre">invalid</span> <span class="pre">after</span> <span class="pre">{completed_modifiers}'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.InvalidModifierCombinationError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
 <p>The combination of modifiers was invalid</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.MissingCorrelationRule">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">MissingCorrelationRule</span></span><a class="headerlink" href="#sigma.errors.MissingCorrelationRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>A rule specified in a correlation document was not found</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.MultipleCorrelationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">MultipleCorrelationError</span></span><a class="headerlink" href="#sigma.errors.MultipleCorrelationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>The given YAML file contained multiple correlation documents</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.NoCorrelationDocument">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">NoCorrelationDocument</span></span><a class="headerlink" href="#sigma.errors.NoCorrelationDocument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>A YAML document contained multiple rules and no correlation</p>
 </dd></dl>
 
 <dl class="py exception">
@@ -127,6 +155,24 @@
 </dd></dl>
 
 <dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.SkipRule">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">SkipRule</span></span><a class="headerlink" href="#sigma.errors.SkipRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>Skip the currently processing rule. This is mainly used during conversion.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.errors.SkipRule.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.SkipRule.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method to always log a skipped rule in the same way</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>rule</strong> (<a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><em>sigma.schema.Rule</em></a>) – the rule that was skipped</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
 <dt class="sig sig-object py" id="sigma.errors.TransformValidationError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">TransformValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.error_wrappers.ValidationError</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.TransformValidationError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaValidationError" title="sigma.errors.SigmaValidationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaValidationError</span></code></a></p>
@@ -145,6 +191,14 @@
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">UnknownModifierError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'detections:</span> <span class="pre">{field}:</span> <span class="pre">invalid</span> <span class="pre">modifier:</span> <span class="pre">{modifier}'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.UnknownModifierError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
 <p>Sigma rule specified an invalid field modifier</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sigma.errors.UnknownRuleNameError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.errors.</span></span><span class="sig-name descname"><span class="pre">UnknownRuleNameError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.errors.UnknownRuleNameError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.errors.SigmaError" title="sigma.errors.SigmaError"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.errors.SigmaError</span></code></a></p>
+<p>The specified rule name (most likely in a correlation) was not found
+in the document.</p>
 </dd></dl>
 
 <dl class="py exception">

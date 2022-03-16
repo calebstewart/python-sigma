@@ -76,6 +76,199 @@ into a python-native format, which is normally used in conjunction with a serial
 </div>
 </div>
 <dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">BaseCorrelation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'correlation'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.schema.CorrelationType" title="sigma.schema.CorrelationType"><span class="pre">sigma.schema.CorrelationType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">timespan</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">sigma.schema.ConstrainedStrValue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sigma.schema.RuleLevel" title="sigma.schema.RuleLevel"><span class="pre">sigma.schema.RuleLevel</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.BaseCorrelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation.action">
+<span class="sig-name descname"><span class="pre">action</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'correlation'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.schema.BaseCorrelation.action" title="Permalink to this definition">¶</a></dt>
+<dd><p>A correlation action</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation.group_by">
+<span class="sig-name descname"><span class="pre">group_by</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.schema.BaseCorrelation.group_by" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional field to group results by</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.RuleLevel" title="sigma.schema.RuleLevel"><span class="pre">sigma.schema.RuleLevel</span></a></em><a class="headerlink" href="#sigma.schema.BaseCorrelation.level" title="Permalink to this definition">¶</a></dt>
+<dd><p>A rule level to apply to the correlation of all rules</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.schema.BaseCorrelation.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of this correlation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation.rule">
+<span class="sig-name descname"><span class="pre">rule</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.schema.BaseCorrelation.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of rule titles or correlation names also specified in the same file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation.timespan">
+<span class="sig-name descname"><span class="pre">timespan</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.schema.BaseCorrelation.timespan" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timespan used for correlating events (e.g. 5m, 3d or 30s)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.BaseCorrelation.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.CorrelationType" title="sigma.schema.CorrelationType"><span class="pre">sigma.schema.CorrelationType</span></a></em><a class="headerlink" href="#sigma.schema.BaseCorrelation.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of correlation to be used</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.Correlation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">Correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.schema.CountCorrelation" title="sigma.schema.CountCorrelation"><span class="pre">sigma.schema.CountCorrelation</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.TemporalCorrelation" title="sigma.schema.TemporalCorrelation"><span class="pre">sigma.schema.TemporalCorrelation</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.Correlation" title="sigma.schema.Correlation"><span class="pre">sigma.schema.Correlation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.Correlation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An object representing a collection of rules bound by a correlation</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationGreaterThan">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CorrelationGreaterThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.CorrelationGreaterThan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.schema.CorrelationSimpleCondition" title="sigma.schema.CorrelationSimpleCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.schema.CorrelationSimpleCondition</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationGreaterThan.gt">
+<span class="sig-name descname"><span class="pre">gt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.schema.CorrelationGreaterThan.gt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationGreaterThanEqual">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CorrelationGreaterThanEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gte</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.CorrelationGreaterThanEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.schema.CorrelationSimpleCondition" title="sigma.schema.CorrelationSimpleCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.schema.CorrelationSimpleCondition</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationGreaterThanEqual.gte">
+<span class="sig-name descname"><span class="pre">gte</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.schema.CorrelationGreaterThanEqual.gte" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationLessThan">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CorrelationLessThan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.CorrelationLessThan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.schema.CorrelationSimpleCondition" title="sigma.schema.CorrelationSimpleCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.schema.CorrelationSimpleCondition</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationLessThan.lt">
+<span class="sig-name descname"><span class="pre">lt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.schema.CorrelationLessThan.lt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationLessThanEqual">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CorrelationLessThanEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lte</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.CorrelationLessThanEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.schema.CorrelationSimpleCondition" title="sigma.schema.CorrelationSimpleCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.schema.CorrelationSimpleCondition</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationLessThanEqual.lte">
+<span class="sig-name descname"><span class="pre">lte</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.schema.CorrelationLessThanEqual.lte" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationRange">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CorrelationRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">sigma.schema.ConstrainedStrValue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.CorrelationRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationRange.maximum">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maximum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.schema.CorrelationRange.maximum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationRange.minimum">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">minimum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.schema.CorrelationRange.minimum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationRange.range">
+<span class="sig-name descname"><span class="pre">range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#sigma.schema.CorrelationRange.range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationSimpleCondition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CorrelationSimpleCondition</span></span><a class="headerlink" href="#sigma.schema.CorrelationSimpleCondition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationSimpleCondition.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#sigma.schema.CorrelationSimpleCondition.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CorrelationType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.CorrelationType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationType.EVENT_COUNT">
+<span class="sig-name descname"><span class="pre">EVENT_COUNT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'event_count'</span></em><a class="headerlink" href="#sigma.schema.CorrelationType.EVENT_COUNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationType.TEMPORAL">
+<span class="sig-name descname"><span class="pre">TEMPORAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'temporal'</span></em><a class="headerlink" href="#sigma.schema.CorrelationType.TEMPORAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CorrelationType.VALUE_COUNT">
+<span class="sig-name descname"><span class="pre">VALUE_COUNT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'value_count'</span></em><a class="headerlink" href="#sigma.schema.CorrelationType.VALUE_COUNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.CountCorrelation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">CountCorrelation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*,</span> <span class="pre">action:</span> <span class="pre">typing.Literal['correlation'],</span> <span class="pre">name:</span> <span class="pre">str,</span> <span class="pre">rule:</span> <span class="pre">typing.Union[str,</span> <span class="pre">typing.List[str]],</span> <span class="pre">type:</span> <span class="pre">typing.Union[typing.Literal[&lt;CorrelationType.EVENT_COUNT:</span> <span class="pre">'event_count'&gt;],</span> <span class="pre">typing.Literal[&lt;CorrelationType.VALUE_COUNT:</span> <span class="pre">'value_count'&gt;]],</span> <span class="pre">timespan:</span> <span class="pre">sigma.schema.ConstrainedStrValue,</span> <span class="pre">level:</span> <span class="pre">sigma.schema.RuleLevel,</span> <span class="pre">condition:</span> <span class="pre">typing.Union[sigma.schema.CorrelationLessThan,</span> <span class="pre">sigma.schema.CorrelationLessThanEqual,</span> <span class="pre">sigma.schema.CorrelationGreaterThan,</span> <span class="pre">sigma.schema.CorrelationGreaterThanEqual,</span> <span class="pre">sigma.schema.CorrelationRange],</span> <span class="pre">**extra_data:</span> <span class="pre">typing.Any</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.CountCorrelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.schema.BaseCorrelation" title="sigma.schema.BaseCorrelation"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.schema.BaseCorrelation</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CountCorrelation.condition">
+<span class="sig-name descname"><span class="pre">condition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.schema.CorrelationLessThan" title="sigma.schema.CorrelationLessThan"><span class="pre">sigma.schema.CorrelationLessThan</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.CorrelationLessThanEqual" title="sigma.schema.CorrelationLessThanEqual"><span class="pre">sigma.schema.CorrelationLessThanEqual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.CorrelationGreaterThan" title="sigma.schema.CorrelationGreaterThan"><span class="pre">sigma.schema.CorrelationGreaterThan</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.CorrelationGreaterThanEqual" title="sigma.schema.CorrelationGreaterThanEqual"><span class="pre">sigma.schema.CorrelationGreaterThanEqual</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.CorrelationRange" title="sigma.schema.CorrelationRange"><span class="pre">sigma.schema.CorrelationRange</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.schema.CountCorrelation.condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.CountCorrelation.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[Literal[&lt;CorrelationType.EVENT_COUNT:</span> <span class="pre">'event_count'&gt;],</span> <span class="pre">Literal[&lt;CorrelationType.VALUE_COUNT:</span> <span class="pre">'value_count'&gt;]]</span></em><a class="headerlink" href="#sigma.schema.CountCorrelation.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of correlation to be used</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.IncludeSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">IncludeSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'include'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic.types.FilePath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.IncludeSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code></p>
+<p>Defines a YAML document which includes an outside rule or correlation</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.IncludeSchema.action">
+<span class="sig-name descname"><span class="pre">action</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'include'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sigma.schema.IncludeSchema.action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.IncludeSchema.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pydantic.types.FilePath</span></em><a class="headerlink" href="#sigma.schema.IncludeSchema.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.schema.IncludeSchema.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></span><a class="headerlink" href="#sigma.schema.IncludeSchema.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the specified included file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="sigma.schema.LowercaseString">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">LowercaseString</span></span><a class="headerlink" href="#sigma.schema.LowercaseString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
@@ -585,10 +778,40 @@ are no periods, then the name is an empty string.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.Sigma">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">Sigma</span></span><a class="headerlink" href="#sigma.schema.Sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class is never instantiated but provides an object-oriented
+interface to loading sigma documents as a whole, which could include
+collections of rules bound by correlations and/or an include document
+which imports other rules from disk.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.schema.Sigma.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.Correlation" title="sigma.schema.Correlation"><span class="pre">sigma.schema.Correlation</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sigma.schema.Correlation" title="sigma.schema.Correlation"><span class="pre">sigma.schema.Correlation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sigma.schema.Sigma.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Sigma rules or correlations from the given path. The return
+value of this function is either a singular sigma rule or a correlation
+object which represents a list of rules bound by a correlation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="sigma.schema.SimpleDate">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">SimpleDate</span></span><a class="headerlink" href="#sigma.schema.SimpleDate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></p>
 <p>Simple date class which has a custom parser to handle either YYYY/MM/DD or YYYY-MM-DD</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sigma.schema.TemporalCorrelation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.schema.</span></span><span class="sig-name descname"><span class="pre">TemporalCorrelation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*,</span> <span class="pre">action:</span> <span class="pre">typing.Literal['correlation'],</span> <span class="pre">name:</span> <span class="pre">str,</span> <span class="pre">rule:</span> <span class="pre">typing.Union[str,</span> <span class="pre">typing.List[str]],</span> <span class="pre">type:</span> <span class="pre">typing.Literal[&lt;CorrelationType.TEMPORAL:</span> <span class="pre">'temporal'&gt;],</span> <span class="pre">timespan:</span> <span class="pre">sigma.schema.ConstrainedStrValue,</span> <span class="pre">level:</span> <span class="pre">sigma.schema.RuleLevel,</span> <span class="pre">**extra_data:</span> <span class="pre">typing.Any</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.schema.TemporalCorrelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sigma.schema.BaseCorrelation" title="sigma.schema.BaseCorrelation"><code class="xref py py-class docutils literal notranslate"><span class="pre">sigma.schema.BaseCorrelation</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sigma.schema.TemporalCorrelation.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[&lt;CorrelationType.TEMPORAL:</span> <span class="pre">'temporal'&gt;]</span></em><a class="headerlink" href="#sigma.schema.TemporalCorrelation.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of correlation to be used</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
