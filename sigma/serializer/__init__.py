@@ -28,11 +28,13 @@ from importlib.abc import Traversable
 import yaml
 from yaml.error import YAMLError
 from pydantic.main import BaseModel
+from pydantic.tools import parse_obj_as
 from pydantic.error_wrappers import ValidationError
 
 from sigma import logger
 from sigma.util import CopyableSchema
 from sigma.errors import (
+    SkipRule,
     SerializerNotFound,
     SerializerValidationError,
     UnsupportedSerializerFormat,
@@ -262,7 +264,7 @@ class CommonSerializerSchema(BaseModel):
 
     name: str
     """ Arbitrary name for this serialization schema """
-    description: str
+    description: Optional[str]
     """ Description of the schema """
     transforms: Optional[List[Transformation.Schema]]
     """ List of transforms to be applied """
@@ -304,12 +306,12 @@ class Serializer(ABC):
         self._extend_transforms(self.schema)
 
     @abstractmethod
-    def serialize(self, rule: Union[Rule, List[Rule]], transform: bool = True) -> Any:
+    def serialize(self, rule: Rule, transform: bool = True) -> Any:
         """Serialize the given sigma rule into a new format. The return value can be
         any python object which represents the equivalent rule in a new format.
 
-        :param rule: a rule or list of rules to serialize
-        :type rule: Union[Rule, List[Rule]]
+        :param rule: a rule to serialize
+        :type rule: Rule
         :param transform: whether to apply transformations (default: True, mainly used internally for inheritence)
         :type transform: bool
         :rtype: Any
@@ -319,9 +321,10 @@ class Serializer(ABC):
     @abstractmethod
     def dumps(
         self,
-        rule: Union[Rule, List[Rule]],
+        rule: List[Rule],
         format: Optional[str] = None,
         pretty: bool = False,
+        ignore_skip: bool = False,
     ) -> str:
         """Serialize the given rule(s) and return a string representation. Regardless of
         the number of rules passed, this method should always return a single string in
@@ -330,12 +333,13 @@ class Serializer(ABC):
         exception should be raised. If no format is given, this method should use the
         default format for the serializer.
 
-        :param rule: rule or list of rules to serialize and dump
-        :type rule: Union[Rule, List[Rule]]
+        :param rule: list of rules to serialize and dump
+        :type rule: List[Rule]
         :param format: a format for dumping (e.g. "yaml" or "json")
         :type format: str
         :param pretty: dump pretty-formatted output (default: false)
         :type pretty: bool
+        :param ignore_skip: If true, log and ignore SkipRule exceptions (default: false)
         :rtype: str
         :returns: A string representation of the rule in the new target format
         """
@@ -367,7 +371,11 @@ class Serializer(ABC):
         return rule
 
     @classmethod
-    def load(cls, name: str, config: Optional[Dict[str, Any]] = None):
+    def load(
+        cls,
+        name: str,
+        config: Optional[Union[Dict[str, Any], CommonSerializerSchema]] = None,
+    ):
         """
         Load a serializer definition from any of:
 
@@ -400,9 +408,25 @@ class Serializer(ABC):
         serializers_path = importlib.resources.files("sigma") / "data" / "serializers"
 
         if (serializers_path / (name + ".yml")).is_file():
-            return cls.from_yaml(serializers_path / (name + ".yml"))
+            serializer = cls.from_yaml(serializers_path / (name + ".yml"))
+            if config is not None:
+                if isinstance(config, dict):
+                    parsed_config = serializer.Schema.parse_obj(config)
+                else:
+                    parsed_config = config
+                serializer.merge_config(parsed_config)
+
+            return serializer
         elif pathlib.Path(name).is_file():
-            return cls.from_yaml(name)
+            serializer = cls.from_yaml(name)
+            if config is not None:
+                if isinstance(config, dict):
+                    parsed_config = serializer.Schema.parse_obj(config)
+                else:
+                    parsed_config = config
+                serializer.merge_config(parsed_config)
+
+            return serializer
         elif name in BUILTIN_SERIALIZERS:
             try:
                 schema = BUILTIN_SERIALIZERS[name][0].Schema.parse_obj(config)
@@ -463,6 +487,38 @@ class Serializer(ABC):
                 return cls.from_dict(yaml.safe_load(filp))
             except (ValidationError, YAMLError) as exc:
                 raise SerializerValidationError(exc)
+
+    def merge_config(self, config: CommonSerializerSchema):
+        """Merge the given configuration into our current schema config"""
+
+        for key in config.__fields__.keys():
+            if key not in self.Schema.__fields__:
+                raise SerializerValidationError(f"{key}: no such serializer field")
+
+            value = getattr(config, key)
+
+            if value is not None:
+                if key == "transforms" and self.schema.transforms:
+                    self._extend_transforms(config)
+                elif key == "transforms":
+                    self.schema.transforms = value
+                elif key == "logsource":
+                    if value.rules:
+                        self.schema.logsource.rules.extend(value.rules)
+                    if isinstance(value.defaultindex, str):
+                        value.defaultindex = [value.defaultindex]
+
+                    if value.defaultindex is not None:
+                        if self.schema.logsource.defaultindex is None:
+                            self.schema.logsource.defaultindex = []
+
+                        self.schema.logsource.defaultindex = (
+                            [self.schema.logsource.defaultindex] + value.defaultindex
+                            if isinstance(self.schema.logsource.defaultindex, str)
+                            else self.schema.logsource.defaultindex + value.defaultindex
+                        )
+                elif value is not None:
+                    setattr(self.schema, key, value)
 
 
 class TextQuerySerializer(Serializer):
@@ -570,21 +626,16 @@ class TextQuerySerializer(Serializer):
                 self._serialize_with_wildcard, "*{}*"
             )
 
-    def serialize(
-        self, rule: Union[Rule, List[Rule]], transform: bool = True
-    ) -> Union[str, List[str]]:
+    def serialize(self, rule: Rule, transform: bool = True) -> str:
         """Serialize the rule to a single text query
 
-        :param rule: a rule or list of rules to be serialized
-        :type rule: Union[Rule, List[Rule]]
+        :param rule: a rule to be serialized
+        :type rule: Rule
         :param transform: whether to apply transformations (default: True)
         :type transform: bool
-        :rtype: Union[str, List[str]]
-        :returns: the serialized rule or list of serialized rules (if a list was passed in)
+        :rtype: str
+        :returns: the serialized rule
         """
-
-        if isinstance(rule, list):
-            return [self.serialize(r) for r in rule]
 
         if transform:
             rule = rule.transform(self.transforms)
@@ -593,9 +644,10 @@ class TextQuerySerializer(Serializer):
 
     def dumps(
         self,
-        rule: Union[Rule, List[Rule]],
+        rule: List[Rule],
         format: Optional[str] = None,
         pretty: bool = False,
+        ignore_skip: bool = True,
     ) -> str:
         """The rule(s) to a string. In the case of a TextQuerySerializer, this
         is the same as dumping the rule(s) directly, with newlines separating"""
@@ -603,7 +655,15 @@ class TextQuerySerializer(Serializer):
         if format is not None and format != "raw":
             raise UnsupportedSerializerFormat(format)
 
-        serialized = self.serialize(rule)
+        serialized = []
+        for r in rule:
+            try:
+                serialized.append(self.serialize(r))
+            except SkipRule as exc:
+                if ignore_skip:
+                    exc.log(r)
+                else:
+                    raise
 
         return serialized if isinstance(serialized, str) else "\n".join(serialized)
 

@@ -14,6 +14,33 @@ class SigmaError(Exception):
     """Base generic sigma error. All other sigma errors are subclasses of this."""
 
 
+class MultipleCorrelationError(SigmaError):
+    """The given YAML file contained multiple correlation documents"""
+
+
+class NoCorrelationDocument(SigmaError):
+    """A YAML document contained multiple rules and no correlation"""
+
+
+class MissingCorrelationRule(SigmaError):
+    """A rule specified in a correlation document was not found"""
+
+
+class DuplicateRuleNameError(SigmaError):
+    """There one or more rules with duplicate names in the given YAML file"""
+
+    def __init__(self, name):
+        super().__init__(f"duplicate rule name/title: {name}")
+
+
+class UnknownRuleNameError(SigmaError):
+    """The specified rule name (most likely in a correlation) was not found
+    in the document."""
+
+    def __init__(self, name):
+        super().__init__(f"{name}: rule not found")
+
+
 class UnsupportedSerializerFormat(SigmaError):
     """An unsupported format argument was provided to the
     :py:meth:`~sigma.serializer.Serializer.dump` method."""
@@ -140,3 +167,16 @@ class SerializerValidationError(SigmaValidationError):
 
 class TransformValidationError(SigmaValidationError):
     """Raised when a transform config fails validation"""
+
+
+class SkipRule(SigmaError):
+    """Skip the currently processing rule. This is mainly used during conversion."""
+
+    def log(self, rule):
+        """Helper method to always log a skipped rule in the same way
+
+        :param rule: the rule that was skipped
+        :type rule: sigma.schema.Rule
+        """
+
+        logger.warn("skipping %s: %s", rule.title, self)

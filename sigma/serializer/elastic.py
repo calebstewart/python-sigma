@@ -1,16 +1,18 @@
 import json
 import uuid
 from enum import Enum
-from typing import Any, Dict, List, Union, Literal, ClassVar, Optional, Annotated
+from typing import Any, Set, Dict, List, Union, Literal, ClassVar, Optional, Annotated
 from datetime import datetime
 
 import yaml
 from pydantic.main import BaseModel
+from pydantic.tools import parse_obj_as
 from pydantic.fields import Field
 
+from sigma import logger
 from sigma.util import CopyableSchema
 from sigma.mitre import Attack, Tactic, Technique
-from sigma.errors import UnsupportedSerializerFormat
+from sigma.errors import SkipRule, UnsupportedSerializerFormat
 from sigma.schema import Rule, RuleTag
 from sigma.grammar import Expression, FieldComparison
 from sigma.serializer import TextQuerySerializer, CommonSerializerSchema
@@ -64,12 +66,7 @@ class EventQueryLanguage(TextQuerySerializer):
         class Config(CopyableSchema):
             schema_extra = CommonSerializerSchema.Config.copy_schema({"base": "eql"})
 
-    def serialize(
-        self, rule: Union[Rule, List[Rule]], transform: bool = True
-    ) -> Union[str, List[str]]:
-
-        if isinstance(rule, list):
-            return [self.serialize(r) for r in rule]
+    def serialize(self, rule: Rule, transform: bool = True) -> str:
 
         if transform:
             rule = rule.transform(self.transforms)
@@ -94,7 +91,7 @@ class EventQueryLanguage(TextQuerySerializer):
         rule.detection.expression.visit(_find_category)
 
         # Serialize the query
-        result = super().serialize(rule)
+        result = super().serialize(rule, transform=False)
 
         if len(categories) > 1 or not categories:
             category = "any"
@@ -355,15 +352,22 @@ class ElasticSecurityRule(EventQueryLanguage):
 
     def dumps(
         self,
-        rule: Union[Rule, List[Rule]],
+        rule: List[Rule],
         format: Optional[str] = None,
         pretty: bool = False,
+        ignore_skip: bool = False,
     ) -> str:
         """Dump the rule as a string in either JSON or YAML format"""
 
-        serialized = self.serialize(rule)
-        if not isinstance(serialized, list):
-            serialized = [serialized]
+        serialized = []
+        for r in rule:
+            try:
+                serialized.append(self.serialize(r))
+            except SkipRule as exc:
+                if ignore_skip:
+                    exc.log(r)
+                else:
+                    raise
 
         if format is None or format == "json":
             if pretty:
@@ -374,14 +378,9 @@ class ElasticSecurityRule(EventQueryLanguage):
         else:
             raise UnsupportedSerializerFormat(format)
 
-    def serialize(
-        self, rule: Union[Rule, List[Rule]], transform: bool = True
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def serialize(self, rule: Rule, transform: bool = True) -> Dict[str, Any]:
         """Serialize the rule(s) to a dictionary representing an Elastic Security
         EQL rule."""
-
-        if isinstance(rule, list):
-            return [self.serialize(r) for r in rule]
 
         if transform:
             rule = rule.transform(self.transforms)
@@ -402,7 +401,7 @@ class ElasticSecurityRule(EventQueryLanguage):
         query = super().serialize(rule, transform=False)
 
         attack = Attack.load()
-        tags = []
+        tags: Set[str] = set()
         threat: List[Dict[str, Any]] = []
         techniques: Dict[str, Technique] = {}
         tactics: Dict[str, Tactic] = {}
@@ -418,30 +417,30 @@ class ElasticSecurityRule(EventQueryLanguage):
                         name = tag.name.replace("_", " ").lower()
                         for tactic in attack.tactics:
                             if tactic.title.lower() == name:
-                                tags.append(tactic.id.upper())
+                                tags.add(tactic.id.upper())
                                 tactics[tactic.id] = tactic
                                 break
                         else:
-                            tags.append(tag.name)
+                            tags.add(tag.name)
 
                         continue
 
                     # Tactic ID
                     tactic = attack.get_tactic(tag.name)
                     if tactic is not None:
-                        tags.append(tactic.id.upper())
+                        tags.add(tactic.id.upper())
                         tactics[tactic.id] = tactic
                         continue
 
                     # Technique ID
                     technique = attack.get_technique(tag.name)
                     if technique is not None:
-                        tags.append(technique.id.upper())
+                        tags.add(technique.id.upper())
                         if technique.tactics:
                             for tactic_id in technique.tactics:
                                 tactic = attack.get_tactic(tactic_id)
                                 if tactic:
-                                    tags.append(tactic.title)
+                                    tags.add(tactic.title)
                                     tactics[tactic.id] = tactic
 
                         techniques[technique.id] = technique
@@ -450,22 +449,20 @@ class ElasticSecurityRule(EventQueryLanguage):
                         if "." in technique.id:
                             technique = attack.get_technique(technique.id.split(".")[0])
                             if technique is not None:
-                                tags.append(technique.id.upper())
+                                tags.add(technique.id.upper())
                                 if technique.tactics:
                                     for tactic_id in technique.tactics:
                                         tactic = attack.get_tactic(tactic_id)
                                         if tactic:
-                                            tags.append(tactic.title)
+                                            tags.add(tactic.title)
                                             tactics[tactic.id] = tactic
                                 techniques[technique.id] = technique
 
                         continue
 
-                    tags.append(tag.name.upper())
+                    tags.add(tag.name.upper())
                 else:
-                    tags.append(str(tag))
-
-        tags.sort()
+                    tags.add(str(tag))
 
         if tactics:
             for tactic in tactics.values():
@@ -550,7 +547,7 @@ class ElasticSecurityRule(EventQueryLanguage):
             )
             if rule.level
             else self.schema.severity_default,
-            "tags": tags,
+            "tags": list(tags),
             "to": "now",
             "type": self.schema.rule_type,
             "threat": threat,
@@ -563,3 +560,12 @@ class ElasticSecurityRule(EventQueryLanguage):
             result["timestamp_override"] = self.schema.timestamp_override
 
         return result
+
+    def merge_config(self, config: Dict[str, Any]):
+
+        if "actions" in config:
+            self.schema.actions.extend(
+                parse_obj_as(List[ElasticSecurityAction], config["actions"])
+            )
+
+        return super().merge_config(config)

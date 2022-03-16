@@ -11,7 +11,7 @@ from rich.logging import RichHandler
 
 from sigma import logging
 from sigma.cli import CommandWithVerbosity, cli, console, error_console
-from sigma.errors import SigmaError
+from sigma.errors import SkipRule, SigmaError
 from sigma.schema import Rule
 from sigma.serializer import Serializer
 
@@ -26,6 +26,7 @@ from sigma.serializer import Serializer
 @click.option(
     "--serializer",
     "-s",
+    "serializer_name",
     help="Name, path or fully-qualified class name of the serializer to use",
     required=True,
 )
@@ -41,15 +42,21 @@ from sigma.serializer import Serializer
     is_flag=True,
     help="Pretty-format the output",
 )
+@click.option(
+    "--fail-on-skip",
+    is_flag=True,
+    help="Cause conversion failure if a rule is skipped.",
+)
 @click.argument("rules", nargs=-1)
 @click.pass_obj
 def convert(
     obj: Dict[str, Any],
     ignore_errors: bool,
-    serializer: str,
+    serializer_name: str,
     format: Optional[str],
     pretty: bool,
     rules: List[str],
+    fail_on_skip: bool,
 ):
     """
     Convert Sigma rules to various formats using built-in or custom serializers.
@@ -64,7 +71,7 @@ def convert(
     """
 
     # Attempt to load the specified serializer
-    serializer: Serializer = Serializer.load(serializer)
+    serializer = Serializer.load(serializer_name)
 
     rule_list = []
     for rule_path in rules:
@@ -86,7 +93,13 @@ def convert(
             extra={"markup": True},
         )
 
-    result = serializer.dumps(rule_list, format=format, pretty=pretty)
+    result = serializer.dumps(
+        rule_list, format=format, pretty=pretty, ignore_skip=not fail_on_skip
+    )
+
+    if result.strip() == "":
+        logging.warn("all rules were skipped.")
+        return
 
     if format is None:
         format = serializer.DEFAULT_FORMAT

@@ -51,7 +51,7 @@ from typing import Any, Dict, List, Type, Tuple, Literal, Pattern, Optional, Gen
 from pydantic.main import BaseModel
 from pydantic.fields import Field
 
-from sigma.errors import SigmaError, UnknownTransform
+from sigma.errors import SkipRule, SigmaError, UnknownTransform
 from sigma.schema import Rule, RuleTag
 from sigma.grammar import (
     FieldLike,
@@ -278,6 +278,8 @@ class FieldMap(Transformation):
         type: Literal["field_map"]
         mapping: Dict[str, str]
         """ Field name mappings """
+        skip_unknown: bool = False
+        """ Raise a SkipRule exception for fields that aren't mapped """
 
         class Config:
             extra = "forbid"
@@ -290,6 +292,7 @@ class FieldMap(Transformation):
                             "CommandLine": "process.command_line",
                             "Image": "process.executable",
                         },
+                        "skip_unknown": False,
                     }
                 ]
             }
@@ -297,14 +300,19 @@ class FieldMap(Transformation):
     def __init__(self, schema: Schema):
         super().__init__(schema)
 
-        self.mapping = schema.mapping
+        self.schema: FieldMap.Schema
 
     def transform_expression(self, rule: Rule, expression: Expression) -> Expression:
         """Replace any field names based on the provided mapping. If the expression
         is not a field comparison, this method simply returns the expression unaltered."""
 
-        if isinstance(expression, FieldComparison) and expression.field in self.mapping:
-            expression.field = self.mapping[expression.field]
+        if (
+            isinstance(expression, FieldComparison)
+            and expression.field in self.schema.mapping
+        ):
+            expression.field = self.schema.mapping[expression.field]
+        elif isinstance(expression, FieldComparison) and self.schema.skip_unknown:
+            raise SkipRule(f"{expression.field}: no valid mapping")
 
         return expression
 
@@ -323,6 +331,8 @@ class FieldFuzzyMap(Transformation):
         type: Literal["field_fuzzy_map"]
         mapping: Dict[str, str]
         """ Field name mappings """
+        skip_unknown: bool = False
+        """ Raise a SkipRule exception for fields that aren't mapped """
 
         class Config:
             extra = "forbid"
@@ -335,6 +345,7 @@ class FieldFuzzyMap(Transformation):
                             "command_line": "process.command_line",
                             "image": "process.executable",
                         },
+                        "skip_unknown": False,
                     }
                 ]
             }
@@ -342,6 +353,7 @@ class FieldFuzzyMap(Transformation):
     def __init__(self, schema: Schema):
         super().__init__(schema)
 
+        self.schema: FieldFuzzyMap.Schema
         self.mapping = {key.lower(): value for key, value in schema.mapping.items()}
         self.mapping.update(
             {key.replace("_", ""): value for key, value in schema.mapping.items()}
@@ -356,6 +368,8 @@ class FieldFuzzyMap(Transformation):
             and expression.field.lower() in self.mapping
         ):
             expression.field = self.mapping[expression.field.lower()]
+        elif isinstance(expression, FieldComparison) and self.schema.skip_unknown:
+            raise SkipRule(f"{expression.field}: no valid mapping")
 
         return expression
 

@@ -49,7 +49,7 @@ class CommandWithVerbosity(click.Command):
 
         # Setup logging according to the --verbose argument
         logging.basicConfig(
-            level=logging.WARNING
+            level=logging.INFO
             - ctx.params["verbose"] * (logging.CRITICAL - logging.ERROR),
             format="%(message)s",
             handlers=[
@@ -154,4 +154,4 @@ def cli(ctx: click.Context, mitre_data: Optional[TextIO]):
     pass
 
 
-from sigma.cli import list, mitre, schema, validate, converter, transform
+from sigma.cli import list, mitre, schema, elastic, validate, converter, transform

@@ -29,13 +29,25 @@ into a python-native format, which is normally used in conjunction with a serial
 import re
 import fnmatch
 import pathlib
+from os import PathLike
 from enum import Enum
 from uuid import UUID
-from typing import Any, Dict, List, Union, Callable, ClassVar, Optional, Generator
+from typing import (
+    Any,
+    Dict,
+    List,
+    Union,
+    Literal,
+    Callable,
+    ClassVar,
+    Optional,
+    Generator,
+)
 from datetime import date
 
 import yaml
 import pydantic
+from pydantic.tools import parse_obj_as
 from pydantic.fields import Field, PrivateAttr
 from pyparsing.exceptions import ParseException
 from pydantic.error_wrappers import ValidationError
@@ -43,7 +55,12 @@ from pydantic.error_wrappers import ValidationError
 from sigma.errors import (
     RuleValidationError,
     ConditionSyntaxError,
+    UnknownRuleNameError,
+    NoCorrelationDocument,
+    DuplicateRuleNameError,
+    MissingCorrelationRule,
     UnknownIdentifierError,
+    MultipleCorrelationError,
 )
 from sigma.grammar import (
     LogicalOr,
@@ -429,6 +446,103 @@ class RuleDetection(pydantic.BaseModel):
         }
 
 
+class CorrelationType(str, Enum):
+    EVENT_COUNT = "event_count"
+    VALUE_COUNT = "value_count"
+    TEMPORAL = "temporal"
+
+
+class CorrelationSimpleCondition(pydantic.BaseModel):
+    @property
+    def value(self) -> int:
+        for _, value in self:
+            return value
+        raise RuntimeError("no condition field")
+
+
+class CorrelationLessThan(CorrelationSimpleCondition):
+    lt: int
+
+
+class CorrelationGreaterThan(CorrelationSimpleCondition):
+    gt: int
+
+
+class CorrelationLessThanEqual(CorrelationSimpleCondition):
+    lte: int
+
+
+class CorrelationGreaterThanEqual(CorrelationSimpleCondition):
+    gte: int
+
+
+class CorrelationRange(pydantic.BaseModel):
+    range: str = Field(regex="[0-9]+\\.\\.[0-9]+")
+
+    @property
+    def minimum(self) -> int:
+        return int(self.range.split("..")[0])
+
+    @property
+    def maximum(self) -> int:
+        return int(self.range.split("..")[1])
+
+
+CorrelationCondition = Union[
+    CorrelationLessThan,
+    CorrelationLessThanEqual,
+    CorrelationGreaterThan,
+    CorrelationGreaterThanEqual,
+    CorrelationRange,
+]
+
+
+class BaseCorrelation(pydantic.BaseModel):
+
+    action: Literal["correlation"]
+    """ A correlation action """
+    name: str
+    """ Name of this correlation """
+    rule: Union[str, List[str]]
+    """ List of rule titles or correlation names also specified in the same file. """
+    group_by: Optional[Union[str, List[str]]] = Field(alias="group-by")
+    """ Optional field to group results by """
+    type: CorrelationType
+    """ Type of correlation to be used """
+    timespan: str = Field(regex="[0-9]+[smhd]")
+    """ A timespan used for correlating events (e.g. 5m, 3d or 30s) """
+    level: RuleLevel
+    """ A rule level to apply to the correlation of all rules """
+
+
+class CountCorrelation(BaseCorrelation):
+
+    type: Union[
+        Literal[CorrelationType.EVENT_COUNT], Literal[CorrelationType.VALUE_COUNT]
+    ]
+    condition: CorrelationCondition
+
+
+class TemporalCorrelation(BaseCorrelation):
+
+    type: Literal[CorrelationType.TEMPORAL]
+
+
+CorrelationSchema = Union[CountCorrelation, TemporalCorrelation]
+
+
+class IncludeSchema(pydantic.BaseModel):
+    """Defines a YAML document which includes an outside rule or correlation"""
+
+    action: Literal["include"]
+    filename: pydantic.FilePath
+
+    def load(self) -> "Rule":
+        """Load the specified included file"""
+
+        return Rule.from_yaml(self.filename)
+
+
 class Rule(pydantic.BaseModel):
     """Sigma Rule Specification"""
 
@@ -594,3 +708,114 @@ class Rule(pydantic.BaseModel):
                 }
             ]
         }
+
+
+class Correlation(object):
+    """An object representing a collection of rules bound by a correlation"""
+
+    def __init__(self, data: CorrelationSchema, rules: List["SigmaDocument"]):
+
+        # Store the raw schema data
+        self.data = data
+
+        # Normalize the rule specification to a list
+        if isinstance(self.data.rule, str):
+            self.data.rule = [self.data.rule]
+
+        # Ensure all rules in the list exist
+        name_map = {rule.title: rule for rule in rules}
+        for rule_name in self.data.rule:
+            if rule_name not in name_map:
+                raise MissingCorrelationRule(
+                    f"{rule_name}: rule was not found in document"
+                )
+
+        # Filter out unused rules
+        self.rules = [rule for rule in rules if rule.title in self.data.rule]
+
+
+# When loading Sigma YAML files, individual documents could be any of
+# these types.
+SigmaDocumentSchema = Union[Rule, CorrelationSchema, IncludeSchema]
+SigmaDocument = Union[Rule, Correlation]
+
+
+class Sigma:
+    """This class is never instantiated but provides an object-oriented
+    interface to loading sigma documents as a whole, which could include
+    collections of rules bound by correlations and/or an include document
+    which imports other rules from disk."""
+
+    @classmethod
+    def load(
+        cls, path: Union[str, PathLike]
+    ) -> Union[SigmaDocument, List[SigmaDocument]]:
+        """Load Sigma rules or correlations from the given path. The return
+        value of this function is either a singular sigma rule or a correlation
+        object which represents a list of rules bound by a correlation."""
+
+        documents: Dict[str, SigmaDocument] = {}
+
+        try:
+            # Load all documents in the file and parse as sigma documents
+            with open(path) as filp:
+                raw_docs = yaml.safe_load_all(filp)
+                raw_documents: List[SigmaDocumentSchema] = parse_obj_as(
+                    List[SigmaDocumentSchema], raw_docs
+                )
+        except ValidationError as exc:
+            raise RuleValidationError(exc)
+
+        # Resolve all of the include statements
+        raw_documents = [
+            d.load() if isinstance(d, IncludeSchema) else d for d in raw_documents
+        ]
+
+        # Next, collect all the rules by name
+        for document in raw_documents:
+            if not isinstance(document, Rule):
+                continue
+
+            # The rule name can either be from a custom field named "name"
+            # or taken from the rule title.
+            if getattr(document, "name", None) is not None:
+                name = document.name
+            else:
+                name = document.title
+
+            if name in documents:
+                raise DuplicateRuleNameError(name)
+
+            documents[name] = document
+
+            # Also able to reference by ID
+            if document.id is not None:
+                documents[str(id)] = document
+
+        # Now collect all the conditions
+        for document in raw_documents:
+            if not isinstance(document, CorrelationSchema):
+                continue
+
+            if document.name in documents:
+                raise DuplicateRuleNameError(document.name)
+
+            rules = []
+
+            if isinstance(document.rule, str):
+                document.rule = [document.rule]
+
+            try:
+                rules = [documents[name] for name in document.rule]
+            except KeyError as exc:
+                raise UnknownRuleNameError(str(exc))
+
+            documents[document.name] = Correlation(document, rules)
+
+        # Return all correlation objects and any rules which  explicitly
+        # specify the generate field as true.
+        return [
+            d
+            for d in documents.values()
+            if isinstance(d, Correlation) or getattr(d, "generate", False)
+        ]
