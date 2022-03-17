@@ -87,6 +87,7 @@ class CommandWithVerbosity(click.Command):
                 logger.exception(str(exc))
             else:
                 logger.error(str(exc))
+            ctx.exit(1)
 
 
 class FuzzyAliasedGroup(click.Group):

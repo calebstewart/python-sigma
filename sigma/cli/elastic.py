@@ -67,8 +67,7 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
             schema = yaml.safe_load(deployment_spec)
             spec = ElasticDeploymentSpec.parse_obj(schema)
         except (YAMLError, ValidationError) as exc:
-            logger.error("failed to parse deployment spec: %s", exc)
-            return
+            raise SigmaError(f"failed to parse deployment spec: {exc}")
 
     # Build the serializers
     logger.info("building serializers from schema")
@@ -77,8 +76,7 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
         try:
             serializers[key] = Serializer.load(value.base, value)
         except SerializerValidationError as exc:
-            logger.error("serializer: %s: %s", key, exc)
-            return
+            raise SigmaError(f"serializer: {key}: {exc}") from exc
 
     for key, rule_paths in spec.rules.items():
 
@@ -87,8 +85,7 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
             try:
                 serializer = Serializer.load(key)
             except SigmaError as exc:
-                logger.error("serializer: %s: %s", key, exc)
-                raise
+                raise SigmaError(f"serializer: {key}: {exc}") from exc
         else:
             serializer = serializers[key]
 
@@ -106,7 +103,7 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
                 rules, format="json", pretty=False, ignore_skip=True
             )
         except SigmaError as exc:
-            logger.error("%s: rule serialization failed: %s", key, exc)
+            raise SigmaError(f"{key}: rule serialization failed: {exc}") from exc
             raise
 
         if result.strip() == "":
@@ -125,12 +122,9 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
         )
 
         if not r.ok:
-            logger.error(
-                "rule upload failed: elastic returned status code: %s: %s",
-                r.status_code,
-                r.text,
+            raise SigmaError(
+                f"rule upload failed: elastic returned status code: {r.status_code}: {r.text}"
             )
-            return
 
 
 def load_rules_from_paths(rule_paths) -> List[Rule]:
