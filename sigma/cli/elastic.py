@@ -1,4 +1,5 @@
 import os
+import glob
 import pathlib
 from io import StringIO
 from typing import IO, Dict, List
@@ -104,7 +105,6 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
             )
         except SigmaError as exc:
             raise SigmaError(f"{key}: rule serialization failed: {exc}") from exc
-            raise
 
         if result.strip() == "":
             logger.info("%s: all rules skipped; skipping upload.")
@@ -132,7 +132,10 @@ def load_rules_from_paths(rule_paths) -> List[Rule]:
     rules = []
 
     for path in rule_paths:
-        if os.path.isdir(path):
+        if "*" in str(path):
+            new_paths = glob.glob(str(path), recursive=True)
+            rules.extend(load_rules_from_paths(new_paths))
+        elif os.path.isdir(path):
             new_paths = list(pathlib.Path(path).rglob("*.yml"))
             rules.extend(load_rules_from_paths(new_paths))
         elif os.path.isfile(path):
