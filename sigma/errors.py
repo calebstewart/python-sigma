@@ -50,6 +50,10 @@ class UnsupportedSerializerFormat(SigmaError):
         self.format = format
 
 
+class NoTestData(SigmaError):
+    """A rule test was attempted but no test data was provided"""
+
+
 class ConditionSyntaxError(SigmaError):
     """The detection.condition field syntax was incorrect"""
 

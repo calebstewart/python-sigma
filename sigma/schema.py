@@ -33,6 +33,7 @@ from os import PathLike
 from enum import Enum
 from uuid import UUID
 from typing import (
+    IO,
     Any,
     Dict,
     List,
@@ -41,6 +42,7 @@ from typing import (
     Literal,
     Callable,
     ClassVar,
+    Iterable,
     Optional,
     Generator,
 )
@@ -53,7 +55,9 @@ from pydantic.fields import Field, PrivateAttr
 from pyparsing.exceptions import ParseException
 from pydantic.error_wrappers import ValidationError
 
+from sigma.util import joined_iterator
 from sigma.errors import (
+    NoTestData,
     RuleValidationError,
     ConditionSyntaxError,
     UnknownRuleNameError,
@@ -551,6 +555,18 @@ class IncludeSchema(pydantic.BaseModel):
         return Rule.from_yaml(self.filename)
 
 
+class RuleTestData(pydantic.BaseModel):
+    """Test data for a given rule. This is a non-standard Sigma rule field which contains data
+    used to automatically test sigma rules. The event documents should use field names which
+    match the field names used in the sigma rule definition, and not detection engine specific
+    field names (e.g. after field mapping)."""
+
+    positive: List[Dict[str, Any]]
+    """ List of event documents with fields which should trigger the sigma rule """
+    negative: List[Dict[str, Any]]
+    """ List of event documents with fields which should **not** trigger the sigma rule """
+
+
 class Rule(pydantic.BaseModel):
     """Sigma Rule Specification"""
 
@@ -600,6 +616,50 @@ class Rule(pydantic.BaseModel):
     )
     """ The date the rule was last modified. This should be YYYY-MM-DD or YYYY/MM/DD.
     If the field is not formatted in this way, it will be saved as a simple string."""
+    test_data: Optional[Union[RuleTestData, Any]]
+    """ A custom field which defines unit test data for the given rule. If the test data
+    does not conform to the RuleTestData structure, it is loaded anyway and ignored in
+    order to comply with the sigma specification. """
+
+    def test(
+        self,
+        positive: Optional[Iterable[Dict[str, Any]]] = None,
+        negative: Optional[Iterable[Dict[str, Any]]] = None,
+    ):
+        """Test the given rule with positive and negative data sets. The rule can contain datasets
+        embedded in the `test_data` field of the rule itself. The given positive and negative datasets
+        will be appended to the embedded data sets. If no data set is provided, and there are no
+        built-in data sets for this rule, a NoTestData exception is raised. If a test fails, an
+        assertion error is raised."""
+
+        if positive is None:
+            positive = []
+        if negative is None:
+            negative = []
+
+        if not positive and not negative:
+            if not isinstance(self.test_data, RuleTestData) or (
+                not self.test_data.positive and not self.test_data.negative
+            ):
+                raise NoTestData("no test data provided")
+
+        expression = self.detection.expression
+
+        for case in joined_iterator(
+            positive,
+            self.test_data.positive if isinstance(self.test_data, RuleTestData) else [],
+        ):
+            assert expression.evaluate(
+                case
+            ), f"evaluation of positive case failed: {case}"
+
+        for case in joined_iterator(
+            negative,
+            self.test_data.negative if isinstance(self.test_data, RuleTestData) else [],
+        ):
+            assert not expression.evaluate(
+                case
+            ), f"evaluation of negative case succeeded: {case}"
 
     def transform(self, transforms: List["sigma.transorms.Transformation"]) -> "Rule":
         """Apply all transformations to this rule and all condition expressions"""
@@ -615,11 +675,14 @@ class Rule(pydantic.BaseModel):
         return rule
 
     @classmethod
-    def from_yaml(cls, path: Union[str, pathlib.Path]) -> "Rule":
+    def from_yaml(cls, path: Union[str, pathlib.Path, IO]) -> "Rule":
         """Load a rule from a YAML file"""
 
-        with open(path) as filp:
-            return cls.from_sigma(yaml.safe_load(filp))
+        if isinstance(path, str) or isinstance(path, pathlib.Path):
+            with open(path) as filp:
+                return cls.from_sigma(yaml.safe_load(filp))
+        else:
+            return cls.from_sigma(yaml.safe_load(path))
 
     @classmethod
     def parse_obj(cls: Type["Rule"], obj: Any) -> "Rule":

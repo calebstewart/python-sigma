@@ -11,6 +11,7 @@ are constructed from the detection matching identifiers and are things like
 field equality tests
 """
 import base64
+import fnmatch
 import itertools
 from typing import Any, Dict, List, Type, Tuple, Union, Callable, ClassVar, Optional
 
@@ -59,6 +60,17 @@ class Expression(BaseModel):
     def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
         """Convert an expression to a condition string and a dict of new detection
         selectors."""
+
+        raise NotImplementedError
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        """Evaluate this expression with the given field values
+
+        :param fields: dictionary mapping field names to values
+        :type fields: Dict[str, Any]
+        :rtype: bool
+        :returns: True if the fields set matches; False otherwise
+        """
 
         raise NotImplementedError
 
@@ -172,6 +184,11 @@ class LogicalNot(LogicalExpression):
 
         return f"not {condition}", selectors
 
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        if not isinstance(self.args[0], Expression):
+            return False
+        return not self.args[0].evaluate(fields)
+
 
 class LogicalOr(LogicalExpression):
     """Logical Or expression"""
@@ -262,6 +279,14 @@ class LogicalOr(LogicalExpression):
         else:
             return " or ".join(conditions), selectors
 
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        for arg in self.args:
+            if not isinstance(arg, Expression):
+                continue
+            if arg.evaluate(fields):
+                return True
+        return False
+
 
 class LogicalAnd(LogicalExpression):
     """Logical And Expression"""
@@ -297,6 +322,14 @@ class LogicalAnd(LogicalExpression):
             return "(" + " and ".join(conditions) + ")", selectors
         else:
             return " and ".join(conditions), selectors
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        for arg in self.args:
+            if not isinstance(arg, Expression):
+                continue
+            if not arg.evaluate(fields):
+                return False
+        return True
 
 
 class Identifier(CoreExpression):
@@ -407,6 +440,12 @@ class FieldEquality(FieldComparison):
 
         return "{}", [{self.field: self.value}]
 
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        try:
+            return fields[self.field] == self.value
+        except KeyError:
+            return False
+
 
 class FieldLike(FieldComparison):
     """Test for field equality"""
@@ -418,6 +457,12 @@ class FieldLike(FieldComparison):
         """Convert a not expression to a detection condition"""
 
         return "{}", [{self.field: self.value}]
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        try:
+            return fnmatch.fnmatch(self.value, fields[self.field])
+        except KeyError:
+            return False
 
 
 class FieldContains(FieldComparison):
@@ -435,6 +480,12 @@ class FieldContains(FieldComparison):
         """Convert a not expression to a detection condition"""
 
         return "{}", [{self.field + "|contains": self.value}]
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        try:
+            return self.value in fields[self.field]
+        except KeyError:
+            return False
 
 
 class Base64FieldEquality(FieldComparison):
@@ -467,6 +518,12 @@ class FieldEndsWith(FieldComparison):
 
         return "{}", [{self.field + "|endswith": self.value}]
 
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        try:
+            return fields[self.field].endswith(self.value)
+        except KeyError:
+            return False
+
 
 class FieldStartsWith(FieldComparison):
     """Test if a field starts with a token"""
@@ -483,6 +540,12 @@ class FieldStartsWith(FieldComparison):
         """Convert a not expression to a detection condition"""
 
         return "{}", [{self.field + "|startswith": self.value}]
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        try:
+            return fields[self.field].startswith(self.value)
+        except KeyError:
+            return False
 
 
 class FieldRegex(FieldComparison):
@@ -501,6 +564,14 @@ class FieldRegex(FieldComparison):
 
         return "{}", [{self.field + "|re": self.value}]
 
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        import re
+
+        try:
+            return re.search(self.value, fields[self.field]) is not None
+        except KeyError:
+            return False
+
 
 class FieldLookup(FieldComparison):
     """Check if the field is in a list of values with wildcard matching"""
@@ -509,6 +580,16 @@ class FieldLookup(FieldComparison):
 
     def __repr__(self):
         return f"IN({self.field}, {repr(self.value)})"
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        try:
+            field_value = fields[self.field]
+            for pattern in self.value:
+                if fnmatch.fnmatch(field_value, pattern):
+                    return True
+        except KeyError:
+            pass
+        return False
 
 
 class FieldLookupRegex(FieldLookup):
@@ -521,6 +602,18 @@ class FieldLookupRegex(FieldLookup):
 
     def __repr__(self):
         return f"REGEX({self.field}, {repr(self.value)})"
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        import re
+
+        try:
+            field_value = fields[self.field]
+            for pattern in self.value:
+                if re.search(pattern, field_value) is not None:
+                    return True
+        except KeyError:
+            pass
+        return False
 
 
 class KeywordSearch(Expression):
@@ -535,6 +628,13 @@ class KeywordSearch(Expression):
         """Convert a not expression to a detection condition"""
 
         return "{}", [[self.value]]
+
+    def evaluate(self, fields: Dict[str, Any]) -> bool:
+        for field_value in fields.values():
+            if fnmatch.fnmatch(str(field_value), self.value):
+                return True
+
+        return False
 
 
 def base64offset_modifier(field: str, value: Any) -> List[str]:

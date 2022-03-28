@@ -252,6 +252,8 @@ class AddTags(Transformation):
                 ]
             }
 
+    schema: Schema
+
     def transform_rule(self, rule: Rule) -> Rule:
 
         if rule.tags is not None:
