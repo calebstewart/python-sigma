@@ -50,7 +50,13 @@ def elastic():
     help="Elastic Base URL",
     envvar="ELASTIC_URL",
 )
-def deploy(deployment_spec: IO, url: str, username: str, password: str):
+@click.option(
+    "--dry-run",
+    "-d",
+    is_flag=True,
+    help="Dump the resulting JSON serialized rules",
+)
+def deploy(deployment_spec: IO, url: str, username: str, password: str, dry_run: bool):
     """Use the given serializer to convert all rules defined in the deployment
     specification and upload directly to an ElasticSearch instance.
 
@@ -58,8 +64,9 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
     DEPLOYMENT_SPEC\tPath to a deployment specification YAML file.
     """
 
-    if not username or not password or not url:
-        raise SigmaError("username, password and url must be provided")
+    if not dry_run:
+        if not username or not password or not url:
+            raise SigmaError("username, password and url must be provided")
 
     # Load the deployment specification
     with deployment_spec:
@@ -110,21 +117,24 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str):
             logger.info("%s: all rules skipped; skipping upload.")
             continue
 
-        logger.info("%s: uploading rules", key)
-        r = requests.post(
-            f"{url}/api/detection_engine/rules/_import",
-            params={"overwrite": "true"},
-            headers={"kbn-xsrf": "true"},
-            auth=(username, password),
-            files={
-                "file": ("rules.ndjson", StringIO(result)),
-            },
-        )
-
-        if not r.ok:
-            raise SigmaError(
-                f"rule upload failed: elastic returned status code: {r.status_code}: {r.text}"
+        if dry_run:
+            print(result)
+        else:
+            logger.info("%s: uploading rules", key)
+            r = requests.post(
+                f"{url}/api/detection_engine/rules/_import",
+                params={"overwrite": "true"},
+                headers={"kbn-xsrf": "true"},
+                auth=(username, password),
+                files={
+                    "file": ("rules.ndjson", StringIO(result)),
+                },
             )
+
+            if not r.ok:
+                raise SigmaError(
+                    f"rule upload failed: elastic returned status code: {r.status_code}: {r.text}"
+                )
 
 
 def load_rules_from_paths(rule_paths) -> List[Rule]:
