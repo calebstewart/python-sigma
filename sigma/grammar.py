@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from pyparsing import Word, Keyword, Literal, opAssoc, alphanums, infixNotation
 from pyparsing.results import ParseResults
 
+from sigma import logger
 from sigma.errors import (
     UnknownModifierError,
     InvalidFieldValueError,
@@ -139,6 +140,25 @@ class LogicalNot(LogicalExpression):
 
     def __repr__(self):
         return f"NOT({repr(self.args[0])})"
+
+    def postprocess(
+        self,
+        detection: "sigma.schema.RuleDetection",
+        parent: Optional["Expression"] = None,
+    ) -> "Expression":
+        """Handle "not null" situations"""
+
+        expression = super().postprocess(detection, parent)
+
+        if isinstance(self.args[0], FieldComparison) and self.args[0].value is None:
+            logger.warn(
+                "rule: %s: %s: using deprecated 'not null' expression",
+                detection.rule.id,
+                self.args[0].field,
+            )
+            return FieldNotEmpty(field=self.args[0].field)
+
+        return expression
 
     def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
         """Convert a not expression to a detection condition"""
@@ -359,14 +379,23 @@ class FieldComparison(Expression):
         return "{}", [{self.to_field_with_modifiers(): self.value}]
 
 
+class FieldNotEmpty(FieldComparison):
+    """A field comparison such as 'field is not null'"""
+
+    value: None = None
+
+    def __repr__(self) -> str:
+        return f"NOTNULL({self.field})"
+
+    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
+        return "not {}", [{self.to_field_with_modifiers(): None}]
+
+
 class FieldEquality(FieldComparison):
     """Test for field equality"""
 
     def __repr__(self) -> str:
         return f"EQ({self.field}, {repr(self.value)})"
-
-    def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
-        """Convert a not expression to a detection condition"""
 
     def to_detection(self) -> Tuple[str, List[Union[List, Dict]]]:
         """Convert a not expression to a detection condition"""

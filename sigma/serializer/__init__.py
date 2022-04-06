@@ -51,6 +51,7 @@ from sigma.grammar import (
     FieldContains,
     FieldEndsWith,
     FieldEquality,
+    FieldNotEmpty,
     KeywordSearch,
     FieldComparison,
     FieldStartsWith,
@@ -557,6 +558,8 @@ class TextQuerySerializer(Serializer):
         """ A format string to test a field with a globbing pattern (e.g. "{}: {}") """
         field_regex: str
         """ A format string to test if a field matches a regex (e.g. "{} match {}")"""
+        field_not_empty: str
+        """ Test if a field exists """
         keyword: str
         """ A format string to match a keyword across all fields (e.g. "{}") """
         field_startswith: Optional[str]
@@ -594,6 +597,9 @@ class TextQuerySerializer(Serializer):
             FieldLookupRegex: self._serialize_in_expression,
             FieldRegex: functools.partial(
                 self._serialize_comparison, self.schema.field_regex
+            ),
+            FieldNotEmpty: functools.partial(
+                self._serialize_comparison, self.schema.field_not_empty
             ),
             KeywordSearch: functools.partial(
                 self._serialize_keyword, self.schema.keyword
@@ -723,8 +729,12 @@ class TextQuerySerializer(Serializer):
         )
 
     def _serialize_comparison(self, fmt: str, expression: FieldComparison) -> str:
+        serialized = self._serialize_expression(expression.value)
         return fmt.format(
-            expression.field, self._serialize_expression(expression.value)
+            expression.field,
+            serialized,
+            field=expression.field,
+            expression=serialized,
         )
 
     def _serialize_core_expression(
