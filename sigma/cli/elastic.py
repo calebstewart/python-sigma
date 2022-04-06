@@ -1,5 +1,6 @@
 import os
 import glob
+import json
 import pathlib
 from io import StringIO
 from typing import IO, Dict, List
@@ -13,7 +14,7 @@ from pydantic.error_wrappers import ValidationError
 
 from sigma import logger
 from sigma.cli import cli, aliased_group
-from sigma.errors import SigmaError, SerializerValidationError
+from sigma.errors import SkipRule, SigmaError, SerializerValidationError
 from sigma.schema import Rule
 from sigma.serializer import Serializer
 from sigma.serializer.elastic import ElasticSecurityRule
@@ -56,13 +57,29 @@ def elastic():
     is_flag=True,
     help="Dump the resulting JSON serialized rules",
 )
-def deploy(deployment_spec: IO, url: str, username: str, password: str, dry_run: bool):
+@click.option(
+    "--backup",
+    "-b",
+    help="Backup existing rules via a rule export to the specified file prior to import.",
+    type=click.File("wb"),
+)
+def deploy(
+    deployment_spec: IO,
+    url: str,
+    username: str,
+    password: str,
+    dry_run: bool,
+    backup: IO[str],
+):
     """Use the given serializer to convert all rules defined in the deployment
     specification and upload directly to an ElasticSearch instance.
 
     \b
     DEPLOYMENT_SPEC\tPath to a deployment specification YAML file.
     """
+
+    # Strip slashes so we can reliably construct URLs
+    url = url.rstrip("/")
 
     if not dry_run:
         if not username or not password or not url:
@@ -86,6 +103,27 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str, dry_run:
         except SerializerValidationError as exc:
             raise SigmaError(f"serializer: {key}: {exc}") from exc
 
+    # Export Elastic Security Rules before uploading as a backup
+    if not dry_run and backup:
+        logger.info("exporting existing rules and exceptions")
+        r = requests.post(
+            f"{url}/api/detection_engine/rules/_export",
+            headers={"kbn-xsrf": "true"},
+            auth=(username, password),
+            stream=True,
+        )
+        if not r.ok:
+            logger.error("failed to export existing rules: %s", r.status_code)
+            return
+
+        logger.info("writing rule backup file: %s", backup.name)
+        with backup:
+            for chunk in r.iter_content(chunk_size=8192):
+                backup.write(chunk)
+
+    elastic_rules = []
+    known_ids = {}
+
     for key, rule_paths in spec.rules.items():
 
         # Grab the corresponding serializer or load it if possible
@@ -98,7 +136,7 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str, dry_run:
             serializer = serializers[key]
 
         # Load the rules for this serializer
-        logger.info("%s: loading rules", key)
+        logger.info("loading and serializing '%s' rules", key)
         rules = load_rules_from_paths(rule_paths)
 
         if not rules:
@@ -106,35 +144,44 @@ def deploy(deployment_spec: IO, url: str, username: str, password: str, dry_run:
             continue
 
         try:
-            logger.info("%s: serializing rules", key)
-            result = serializer.dumps(
-                rules, format="json", pretty=False, ignore_skip=True
-            )
+            for rule in rules:
+                # Verify we don't have the same rule in multiple sections
+                if rule.id in known_ids:
+                    raise SigmaError(
+                        f"rule '{rule.id}' found in multiple sections: {key}, {known_ids[rule.id]}"
+                    )
+                else:
+                    known_ids[rule.id] = key
+
+                try:
+                    # Serialize the rule
+                    elastic_rules.append(serializer.serialize(rule))
+                except SkipRule as exc:
+                    exc.log(rule)
         except SigmaError as exc:
             raise SigmaError(f"{key}: rule serialization failed: {exc}") from exc
 
-        if result.strip() == "":
-            logger.info("%s: all rules skipped; skipping upload.")
-            continue
+    if dry_run:
+        print(elastic_rules)
+    else:
+        logger.info("uploading %s converted rules", len(elastic_rules))
+        r = requests.post(
+            f"{url}/api/detection_engine/rules/_import",
+            params={"overwrite": "true"},
+            headers={"kbn-xsrf": "true"},
+            auth=(username, password),
+            files={
+                "file": (
+                    "rules.ndjson",
+                    StringIO("\n".join(json.dumps(rule) for rule in elastic_rules)),
+                ),
+            },
+        )
 
-        if dry_run:
-            print(result)
-        else:
-            logger.info("%s: uploading rules", key)
-            r = requests.post(
-                f"{url}/api/detection_engine/rules/_import",
-                params={"overwrite": "true"},
-                headers={"kbn-xsrf": "true"},
-                auth=(username, password),
-                files={
-                    "file": ("rules.ndjson", StringIO(result)),
-                },
+        if not r.ok:
+            raise SigmaError(
+                f"rule upload failed: elastic returned status code: {r.status_code}: {r.text}"
             )
-
-            if not r.ok:
-                raise SigmaError(
-                    f"rule upload failed: elastic returned status code: {r.status_code}: {r.text}"
-                )
 
 
 def load_rules_from_paths(rule_paths) -> List[Rule]:
