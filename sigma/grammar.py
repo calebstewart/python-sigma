@@ -142,15 +142,19 @@ class LogicalNot(LogicalExpression):
         return f"NOT({repr(self.args[0])})"
 
     def postprocess(
-        self, rule: "sigma.schema.RuleDetection", parent: Optional["Expression"] = None
+        self,
+        detection: "sigma.schema.RuleDetection",
+        parent: Optional["Expression"] = None,
     ) -> "Expression":
         """Handle "not null" situations"""
 
-        expression = super().postprocess(rule, parent)
+        expression = super().postprocess(detection, parent)
 
         if isinstance(self.args[0], FieldComparison) and self.args[0].value is None:
             logger.warn(
-                "%s: using deprecated 'not null' expression", self.args[0].field
+                "rule: %s: %s: using deprecated 'not null' expression",
+                detection.rule.id,
+                self.args[0].field,
             )
             return FieldNotEmpty(field=self.args[0].field)
 

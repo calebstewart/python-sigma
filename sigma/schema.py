@@ -36,6 +36,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Type,
     Union,
     Literal,
     Callable,
@@ -313,11 +314,14 @@ class RuleDetection(pydantic.BaseModel):
     timeframe: Optional[str] = Field(None, regex="[0-9]+[smhdMY]")
     condition: Union[List[str], str]
     __parsed_expression: Expression = PrivateAttr()
+    _rule: "Rule" = PrivateAttr()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Parse the condition grammar
+    def post_init(self, rule: "Rule"):
+
+        self._rule = rule
         self.__parsed_expression = self.parse_grammar()
 
     def transform(self, rule: "Rule", transforms: "sigma.transform.Transformation"):
@@ -332,6 +336,10 @@ class RuleDetection(pydantic.BaseModel):
         self.__parsed_expression = self.expression.visit(
             expression_visitor
         ).postprocess(rule, None)
+
+    @property
+    def rule(self) -> "Rule":
+        return self._rule
 
     @property
     def expression(self) -> Expression:
@@ -612,6 +620,12 @@ class Rule(pydantic.BaseModel):
 
         with open(path) as filp:
             return cls.from_sigma(yaml.safe_load(filp))
+
+    @classmethod
+    def parse_obj(cls: Type["Rule"], obj: Any) -> "Rule":
+        rule = super().parse_obj(obj)
+        rule.detection.post_init(rule)
+        return rule
 
     @classmethod
     def from_sigma(cls, definition: Dict[str, Any]) -> "Rule":
