@@ -14,6 +14,7 @@ from pydantic.error_wrappers import ValidationError
 
 from sigma import logger
 from sigma.cli import cli, aliased_group
+from sigma.util import iter_chunked
 from sigma.errors import SkipRule, SigmaError, SerializerValidationError
 from sigma.schema import Rule
 from sigma.serializer import Serializer
@@ -139,10 +140,6 @@ def deploy(
         logger.info("loading and serializing '%s' rules", key)
         rules = load_rules_from_paths(rule_paths)
 
-        if not rules:
-            logger.info("%s: skipping empty section", key)
-            continue
-
         try:
             for rule in rules:
                 # Verify we don't have the same rule in multiple sections
@@ -162,26 +159,29 @@ def deploy(
             raise SigmaError(f"{key}: rule serialization failed: {exc}") from exc
 
     if dry_run:
-        print(elastic_rules)
+        print("\n".join(json.dumps(rule) for rule in elastic_rules))
     else:
-        logger.info("uploading %s converted rules", len(elastic_rules))
-        r = requests.post(
-            f"{url}/api/detection_engine/rules/_import",
-            params={"overwrite": "true"},
-            headers={"kbn-xsrf": "true"},
-            auth=(username, password),
-            files={
-                "file": (
-                    "rules.ndjson",
-                    StringIO("\n".join(json.dumps(rule) for rule in elastic_rules)),
-                ),
-            },
-        )
+        logger.info("uploading %s total converted rules", len(elastic_rules))
 
-        if not r.ok:
-            raise SigmaError(
-                f"rule upload failed: elastic returned status code: {r.status_code}: {r.text}"
+        for chunk in iter_chunked(elastic_rules, 50):
+            logger.info("  uploading chunk of %s rules", len(chunk))
+            r = requests.post(
+                f"{url}/api/detection_engine/rules/_import",
+                params={"overwrite": "true"},
+                headers={"kbn-xsrf": "true"},
+                auth=(username, password),
+                files={
+                    "file": (
+                        "rules.ndjson",
+                        StringIO("\n".join(json.dumps(rule) for rule in chunk)),
+                    ),
+                },
             )
+
+            if not r.ok:
+                raise SigmaError(
+                    f"rule upload failed: elastic returned status code: {r.status_code}: {r.text}"
+                )
 
 
 def load_rules_from_paths(rule_paths) -> List[Rule]:
@@ -201,6 +201,6 @@ def load_rules_from_paths(rule_paths) -> List[Rule]:
             except SigmaError as exc:
                 logger.warn("%s: ignoring malformed rule: %s", path, exc)
         else:
-            raise SigmaError(f"{path}: no such file or directory")
+            logger.warn("%s: ignoring non-existent rule path", path)
 
     return rules

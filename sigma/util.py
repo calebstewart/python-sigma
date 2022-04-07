@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Dict
+from typing import Any, Dict, TypeVar, Sequence, Generator
 
 
 class CopyableSchema:
@@ -13,3 +13,10 @@ class CopyableSchema:
             example.update(example_extra)
 
         return schema
+
+
+T = TypeVar("T")
+
+
+def iter_chunked(seq: Sequence[T], size: int) -> Generator[Sequence[T], None, None]:
+    yield from (seq[p : p + size] for p in range(0, len(seq), size))
