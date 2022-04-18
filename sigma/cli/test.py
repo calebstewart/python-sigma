@@ -39,29 +39,8 @@ def get_list_or_stream(
 
 
 @cli.command()
-@click.argument("rule_file", type=click.File("r"))
-@click.option(
-    "--stream",
-    "-s",
-    is_flag=True,
-    help="Treat positive and negative arguments as jsonl stream files",
-)
-@click.option(
-    "--positive",
-    "-p",
-    type=click.File("r"),
-    help="Positive test cases (must match to succeed)",
-)
-@click.option(
-    "--negative",
-    "-n",
-    type=click.File("r"),
-    help="Negative test cases (must NOT match to succeed)",
-)
+@click.argument("rule_file", nargs=-1, type=click.File("r"))
 def test(
-    stream: Optional[bool],
-    positive: Optional[IO],
-    negative: Optional[IO],
     rule_file: IO,
 ):
     """Evaluate a rule against test data. If the given rule contains embedded
@@ -82,16 +61,25 @@ def test(
     RULE_FILE\tPath to a Sigma rule file to test
     """
 
-    rule = Rule.from_yaml(rule_file)
-    positive_list = get_list_or_stream(positive, stream)
-    negative_list = get_list_or_stream(negative, stream)
+    result = 0
 
-    try:
-        rule.test(positive=positive_list, negative=negative_list)
-        logger.info("all tests passed")
-    except NoTestData as exc:
-        # We don't want to exit with a non-zero status if no test data was provided.
-        logger.warn(str(exc))
-        return
-    except AssertionError as exc:
-        raise SigmaError(str(exc))
+    for filp in rule_file:
+        try:
+            rule = Rule.from_yaml(filp)
+        except SigmaError as exc:
+            logger.error(f"{filp.name}: {str(exc)}")
+            result = 1
+            continue
+
+        try:
+            rule.test()
+            logger.info("%s: all tests passed", filp.name)
+        except NoTestData as exc:
+            # We don't want to exit with a non-zero status if no test data was provided.
+            logger.warn("%s: %s", filp.name, exc)
+        except AssertionError as exc:
+            # Show the error and continue other tests.
+            logger.error(f"{filp.name}: {str(exc)}")
+            result = 1
+
+    return result
