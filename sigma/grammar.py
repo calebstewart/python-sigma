@@ -150,6 +150,11 @@ class LogicalNot(LogicalExpression):
 
         expression = super().postprocess(detection, parent)
 
+        if isinstance(self.args[0], LogicalOr) or isinstance(self.args[0], LogicalAnd):
+            new_type = LogicalOr if isinstance(self.args[0], LogicalAnd) else LogicalAnd
+
+            return new_type(args=[LogicalNot(args=[a]) for a in self.args[0].args])
+
         if isinstance(self.args[0], FieldComparison) and self.args[0].value is None:
             logger.warn(
                 "rule: %s: %s: using deprecated 'not null' expression",
