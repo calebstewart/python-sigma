@@ -441,7 +441,11 @@ class FieldEquality(FieldComparison):
         return "{}", [{self.field: self.value}]
 
     def evaluate(self, fields: Dict[str, Any]) -> bool:
+
         try:
+            if isinstance(fields[self.field], list):
+                return any(v == self.value for v in fields[self.field])
+
             return fields[self.field] == self.value
         except KeyError:
             return False
@@ -460,6 +464,8 @@ class FieldLike(FieldComparison):
 
     def evaluate(self, fields: Dict[str, Any]) -> bool:
         try:
+            if isinstance(fields[self.field], list):
+                return any(fnmatch.fnmatch(self.value, v) for v in fields[self.field])
             return fnmatch.fnmatch(self.value, fields[self.field])
         except KeyError:
             return False
@@ -483,6 +489,8 @@ class FieldContains(FieldComparison):
 
     def evaluate(self, fields: Dict[str, Any]) -> bool:
         try:
+            if isinstance(fields[self.field], list):
+                return any(self.value in v for v in fields[self.field])
             return self.value in fields[self.field]
         except KeyError:
             return False
@@ -520,6 +528,8 @@ class FieldEndsWith(FieldComparison):
 
     def evaluate(self, fields: Dict[str, Any]) -> bool:
         try:
+            if isinstance(fields[self.field], list):
+                return any(v.endswith(self.value) for v in fields[self.field])
             return fields[self.field].endswith(self.value)
         except KeyError:
             return False
@@ -543,6 +553,8 @@ class FieldStartsWith(FieldComparison):
 
     def evaluate(self, fields: Dict[str, Any]) -> bool:
         try:
+            if isinstance(fields[self.field], list):
+                return any(v.startsswith(self.value) for v in fields[self.field])
             return fields[self.field].startswith(self.value)
         except KeyError:
             return False
@@ -568,6 +580,10 @@ class FieldRegex(FieldComparison):
         import re
 
         try:
+            if isinstance(fields[self.field], list):
+                return any(
+                    re.search(self.value, v) is not None for v in fields[self.field]
+                )
             return re.search(self.value, fields[self.field]) is not None
         except KeyError:
             return False
@@ -585,7 +601,11 @@ class FieldLookup(FieldComparison):
         try:
             field_value = fields[self.field]
             for pattern in self.value:
-                if fnmatch.fnmatch(field_value, pattern):
+                if isinstance(field_value, list):
+                    for v in field_value:
+                        if fnmatch.fnmatch(v, pattern):
+                            return True
+                elif fnmatch.fnmatch(field_value, pattern):
                     return True
         except KeyError:
             pass
@@ -609,7 +629,11 @@ class FieldLookupRegex(FieldLookup):
         try:
             field_value = fields[self.field]
             for pattern in self.value:
-                if re.search(pattern, field_value) is not None:
+                if isinstance(field_value, list):
+                    for v in field_value:
+                        if re.search(pattern, v) is not None:
+                            return True
+                elif re.search(pattern, field_value) is not None:
                     return True
         except KeyError:
             pass
