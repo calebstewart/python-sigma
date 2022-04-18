@@ -43,18 +43,14 @@ def get_list_or_stream(
 def test(
     rule_file: IO,
 ):
-    """Evaluate a rule against test data. If the given rule contains embedded
-    test data, it will always be tested against this data. The positive and
-    negative arguments can be used to augment embedded testing data as well.
+    """Evaluate a rule against test data. The test data must be embedded
+    within the rule itself in the custom "test_data" field. The rule can
+    contain lists of positive and negative rules to test.
 
-    For the custom test cases, if the file extension is jsonl, the files are
-    treated as json list files with one dictionary object per line in the file.
-    Otherwise, the given files must consist of a single JSON list object
-    containing dictionaries which represent individual events.
-
-    This tool exits with a non-zero status if the rule fails to pass all tests.
-    If no test data is defined in the rule and none is provided through arguments,
-    then a zero exit status is returned, and a warning is printed.
+    If any test data for any rule fails evaluation, a non-zero exit status
+    is returned. Otherwise, a zero exit status is returned. Rules with no
+    embedded test data are treated as passing tests, but a warning is
+    printed.
 
     \b
     \x08\x08Arguments:
