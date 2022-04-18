@@ -211,7 +211,10 @@ class ElasticSecurityWebhookAction(ElasticSecurityBaseAction):
 
         result = super().to_rule_format()
 
-        result["params"]["body"] = json.dumps(self.body)
+        if isinstance(self.body, list) or isinstance(self.body, dict):
+            result["params"]["body"] = json.dumps(self.body)
+        else:
+            result["params"]["body"] = self.body
 
         return result
 
