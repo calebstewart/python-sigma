@@ -1,6 +1,7 @@
 import logging
 import warnings
 from typing import TextIO, Optional
+import importlib.metadata
 
 # Ignore the warning from thefuzz if we don't have thefuzz[speedup]
 warnings.filterwarnings(
