@@ -49,73 +49,13 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-sigma.cli">
-<span id="sigma-cli-package"></span><h1>sigma.cli package<a class="headerlink" href="#module-sigma.cli" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="sigma.cli.CommandWithVerbosity">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.cli.</span></span><span class="sig-name descname"><span class="pre">CommandWithVerbosity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.cli.CommandWithVerbosity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">click.core.Command</span></code></p>
-<p>A command that automatically adds the verbosity and traceback
-arguments, sets up logging prior to invocation, and catches any
-unhandled exceptions/logs them according to the logging configuration.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="sigma.cli.CommandWithVerbosity.invoke">
-<span class="sig-name descname"><span class="pre">invoke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">click.core.Context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.cli.CommandWithVerbosity.invoke" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a context, this invokes the attached callback (if it exists)
-in the right way.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="sigma.cli.FuzzyAliasedGroup">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sigma.cli.</span></span><span class="sig-name descname"><span class="pre">FuzzyAliasedGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">click.core.Command</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">click.core.Command</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">attrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.cli.FuzzyAliasedGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">click.core.Group</span></code></p>
-<p>Click group with fuzzy sub-command matching
-provided by FuzzyWuzzy.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="sigma.cli.FuzzyAliasedGroup.command">
-<span class="sig-name descname"><span class="pre">command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.cli.FuzzyAliasedGroup.command" title="Permalink to this definition">¶</a></dt>
-<dd><p>A shortcut decorator for declaring and attaching a command to
-the group. This takes the same arguments as <a class="reference internal" href="#sigma.cli.FuzzyAliasedGroup.command" title="sigma.cli.FuzzyAliasedGroup.command"><code class="xref py py-func docutils literal notranslate"><span class="pre">command()</span></code></a> and
-immediately registers the created command with this group by
-calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">add_command()</span></code>.</p>
-<p>To customize the command class used, set the
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">command_class</span></code> attribute.</p>
-<div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 8.0: </span>Added the <code class="xref py py-attr docutils literal notranslate"><span class="pre">command_class</span></code> attribute.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="sigma.cli.FuzzyAliasedGroup.get_command">
-<span class="sig-name descname"><span class="pre">get_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmd_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.cli.FuzzyAliasedGroup.get_command" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a context and a command name, this returns a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code> object if it exists or returns <cite>None</cite>.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="sigma.cli.aliased_group">
-<span class="sig-prename descclassname"><span class="pre">sigma.cli.</span></span><span class="sig-name descname"><span class="pre">aliased_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sigma.cli.aliased_group" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decorator for creating sub-command groups with fuzzy matching</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parent</strong> – the parent command</p></li>
-<li><p><strong>attrs</strong> – keyword arguments passed directly to <code class="docutils literal notranslate"><span class="pre">parent.command</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+  <div class="section" id="sigma-cli-package">
+<h1>sigma.cli package<a class="headerlink" href="#sigma-cli-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="sigma.cli.converter.html">sigma.cli.converter module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sigma.cli.elastic.html">sigma.cli.elastic module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sigma.cli.list.html">sigma.cli.list module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sigma.cli.mitre.html">sigma.cli.mitre module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sigma.cli.schema.html">sigma.cli.schema module</a></li>
