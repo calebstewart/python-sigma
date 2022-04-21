@@ -85,6 +85,8 @@
 </li>
       <li><a href="api/sigma.transform.html#sigma.transform.AddTags.Schema.Config">AddTags.Schema.Config (class in sigma.transform)</a>
 </li>
+      <li><a href="api/sigma.cli.html#sigma.cli.aliased_group">aliased_group() (in module sigma.cli)</a>
+</li>
       <li><a href="api/sigma.serializer.elastic.html#sigma.serializer.elastic.EventQueryLanguage.Schema.and_format">and_format (sigma.serializer.elastic.EventQueryLanguage.Schema attribute)</a>
 
       <ul>
@@ -161,6 +163,10 @@
 </li>
       <li><a href="api/sigma.errors.html#sigma.errors.ConditionSyntaxError.column">column (sigma.errors.ConditionSyntaxError property)</a>
 </li>
+      <li><a href="api/sigma.cli.html#sigma.cli.FuzzyAliasedGroup.command">command() (sigma.cli.FuzzyAliasedGroup method)</a>
+</li>
+      <li><a href="api/sigma.cli.html#sigma.cli.CommandWithVerbosity">CommandWithVerbosity (class in sigma.cli)</a>
+</li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.CommonSerializerSchema">CommonSerializerSchema (class in sigma.serializer)</a>
 </li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.CommonSerializerSchema.Config">CommonSerializerSchema.Config (class in sigma.serializer)</a>
@@ -179,10 +185,10 @@
       </ul></li>
       <li><a href="api/sigma.serializer.html#sigma.serializer.LogSourceMatch.conditions">conditions (sigma.serializer.LogSourceMatch attribute)</a>
 </li>
-      <li><a href="api/sigma.errors.html#sigma.errors.ConditionSyntaxError">ConditionSyntaxError</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sigma.errors.html#sigma.errors.ConditionSyntaxError">ConditionSyntaxError</a>
+</li>
       <li><a href="api/sigma.transform.html#sigma.transform.ExpressionType.CONTAINS">CONTAINS (sigma.transform.ExpressionType attribute)</a>
 </li>
       <li><a href="api/sigma.transform.html#sigma.transform.ContainsToMatch">ContainsToMatch (class in sigma.transform)</a>
@@ -435,10 +441,10 @@
         <li><a href="api/sigma.serializer.html#sigma.serializer.TextQuerySerializer.Schema.field_startswith">(sigma.serializer.TextQuerySerializer.Schema attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.grammar.html#sigma.grammar.FieldComparison">FieldComparison (class in sigma.grammar)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.grammar.html#sigma.grammar.FieldContains">FieldContains (class in sigma.grammar)</a>
 </li>
       <li><a href="api/sigma.grammar.html#sigma.grammar.FieldEndsWith">FieldEndsWith (class in sigma.grammar)</a>
@@ -491,6 +497,8 @@
         <li><a href="api/sigma.serializer.html#sigma.serializer.Serializer.from_yaml">(sigma.serializer.Serializer class method)</a>
 </li>
       </ul></li>
+      <li><a href="api/sigma.cli.html#sigma.cli.FuzzyAliasedGroup">FuzzyAliasedGroup (class in sigma.cli)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -498,6 +506,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.serializer.html#sigma.serializer.get_builtin_serializers">get_builtin_serializers() (in module sigma.serializer)</a>
+</li>
+      <li><a href="api/sigma.cli.html#sigma.cli.FuzzyAliasedGroup.get_command">get_command() (sigma.cli.FuzzyAliasedGroup method)</a>
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.RuleDetection.get_expression">get_expression() (sigma.schema.RuleDetection method)</a>
 </li>
@@ -572,6 +582,8 @@
       <li><a href="api/sigma.errors.html#sigma.errors.InvalidFieldValueError">InvalidFieldValueError</a>
 </li>
       <li><a href="api/sigma.errors.html#sigma.errors.InvalidModifierCombinationError">InvalidModifierCombinationError</a>
+</li>
+      <li><a href="api/sigma.cli.html#sigma.cli.CommandWithVerbosity.invoke">invoke() (sigma.cli.CommandWithVerbosity method)</a>
 </li>
       <li><a href="api/sigma.util.html#sigma.util.iter_chunked">iter_chunked() (in module sigma.util)</a>
 </li>
@@ -709,13 +721,13 @@
 </li>
       <li><a href="api/sigma.schema.html#sigma.schema.Rule.modified">modified (sigma.schema.Rule attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
       <ul>
         <li><a href="api/sigma.html#module-sigma">sigma</a>
+</li>
+        <li><a href="api/sigma.cli.html#module-sigma.cli">sigma.cli</a>
 </li>
         <li><a href="api/sigma.cli.converter.html#module-sigma.cli.converter">sigma.cli.converter</a>
 </li>
@@ -746,6 +758,8 @@
         <li><a href="api/sigma.util.html#module-sigma.util">sigma.util</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sigma.errors.html#sigma.errors.MultipleCorrelationError">MultipleCorrelationError</a>
 </li>
   </ul></td>
@@ -1032,12 +1046,21 @@
       <li><a href="api/sigma.schema.html#sigma.schema.Sigma">Sigma (class in sigma.schema)</a>
 </li>
       <li>
+    sigma.cli
+
+      <ul>
+        <li><a href="api/sigma.cli.html#module-sigma.cli">module</a>
+</li>
+      </ul></li>
+      <li>
     sigma.cli.converter
 
       <ul>
         <li><a href="api/sigma.cli.converter.html#module-sigma.cli.converter">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     sigma.cli.list
 
@@ -1045,8 +1068,6 @@
         <li><a href="api/sigma.cli.list.html#module-sigma.cli.list">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     sigma.cli.mitre
 
