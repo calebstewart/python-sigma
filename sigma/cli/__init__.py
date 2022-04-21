@@ -156,4 +156,4 @@ def cli(ctx: click.Context, mitre_data: Optional[TextIO]):
     pass
 
 
-from sigma.cli import list, mitre, schema, elastic, validate, converter, transform
+from sigma.cli import list, mitre, schema, validate, converter, transform
