@@ -535,7 +535,7 @@ class ElasticSecurityRule(EventQueryLanguage):
             else "now-360s",
             "immutable": False,
             "index": indices,
-            "interval": "5m",
+            "interval": self.schema.interval,
             "rule_id": str(rule.id) if rule.id else str(uuid.uuid4()),
             "language": self.RULE_LANGUAGE_MAP.get(self.schema.rule_type, "eql"),
             "output_index": self.schema.output_index,
