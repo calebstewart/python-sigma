@@ -8,7 +8,7 @@ authors = ["Caleb Stewart <caleb.stewart94@gmail.com>"]
 sigma = "sigma.__main__:entrypoint"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 pydantic = "^1.9.0"
 PyYAML = "^6.0"
 rich = "^11.1.0"
