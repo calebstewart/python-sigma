@@ -406,7 +406,7 @@ class RuleDetection(pydantic.BaseModel):
                 definition = getattr(self, key)
                 if isinstance(
                     definition,
-                    Union[RuleDetectionFields, RuleDetectionList],
+                    (RuleDetectionFields, RuleDetectionList),
                 ):
                     yield key
 
