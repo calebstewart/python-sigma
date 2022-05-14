@@ -41,7 +41,7 @@ class EventQueryLanguage(TextQuerySerializer):
         """ A format string to construct a grouping (e.g. "({})") """
         escaped_characters: str = r'(["\\])'
         """ Characters aside from the quote and escape character that require escaping """
-        field_equality: str = "{}: {}"
+        field_equality: str = "{} == {}"
         """ A format string to test field equality (e.g. "{} == {}") """
         field_like: str = "{}: {}"
         field_lookup: str = "{}: {}"

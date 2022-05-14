@@ -572,6 +572,10 @@ class TextQuerySerializer(Serializer):
         """ Format for matching a field to a list of patterns (e.g. "{} like~ {}") """
         field_lookup_regex: Optional[str]
         """ Format for matching a field to a list of regex patterns (e.g. "{} regex {}") """
+        bool_true: str = "true"
+        """ Representation of a positive boolean value """
+        bool_false: str = "false"
+        """ Representation of a negative boolean value """
 
     def __init__(self, schema: Schema):
         super().__init__(schema)
@@ -605,6 +609,9 @@ class TextQuerySerializer(Serializer):
                 self._serialize_keyword, self.schema.keyword
             ),
             str: self._serialize_string,
+            bool: self._serialize_bool,
+            int: str,
+            float: str,
         }
 
         if self.schema.field_endswith is not None:
@@ -765,6 +772,9 @@ class TextQuerySerializer(Serializer):
                 expression,
             )
         )
+
+    def _serialize_bool(self, value: bool) -> str:
+        return self.schema.bool_true if value else self.schema.bool_false
 
 
 from sigma.serializer.elastic import EventQueryLanguage, ElasticSecurityRule

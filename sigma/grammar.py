@@ -419,6 +419,16 @@ class FieldLike(FieldComparison):
 
         return "{}", [{self.field: self.value}]
 
+    def postprocess(
+        self, rule: "sigma.schema.RuleDetection", parent: Optional["Expression"] = None
+    ) -> "Expression":
+
+        # The "like" expression only works for strings
+        if not isinstance(self.value, str):
+            return FieldEquality(field=self.field, value=self.value)
+
+        return super().postprocess(rule, parent)
+
 
 class FieldContains(FieldComparison):
     """Test if a string is in the field somewhere"""
