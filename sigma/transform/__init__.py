@@ -43,10 +43,24 @@ transformation names or a fully-qualified python class path formatted as
             ParentImage: process.parent.executable
 
 """
+import uuid
 import importlib
+import contextlib
 from abc import ABC
 from enum import Enum
-from typing import Any, Dict, List, Type, Tuple, Literal, Pattern, Optional, Generator
+from typing import (
+    Any,
+    Dict,
+    List,
+    Type,
+    Tuple,
+    Literal,
+    Pattern,
+    Iterator,
+    Optional,
+    Generator,
+    ContextManager,
+)
 
 from pydantic.main import BaseModel
 from pydantic.fields import Field
@@ -113,6 +127,16 @@ class Transformation(ABC):
         The default implementation simply returns the original expression."""
 
         return expression
+
+    def transform_serializer(
+        self, serializer: "Serializer", rule: Rule
+    ) -> ContextManager:
+        """Transform the given serializer for this rule. The transformation must
+        be temporary, and must be removed when the context manager exits. Some
+        serializer-specific configurations not specified in the sigma spec could
+        be done here."""
+
+        raise NotImplementedError
 
     @classmethod
     def lookup_class(cls, name: str) -> Type["Transformation"]:

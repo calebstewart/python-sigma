@@ -9,6 +9,7 @@ import re
 import pathlib
 import functools
 import importlib
+import contextlib
 import importlib.resources
 from abc import ABC, abstractmethod
 from typing import (
@@ -20,6 +21,7 @@ from typing import (
     Union,
     Literal,
     ClassVar,
+    Iterator,
     Optional,
     Generator,
 )
@@ -37,6 +39,7 @@ from sigma.errors import (
     SkipRule,
     SerializerNotFound,
     SerializerValidationError,
+    UnsupportedFieldComparison,
     UnsupportedSerializerFormat,
 )
 from sigma.schema import Rule, RuleDetectionFields
@@ -299,10 +302,12 @@ class Serializer(ABC):
     DEFAULT_FORMAT: ClassVar[Optional[str]] = None
     """ Default format name when using dumps (used to highlight output) """
     Schema: ClassVar[Type[CommonSerializerSchema]]
+    """ The type for this serializers config schema """
 
     def __init__(self, schema: CommonSerializerSchema):
         self.schema = schema
         self.transforms: List[Transformation] = []
+        self._has_transformed: bool = False
 
         self._extend_transforms(self.schema)
 
@@ -371,6 +376,44 @@ class Serializer(ABC):
 
         return rule
 
+    @contextlib.contextmanager
+    def transform(self, rule: Rule) -> Iterator[Rule]:
+
+        # If we've already transformed, then this is a noop
+        if self._has_transformed:
+            try:
+                yield rule
+            finally:
+                return
+
+        with contextlib.ExitStack() as stack:
+
+            @stack.callback
+            def _():
+                self._has_transformed = False
+
+            # The rule has already been transformed, so this is a noop
+            if self._has_transformed:
+                stack.pop_all()
+                yield rule
+                return
+
+            # Mark as being transformed
+            self._has_transformed = True
+
+            # Transform the rule
+            rule = rule.transform(self.transforms)
+
+            # Enter any serialization transforms
+            for t in self.transforms:
+                try:
+                    stack.enter_context(t.transform_serializer(self, rule))
+                except NotImplementedError:
+                    continue
+
+            # Yield the rule (with serializer transforms applied)
+            yield rule
+
     @classmethod
     def load(
         cls,
@@ -398,14 +441,6 @@ class Serializer(ABC):
         :returns: A constructed serializer class from the given name/type
         """
 
-        if config is None:
-            config = {
-                "name": "unnamed",
-                "description": "unknown",
-                "base": name,
-                "transforms": [],
-            }
-
         serializers_path = importlib.resources.files("sigma") / "data" / "serializers"
 
         if (serializers_path / (name + ".yml")).is_file():
@@ -430,7 +465,15 @@ class Serializer(ABC):
             return serializer
         elif name in BUILTIN_SERIALIZERS:
             try:
-                schema = BUILTIN_SERIALIZERS[name][0].Schema.parse_obj(config)
+                schema = BUILTIN_SERIALIZERS[name][0].Schema.parse_obj(
+                    config
+                    or {
+                        "name": "unnamed",
+                        "description": "unknown",
+                        "base": name,
+                        "transforms": [],
+                    }
+                )
                 return BUILTIN_SERIALIZERS[name][0](schema)
             except ValidationError as exc:
                 raise SerializerValidationError(exc)
@@ -443,7 +486,15 @@ class Serializer(ABC):
                 if not issubclass(serializer_type, Serializer):
                     raise ValueError
 
-                schema = serializer_type.Schema.parse_obj(config)
+                schema = serializer_type.Schema.parse_obj(
+                    config
+                    or {
+                        "name": "unnamed",
+                        "description": "unknown",
+                        "base": name,
+                        "transforms": [],
+                    }
+                )
                 return serializer_type(schema)
             except ValidationError as exc:
                 raise SerializerValidationError(exc)
@@ -736,6 +787,10 @@ class TextQuerySerializer(Serializer):
         )
 
     def _serialize_comparison(self, fmt: str, expression: FieldComparison) -> str:
+
+        if fmt is None:
+            raise UnsupportedFieldComparison(expression.field, type(expression))
+
         serialized = self._serialize_expression(expression.value)
         return fmt.format(
             expression.field,
@@ -777,7 +832,11 @@ class TextQuerySerializer(Serializer):
         return self.schema.bool_true if value else self.schema.bool_false
 
 
-from sigma.serializer.elastic import EventQueryLanguage, ElasticSecurityRule
+from sigma.serializer.elastic import (
+    EventQueryLanguage,
+    ElasticSecurityRule,
+    KibanaQueryLanguage,
+)
 
 BUILTIN_SERIALIZERS: Dict[str, Tuple[Type[Serializer], str]] = {
     "TextQuerySerializer": (
@@ -787,6 +846,10 @@ BUILTIN_SERIALIZERS: Dict[str, Tuple[Type[Serializer], str]] = {
     "eql": (
         EventQueryLanguage,
         "Elastic Event Query Language (EQL) Text-Based Serializer",
+    ),
+    "kql": (
+        KibanaQueryLanguage,
+        "Kibana Query Language (KQL) Text-Based Serializer",
     ),
     "es-rule": (
         ElasticSecurityRule,

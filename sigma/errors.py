@@ -98,6 +98,18 @@ class UnknownModifierError(SigmaError):
         self.modifier = modifier
 
 
+class UnsupportedFieldComparison(SigmaError):
+    """A field comparison was unsupported by the serializer"""
+
+    def __init__(
+        self,
+        field: str,
+        type_: Type,
+        message: str = "detections: {field}: invalid comparison: {type_}",
+    ):
+        super().__init__(message.format(field=field, type_=type_))
+
+
 class InvalidModifierCombinationError(SigmaError):
     """The combination of modifiers was invalid"""
 
