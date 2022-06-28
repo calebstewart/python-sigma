@@ -446,6 +446,15 @@ entirely new rule. The default implementation simply returns the original
 rule.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="sigma.transform.Transformation.transform_serializer">
+<span class="sig-name descname"><span class="pre">transform_serializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serializer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.serializer.html#sigma.serializer.Serializer" title="sigma.serializer.Serializer"><span class="pre">Serializer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sigma.schema.html#sigma.schema.Rule" title="sigma.schema.Rule"><span class="pre">sigma.schema.Rule</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ContextManager</span></span></span><a class="headerlink" href="#sigma.transform.Transformation.transform_serializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform the given serializer for this rule. The transformation must
+be temporary, and must be removed when the context manager exits. Some
+serializer-specific configurations not specified in the sigma spec could
+be done here.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
