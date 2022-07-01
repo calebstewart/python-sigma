@@ -836,6 +836,7 @@ from sigma.serializer.elastic import (
     EventQueryLanguage,
     ElasticSecurityRule,
     KibanaQueryLanguage,
+    LuceneQueryLanguage,
 )
 
 BUILTIN_SERIALIZERS: Dict[str, Tuple[Type[Serializer], str]] = {
@@ -855,6 +856,7 @@ BUILTIN_SERIALIZERS: Dict[str, Tuple[Type[Serializer], str]] = {
         ElasticSecurityRule,
         "Elastic Security EQL Rule in JSON format",
     ),
+    "lucene": (LuceneQueryLanguage, "Lucene Query Language Text-Based Serializer"),
 }
 
 

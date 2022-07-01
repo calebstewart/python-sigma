@@ -82,6 +82,70 @@ class KibanaQueryLanguage(TextQuerySerializer):
             return f'"{escaped}"'
 
 
+class LuceneQueryLanguage(TextQuerySerializer):
+    """LuceneQueryLanguage Serializer"""
+
+    class Schema(TextQuerySerializer.Schema):
+        """Text Query configuration options which define how to combine the logical expressions
+        into the correct query syntax for your detection engine."""
+
+        quote: str = "{}"
+        """ The character used for literal escapes in strings """
+        escape: str = "\\{}"
+        """ The character used to escape the following character in a string """
+        list_separator: str = " OR "
+        """ The string used to separate list items """
+        or_format: str = "{} {}"
+        """ A format string to construct an OR expression (e.g. "{} or {}") """
+        and_format: str = "{} AND {}"
+        """ A format string to construct an AND expression (e.g. "{} or {}") """
+        not_format: str = "NOT {}"
+        """ A format string to construct a NOT expression (e.g. "not {}") """
+        grouping: str = "({})"
+        """ A format string to construct a grouping (e.g. "({})") """
+        escaped_characters: str = (
+            '([+\\=!(){}\\[\\]^"~:/]|(?<!\\\\)\\\\(?![*?\\\\])|\\\\u|&&|\\|\\|)'
+        )
+        """ Characters aside from the quote and escape character that require escaping """
+        field_equality: str = "{}:{}"
+        """ A format string to test field equality (e.g. "{} == {}") """
+        field_like: str = "{}:{}"
+        field_lookup: str = "{}:{}"
+        field_lookup_regex: Optional[str] = None
+        field_match: str = "{}:{}"
+        """ A format string to test a field with a globbing pattern (e.g. "{}: {}") """
+        field_regex: Optional[str] = "{}:/{}/"
+        """ A format string to test if a field matches a regex (e.g. "{} match {}")"""
+        keyword: str = "{}"
+        """ A format string to match a keyword across all fields (e.g. "{}") """
+        field_startswith: Optional[str] = None
+        """ A format string to test if a field starts with a string """
+        field_endswith: Optional[str] = None
+        """ A format string to test if a field ends with a string """
+        field_contains: Optional[str] = None
+        """ A format string to test if a field contains another string """
+        field_not_empty: Optional[str] = "_exists_:{field}"
+        """ Test if a field exists """
+        rule_separator: str = "\n"
+        """ Separator for when outputting multiple rules to a file """
+
+        class Config(CopyableSchema):
+            schema_extra = CommonSerializerSchema.Config.copy_schema({"base": "kql"})
+
+    def _serialize_string(self, value: str) -> str:
+
+        escaped = re.sub(
+            self.schema.escaped_characters,
+            lambda m: self.schema.escape.format(m.group(1)),
+            value,
+        )
+
+        if "*" in value:
+            return escaped
+        else:
+            return f'"{escaped}"'
+
+
 class EventQueryLanguage(TextQuerySerializer):
     """Elastic EQL Serializer"""
 
@@ -366,7 +430,7 @@ class ElasticSecurityRule(Serializer):
         """ Set the enable field in the resulting rule to True """
         interval: str = "5m"
         """ Rule test interval """
-        language: str  # Union[Literal["eql"], Literal["kql"]] = "eql"
+        language: Union[Literal["eql"], Literal["kql"], Literal["lucene"]] = "eql"
         """ The rule query type """
         output_index: str = ".siem-signals-default"
         """ Output index for rule alerts """
@@ -411,6 +475,48 @@ class ElasticSecurityRule(Serializer):
             )
 
     schema: Schema
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._eql = None
+        self._kql = None
+        self._lucene = None
+
+    @property
+    def eql(self) -> Serializer:
+
+        if self._eql is None:
+            self._eql = Serializer.load("eql")
+
+        return self._eql
+
+    @property
+    def kql(self) -> Serializer:
+
+        if self._kql is None:
+            self._kql = Serializer.load("kql")
+
+        return self._kql
+
+    @property
+    def lucene(self) -> Serializer:
+
+        if self._lucene is None:
+            self._lucene = Serializer.load("lucene")
+
+        return self._lucene
+
+    def _get_internal_serializer(self, language: str) -> Serializer:
+
+        if language == "kql":
+            return self.kql
+        elif language == "eql":
+            return self.eql
+        elif language == "lucene":
+            return self.lucene
+        else:
+            raise ValueError(f"invalid language {language}")
 
     def dumps(
         self,
@@ -459,7 +565,7 @@ class ElasticSecurityRule(Serializer):
                 ]
 
             # Serialize the rule to an EQL query
-            language_serializer = Serializer.load(self.schema.language)
+            language_serializer = self._get_internal_serializer(self.schema.language)
             query = language_serializer.serialize(rule, transform=False)
 
             attack = Attack.load()
@@ -624,11 +730,10 @@ class ElasticSecurityRule(Serializer):
                 "version": 1,
                 "references": rule.references or [],
                 "actions": actions,
+                "language": self.schema.language
+                if self.schema.language != "kql"
+                else "kuery",
             }
-
-            # This is only a thing for EQL rules
-            if self.schema.language == "eql":
-                result["language"] = "eql"
 
             if self.schema.timestamp_override:
                 result["timestamp_override"] = self.schema.timestamp_override
